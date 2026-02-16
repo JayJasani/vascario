@@ -1,0 +1,14 @@
+services:
+  # ── Next.js App ──
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      ADMIN_SECRET: "vascario-admin-2026"
+      # Firebase configuration - set these via environment variables or .env file
+      # FIREBASE_SERVICE_ACCOUNT_KEY: "${FIREBASE_SERVICE_ACCOUNT_KEY}"
+      # Or use GOOGLE_APPLICATION_CREDENTIALS for service account file path

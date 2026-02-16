@@ -3,44 +3,19 @@
 import { useRef, useState, useEffect } from "react"
 import { ProductCard } from "@/components/ProductCard"
 
-const PRODUCTS = [
-    {
-        id: "prod_1",
-        name: "Signature Tee — Onyx",
-        price: 85,
-        images: ["/placeholder-tee-black.png"],
-        tag: "Bestseller",
-    },
-    {
-        id: "prod_2",
-        name: "Heavyweight — Charcoal",
-        price: 95,
-        images: ["/placeholder-tee-charcoal.png"],
-        tag: "New",
-    },
-    {
-        id: "prod_3",
-        name: "Gold Edition",
-        price: 120,
-        images: ["/placeholder-tee-gold.png"],
-        tag: "Limited",
-    },
-    {
-        id: "prod_4",
-        name: "Phantom — All Black",
-        price: 110,
-        images: ["/placeholder-tee-phantom.png"],
-    },
-    {
-        id: "prod_5",
-        name: "Archive 001 — Bone",
-        price: 130,
-        images: ["/placeholder-tee-bone.png"],
-        tag: "Archive",
-    },
-]
+interface ShowcaseProduct {
+    id: string;
+    name: string;
+    price: number;
+    images: string[];
+    tag?: string;
+}
 
-export function ProductShowcase() {
+interface ProductShowcaseProps {
+    products: ShowcaseProduct[];
+}
+
+export function ProductShowcase({ products }: ProductShowcaseProps) {
     const scrollRef = useRef<HTMLDivElement>(null)
     const [isDragging, setIsDragging] = useState(false)
     const [startX, setStartX] = useState(0)
@@ -132,7 +107,7 @@ export function ProductShowcase() {
                 onMouseLeave={handleMouseLeave}
                 onMouseMove={handleMouseMove}
             >
-                {PRODUCTS.map((product, index) => (
+                {products.map((product, index) => (
                     <div
                         key={product.id}
                         className="shrink-0"
