@@ -1,10 +1,15 @@
 "use server";
 
+import { unstable_cache } from "next/cache";
 import {
     getActiveProducts as getActiveProductsHelper,
     getProductById as getProductByIdHelper,
 } from "@/lib/firebase-helpers";
+import { CACHE_TAGS } from "@/lib/storefront-cache";
 import type { SearchItem } from "@/lib/search-data";
+
+// Cache TTL in seconds (live env: avoid hitting Firebase on every search/navigation)
+const CACHE_REVALIDATE = 60;
 
 // ─── PUBLIC STOREFRONT QUERIES ──────────────────────────────────────────────────
 
@@ -19,12 +24,21 @@ export interface StorefrontProduct {
     sku: string | null;
 }
 
+/** Cached active products (shared by getActiveProducts + searchItems) for fast live env. */
+async function getCachedActiveProducts() {
+    return unstable_cache(
+        async () => getActiveProductsHelper(),
+        ["storefront", "active-products"],
+        { revalidate: CACHE_REVALIDATE, tags: [CACHE_TAGS.activeProducts] }
+    )();
+}
+
 /**
  * Fetch all active products for the storefront.
  * Returns products ordered by newest first.
  */
 export async function getActiveProducts(): Promise<StorefrontProduct[]> {
-    const products = await getActiveProductsHelper();
+    const products = await getCachedActiveProducts();
 
     return products.map((p) => ({
         id: p.id,
@@ -43,7 +57,11 @@ export async function getActiveProducts(): Promise<StorefrontProduct[]> {
  * Returns null if not found or inactive.
  */
 export async function getProductById(id: string): Promise<StorefrontProduct | null> {
-    const product = await getProductByIdHelper(id);
+    const product = await unstable_cache(
+        async () => getProductByIdHelper(id),
+        ["storefront", "product", id],
+        { revalidate: CACHE_REVALIDATE, tags: [CACHE_TAGS.activeProducts, CACHE_TAGS.product(id)] }
+    )();
 
     if (!product || !product.isActive) return null;
 
@@ -67,8 +85,8 @@ export async function searchItems(query: string): Promise<SearchItem[]> {
     if (!query.trim()) return [];
 
     try {
-        // Fetch active products from Firebase
-        const products = await getActiveProductsHelper();
+        // Use cached active products (same as getActiveProducts) for fast search on live
+        const products = await getCachedActiveProducts();
 
         // Convert products to search items
         const productItems: SearchItem[] = products.map((product) => ({
