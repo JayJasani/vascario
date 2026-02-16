@@ -78,17 +78,33 @@ export function Footer() {
                         Legal
                     </span>
                     <ul className="space-y-2">
-                        {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
-                            <li key={item}>
-                                <Link
-                                    href="#"
-                                    className="text-xs text-[var(--vsc-gray-400)] uppercase tracking-[0.15em] hover:text-[var(--vsc-accent)] transition-colors duration-200"
-                                    style={{ fontFamily: "var(--font-space-mono)" }}
-                                >
-                                    {item}
-                                </Link>
-                            </li>
-                        ))}
+                        <li>
+                            <Link
+                                href="/privacy-policy"
+                                className="text-xs text-[var(--vsc-gray-400)] uppercase tracking-[0.15em] hover:text-[var(--vsc-accent)] transition-colors duration-200"
+                                style={{ fontFamily: "var(--font-space-mono)" }}
+                            >
+                                Privacy Policy
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                href="/terms-of-service"
+                                className="text-xs text-[var(--vsc-gray-400)] uppercase tracking-[0.15em] hover:text-[var(--vsc-accent)] transition-colors duration-200"
+                                style={{ fontFamily: "var(--font-space-mono)" }}
+                            >
+                                Terms of Service
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                href="#"
+                                className="text-xs text-[var(--vsc-gray-400)] uppercase tracking-[0.15em] hover:text-[var(--vsc-accent)] transition-colors duration-200"
+                                style={{ fontFamily: "var(--font-space-mono)" }}
+                            >
+                                Cookie Policy
+                            </Link>
+                        </li>
                     </ul>
                 </div>
 
