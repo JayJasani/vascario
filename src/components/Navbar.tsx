@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { useCart } from "@/context/CartContext"
 
 export function Navbar() {
     const [scrolled, setScrolled] = useState(false)
+    const { cartCount } = useCart()
 
     useEffect(() => {
         const handleScroll = () => {
@@ -37,21 +39,21 @@ export function Navbar() {
                 {/* Nav Links — monospace, minimal */}
                 <div className="hidden md:flex items-center gap-8">
                     <Link
-                        href="#collection"
+                        href="/#collection"
                         className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-400)] hover:text-[var(--vsc-white)] transition-colors duration-200"
                         style={{ fontFamily: "var(--font-space-mono)" }}
                     >
                         Collection
                     </Link>
                     <Link
-                        href="#editorial"
+                        href="/#editorial"
                         className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-400)] hover:text-[var(--vsc-white)] transition-colors duration-200"
                         style={{ fontFamily: "var(--font-space-mono)" }}
                     >
                         Lookbook
                     </Link>
                     <Link
-                        href="#about"
+                        href="/#about"
                         className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-400)] hover:text-[var(--vsc-white)] transition-colors duration-200"
                         style={{ fontFamily: "var(--font-space-mono)" }}
                     >
@@ -59,14 +61,31 @@ export function Navbar() {
                     </Link>
                 </div>
 
-                {/* CTA */}
-                <Link
-                    href="#collection"
-                    className="px-8 py-4 bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:text-[var(--vsc-accent)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
-                    style={{ fontFamily: "var(--font-space-mono)" }}
-                >
-                    Shop →
-                </Link>
+                {/* Right side — Cart + CTA */}
+                <div className="flex items-center gap-4">
+                    {/* Cart icon */}
+                    <Link
+                        href="/cart"
+                        className="relative px-4 py-3 text-xs font-bold uppercase tracking-[0.2em] text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] transition-colors duration-200 border border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)]"
+                        style={{ fontFamily: "var(--font-space-mono)" }}
+                    >
+                        BAG
+                        {cartCount > 0 && (
+                            <span className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-[10px] font-bold">
+                                {cartCount}
+                            </span>
+                        )}
+                    </Link>
+
+                    {/* Shop CTA */}
+                    <Link
+                        href="/#collection"
+                        className="hidden md:block px-8 py-4 bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:text-[var(--vsc-accent)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
+                        style={{ fontFamily: "var(--font-space-mono)" }}
+                    >
+                        Shop →
+                    </Link>
+                </div>
             </div>
         </nav>
     )
