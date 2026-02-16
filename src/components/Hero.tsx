@@ -47,7 +47,7 @@ export function Hero() {
           }}
         />
         {/* Grid lines for digital rawness */}
-        <div
+        {/* <div
           className="absolute inset-0 opacity-[0.10] pointer-events-none"
           style={{
             backgroundImage: `
@@ -56,7 +56,7 @@ export function Hero() {
             `,
             backgroundSize: "20px 20px",
           }}
-        />
+        /> */}
       </div>
 
       {/* Title — massive, cropped at edges */}
