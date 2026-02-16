@@ -73,12 +73,6 @@ export function CategoryCard({
         >
           {category.name}
         </h3>
-        <span
-          className="text-xs font-bold text-[var(--vsc-accent)] group-hover:text-[var(--vsc-black)] tracking-[0.15em] transition-colors duration-200 shrink-0 ml-4"
-          style={{ fontFamily: "var(--font-space-mono)" }}
-        >
-          VIEW →
-        </span>
       </div>
     </Link>
   );
