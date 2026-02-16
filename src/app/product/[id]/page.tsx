@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
 import { MarqueeStrip } from "@/components/MarqueeStrip"
@@ -91,10 +92,19 @@ export default function ProductDetailPage({
 }) {
     // For Next.js 16 with async params, we handle with use()
     // But for client component simplicity, extract from URL
+    const searchParams = useSearchParams()
     const id =
         typeof window !== "undefined"
             ? window.location.pathname.split("/").pop() || "prod_1"
             : "prod_1"
+
+    const categorySlug = searchParams.get("category")
+    const categoryLabel =
+        categorySlug &&
+        categorySlug
+            .split("-")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ")
 
     const product = useProduct(id)
     const [selectedSize, setSelectedSize] = useState<string>("")
@@ -125,6 +135,18 @@ export default function ProductDetailPage({
                         >
                             Collection
                         </Link>
+                        {categorySlug && categoryLabel && (
+                            <>
+                                <span className="text-[var(--vsc-gray-700)] text-xs">/</span>
+                                <Link
+                                    href={`/collection/${categorySlug}`}
+                                    className="text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors"
+                                    style={{ fontFamily: "var(--font-space-mono)" }}
+                                >
+                                    {categoryLabel}
+                                </Link>
+                            </>
+                        )}
                         <span className="text-[var(--vsc-gray-700)] text-xs">/</span>
                         <span
                             className="text-[10px] text-[var(--vsc-gray-400)] uppercase tracking-[0.2em]"

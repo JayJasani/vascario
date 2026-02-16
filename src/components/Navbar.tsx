@@ -163,13 +163,13 @@ export function Navbar() {
           </Link>
 
           {/* Shop CTA */}
-          <Link
+          {/* <Link
             href="/collection"
             className="hidden md:block px-8 py-4 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
             Shop →
-          </Link>
+          </Link> */}
         </div>
       </div>
 

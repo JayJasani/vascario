@@ -15,9 +15,10 @@ interface ProductCardProps {
   product: Product
   variant?: "default" | "featured" | "grid"
   aspectClass?: string
+  href?: string
 }
 
-export function ProductCard({ product, variant = "default", aspectClass }: ProductCardProps) {
+export function ProductCard({ product, variant = "default", aspectClass, href }: ProductCardProps) {
   const isFeatured = variant === "featured"
   const isGrid = variant === "grid"
 
@@ -28,9 +29,10 @@ export function ProductCard({ product, variant = "default", aspectClass }: Produ
       : "group relative block overflow-hidden border border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] transition-colors duration-200 min-w-[300px] md:min-w-[360px]"
 
   const aspect = aspectClass ?? "aspect-[3/4]"
+  const targetHref = href ?? `/product/${product.id}`
 
   return (
-    <Link href={`/product/${product.id}`} className={linkClass}>
+    <Link href={targetHref} className={linkClass}>
       {/* Image container with chromatic aberration */}
       <div
         className={`relative overflow-hidden bg-[var(--vsc-gray-800)] chromatic-hover ${aspect}`}

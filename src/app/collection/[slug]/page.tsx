@@ -124,6 +124,7 @@ export default async function CategoryProductListPage({
               product={product}
               variant="grid"
               aspectClass="aspect-[3/4]"
+              href={`/product/${product.id}?category=${slug}`}
             />
           ))}
         </div>

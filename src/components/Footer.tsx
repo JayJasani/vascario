@@ -4,7 +4,7 @@ export function Footer() {
   return (
     <footer className="border-t border-[var(--vsc-gray-200)] bg-[var(--vsc-white)]">
       {/* Giant brand name */}
-      <div className="px-6 md:px-12 lg:px-20 pt-20 md:pt-32 pb-12">
+      {/* <div className="px-6 md:px-12 lg:px-20 pt-20 md:pt-32 pb-12">
         <h2
           className="text-[var(--vsc-gray-100)] leading-[0.85] select-none"
           style={{
@@ -14,9 +14,20 @@ export function Footer() {
             fontWeight: 700,
           }}
         >
-          VASCARIO
+          VASC
+          <span className="relative inline-flex items-baseline mx-[0.02em]">
+            <Image
+              src="/logo/Alogo.png"
+              alt="VASCARIO A logo"
+              width={200}
+              height={200}
+              className="block h-[0.75em] w-auto translate-y-[0.03em]"
+              priority
+            />
+          </span>
+          RIO
         </h2>
-      </div>
+      </div> */}
 
       {/* Accent divider */}
       <div className="h-px bg-[var(--vsc-gray-200)] mx-6 md:mx-12 lg:mx-20" />
@@ -120,7 +131,7 @@ export function Footer() {
               className="flex-1 px-5 py-4 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-xs uppercase tracking-[0.15em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]"
               style={{ fontFamily: "var(--font-space-mono)" }}
             />
-              <button
+            <button
               className="px-6 py-4 bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.15em] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200"
               style={{ fontFamily: "var(--font-space-mono)" }}
             >
