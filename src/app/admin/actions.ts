@@ -1,10 +1,24 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import {
+    getRecentOrdersWithItems,
+    getOrdersWithItems,
+    updateOrder,
+    createAuditLog,
+    countOrders,
+    aggregateOrderTotal,
+    getAllProducts,
+    getActiveProducts,
+    createProduct as createProductHelper,
+    updateProduct,
+    getProductById,
+    getStockLevelsByProductId,
+    updateStockLevel,
+    getLowStockAlerts,
+    createStockLevel,
+    type OrderStatus,
+} from "@/lib/firebase-helpers";
 import { revalidatePath } from "next/cache";
-
-// Local type matching the Prisma OrderStatus enum — avoids import issues before `prisma generate`
-type OrderStatus = "PENDING" | "PAID" | "IN_PRODUCTION" | "SHIPPED" | "DELIVERED" | "CANCELLED";
 
 // ─── DASHBOARD STATS ───────────────────────────────────────────────────────────
 
@@ -18,30 +32,20 @@ export async function getDashboardStats() {
         lowStockAlerts,
         recentOrders,
     ] = await Promise.all([
-        prisma.order.count(),
-        prisma.order.count({ where: { status: "PENDING" } }),
-        prisma.order.count({ where: { status: "PAID" } }),
-        prisma.order.aggregate({ _sum: { totalAmount: true } }),
-        prisma.product.count({ where: { isActive: true } }),
-        prisma.$queryRawUnsafe<[{ count: bigint }]>(
-            `SELECT COUNT(*)::bigint as count FROM "StockLevel" WHERE quantity <= "lowThreshold"`
-        ).then((res) => Number(res[0]?.count ?? 0)),
-        prisma.order.findMany({
-            take: 10,
-            orderBy: { createdAt: "desc" },
-            include: {
-                items: {
-                    include: { product: true },
-                },
-            },
-        }),
+        countOrders(),
+        countOrders("PENDING"),
+        countOrders("PAID"),
+        aggregateOrderTotal(),
+        getActiveProducts().then((products) => products.length),
+        getLowStockAlerts().then((alerts) => alerts.length),
+        getRecentOrdersWithItems(10),
     ]);
 
     return {
         totalOrders,
         pendingOrders,
         paidOrders,
-        totalRevenue: totalRevenue._sum.totalAmount?.toString() ?? "0",
+        totalRevenue: totalRevenue.toString(),
         activeProducts,
         lowStockAlerts,
         recentOrders: recentOrders.map((order) => ({
@@ -64,15 +68,7 @@ export async function getDashboardStats() {
 // ─── ORDERS ─────────────────────────────────────────────────────────────────────
 
 export async function getOrders(statusFilter?: OrderStatus) {
-    const orders = await prisma.order.findMany({
-        where: statusFilter ? { status: statusFilter } : undefined,
-        orderBy: { createdAt: "desc" },
-        include: {
-            items: {
-                include: { product: true },
-            },
-        },
-    });
+    const orders = await getOrdersWithItems(statusFilter);
 
     return orders.map((order) => ({
         id: order.id,
@@ -95,18 +91,13 @@ export async function getOrders(statusFilter?: OrderStatus) {
 }
 
 export async function updateOrderStatus(orderId: string, status: OrderStatus) {
-    await prisma.order.update({
-        where: { id: orderId },
-        data: { status },
-    });
+    await updateOrder(orderId, { status });
 
-    await prisma.auditLog.create({
-        data: {
-            action: `ORDER_${status}`,
-            entity: "Order",
-            entityId: orderId,
-            details: { newStatus: status },
-        },
+    await createAuditLog({
+        action: `ORDER_${status}`,
+        entity: "Order",
+        entityId: orderId,
+        details: { newStatus: status },
     });
 
     revalidatePath("/admin/orders");
@@ -118,22 +109,17 @@ export async function addTrackingInfo(
     trackingNumber: string,
     carrier: string
 ) {
-    await prisma.order.update({
-        where: { id: orderId },
-        data: {
-            trackingNumber,
-            trackingCarrier: carrier,
-            status: "SHIPPED",
-        },
+    await updateOrder(orderId, {
+        trackingNumber,
+        trackingCarrier: carrier,
+        status: "SHIPPED",
     });
 
-    await prisma.auditLog.create({
-        data: {
-            action: "ORDER_SHIPPED",
-            entity: "Order",
-            entityId: orderId,
-            details: { trackingNumber, carrier },
-        },
+    await createAuditLog({
+        action: "ORDER_SHIPPED",
+        entity: "Order",
+        entityId: orderId,
+        details: { trackingNumber, carrier },
     });
 
     revalidatePath("/admin/orders");
@@ -143,31 +129,32 @@ export async function addTrackingInfo(
 // ─── PRODUCTS / DROPS ───────────────────────────────────────────────────────────
 
 export async function getProducts() {
-    const products = await prisma.product.findMany({
-        orderBy: { createdAt: "desc" },
-        include: {
-            stock: true,
-        },
-    });
+    const products = await getAllProducts();
+    const productsWithStock = await Promise.all(
+        products.map(async (product) => {
+            const stock = await getStockLevelsByProductId(product.id);
+            return {
+                id: product.id,
+                name: product.name,
+                description: product.description,
+                price: product.price.toString(),
+                images: product.images,
+                colors: product.colors,
+                sizes: product.sizes,
+                sku: product.sku,
+                isActive: product.isActive,
+                createdAt: product.createdAt.toISOString(),
+                stock: stock.map((s) => ({
+                    id: s.id,
+                    size: s.size,
+                    quantity: s.quantity,
+                    lowThreshold: s.lowThreshold,
+                })),
+            };
+        })
+    );
 
-    return products.map((product) => ({
-        id: product.id,
-        name: product.name,
-        description: product.description,
-        price: product.price.toString(),
-        images: product.images,
-        colors: product.colors,
-        sizes: product.sizes,
-        sku: product.sku,
-        isActive: product.isActive,
-        createdAt: product.createdAt.toISOString(),
-        stock: product.stock.map((s) => ({
-            id: s.id,
-            size: s.size,
-            quantity: s.quantity,
-            lowThreshold: s.lowThreshold,
-        })),
-    }));
+    return productsWithStock;
 }
 
 export async function createProduct(formData: FormData) {
@@ -175,10 +162,10 @@ export async function createProduct(formData: FormData) {
     const description = formData.get("description") as string;
     const price = parseFloat(formData.get("price") as string);
     const sku = (formData.get("sku") as string) || null;
-    const images = (formData.get("images") as string)
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
+    const imagesString = formData.get("images") as string;
+    const images = imagesString
+        ? imagesString.split(",").map((s) => s.trim()).filter(Boolean)
+        : [];
     const colors = (formData.get("colors") as string)
         .split(",")
         .map((s) => s.trim())
@@ -188,32 +175,34 @@ export async function createProduct(formData: FormData) {
         .map((s) => s.trim())
         .filter(Boolean);
 
-    const product = await prisma.product.create({
-        data: {
-            name,
-            description,
-            price,
-            sku,
-            images,
-            colors,
-            sizes,
-            stock: {
-                create: sizes.map((size) => ({
-                    size,
-                    quantity: 0,
-                    lowThreshold: 5,
-                })),
-            },
-        },
+    const product = await createProductHelper({
+        name,
+        description,
+        price,
+        sku,
+        images,
+        colors,
+        sizes,
+        isActive: true,
     });
 
-    await prisma.auditLog.create({
-        data: {
-            action: "PRODUCT_CREATED",
-            entity: "Product",
-            entityId: product.id,
-            details: { name },
-        },
+    // Create stock levels for each size
+    await Promise.all(
+        sizes.map((size) =>
+            createStockLevel({
+                productId: product.id,
+                size,
+                quantity: 0,
+                lowThreshold: 5,
+            })
+        )
+    );
+
+    await createAuditLog({
+        action: "PRODUCT_CREATED",
+        entity: "Product",
+        entityId: product.id,
+        details: { name },
     });
 
     revalidatePath("/admin/drops");
@@ -222,15 +211,10 @@ export async function createProduct(formData: FormData) {
 }
 
 export async function toggleProductActive(productId: string) {
-    const product = await prisma.product.findUnique({
-        where: { id: productId },
-    });
+    const product = await getProductById(productId);
     if (!product) return;
 
-    await prisma.product.update({
-        where: { id: productId },
-        data: { isActive: !product.isActive },
-    });
+    await updateProduct(productId, { isActive: !product.isActive });
 
     revalidatePath("/admin/drops");
     revalidatePath("/admin");
@@ -239,41 +223,45 @@ export async function toggleProductActive(productId: string) {
 // ─── INVENTORY ──────────────────────────────────────────────────────────────────
 
 export async function getStockLevels() {
-    const products = await prisma.product.findMany({
-        where: { isActive: true },
-        orderBy: { name: "asc" },
-        include: { stock: true },
-    });
+    const products = await getAllProducts();
+    const activeProducts = products.filter((p) => p.isActive);
+    activeProducts.sort((a, b) => a.name.localeCompare(b.name));
 
-    return products.map((product) => ({
-        id: product.id,
-        name: product.name,
-        sku: product.sku,
-        sizes: product.sizes,
-        stock: product.stock.map((s) => ({
-            id: s.id,
-            size: s.size,
-            quantity: s.quantity,
-            lowThreshold: s.lowThreshold,
-        })),
-    }));
+    const productsWithStock = await Promise.all(
+        activeProducts.map(async (product) => {
+            const stock = await getStockLevelsByProductId(product.id);
+            return {
+                id: product.id,
+                name: product.name,
+                sku: product.sku,
+                sizes: product.sizes,
+                stock: stock.map((s) => ({
+                    id: s.id,
+                    size: s.size,
+                    quantity: s.quantity,
+                    lowThreshold: s.lowThreshold,
+                })),
+            };
+        })
+    );
+
+    return productsWithStock;
 }
 
 export async function updateStock(
     stockLevelId: string,
     quantity: number
 ) {
-    const stockLevel = await prisma.stockLevel.update({
-        where: { id: stockLevelId },
-        data: { quantity },
-    });
+    const stockLevel = await updateStockLevel(stockLevelId, quantity);
 
-    await prisma.auditLog.create({
-        data: {
-            action: "STOCK_UPDATED",
-            entity: "StockLevel",
-            entityId: stockLevelId,
-            details: { newQuantity: quantity, productId: stockLevel.productId, size: stockLevel.size },
+    await createAuditLog({
+        action: "STOCK_UPDATED",
+        entity: "StockLevel",
+        entityId: stockLevelId,
+        details: {
+            newQuantity: quantity,
+            productId: stockLevel.productId,
+            size: stockLevel.size,
         },
     });
 

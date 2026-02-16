@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { AdminButton } from "@/components/admin/AdminButton";
 import { AdminInput, AdminTextarea } from "@/components/admin/AdminInput";
 import { createProduct, toggleProductActive } from "../actions";
 import useSWR from "swr";
+import Image from "next/image";
 
 interface Product {
     id: string;
@@ -35,11 +36,56 @@ export default function DropsPage() {
         price: "",
         description: "",
     });
+    const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    async function handleFileUpload(files: FileList | null) {
+        if (!files || files.length === 0) return;
+
+        setUploading(true);
+        try {
+            const uploadFormData = new FormData();
+            Array.from(files).forEach((file) => {
+                uploadFormData.append("files", file);
+            });
+
+            const response = await fetch("/admin/drops/api/upload", {
+                method: "POST",
+                body: uploadFormData,
+            });
+
+            if (!response.ok) {
+                throw new Error("Upload failed");
+            }
+
+            const data = await response.json();
+            setUploadedImages((prev) => [...prev, ...data.urls]);
+        } catch (error) {
+            console.error("Upload error:", error);
+            alert("Failed to upload images. Please try again.");
+        } finally {
+            setUploading(false);
+        }
+    }
+
+    function removeImage(index: number) {
+        setUploadedImages((prev) => prev.filter((_, i) => i !== index));
+    }
 
     async function handleSubmit(formData: FormData) {
+        // Add uploaded image URLs to form data
+        if (uploadedImages.length > 0) {
+            formData.set("images", uploadedImages.join(","));
+        }
+
         await createProduct(formData);
         setShowForm(false);
         setPreview({ name: "", price: "", description: "" });
+        setUploadedImages([]);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
         mutate();
     }
 
@@ -65,7 +111,16 @@ export default function DropsPage() {
                 </div>
                 <AdminButton
                     variant={showForm ? "secondary" : "primary"}
-                    onClick={() => setShowForm(!showForm)}
+                    onClick={() => {
+                        if (showForm) {
+                            setUploadedImages([]);
+                            setPreview({ name: "", price: "", description: "" });
+                            if (fileInputRef.current) {
+                                fileInputRef.current.value = "";
+                            }
+                        }
+                        setShowForm(!showForm);
+                    }}
                 >
                     {showForm ? "✕ Cancel" : "+ New Drop"}
                 </AdminButton>
@@ -117,12 +172,53 @@ export default function DropsPage() {
                                     hint="Optional"
                                 />
                             </div>
-                            <AdminInput
-                                label="Image URLs"
-                                name="images"
-                                placeholder="https://..., https://..."
-                                hint="Comma-separated"
-                            />
+                            {/* Image Upload */}
+                            <div>
+                                <label className="block font-mono text-[10px] text-[#999] tracking-[0.2em] uppercase mb-2">
+                                    Product Images
+                                </label>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={(e) => handleFileUpload(e.target.files)}
+                                    className="hidden"
+                                    id="image-upload"
+                                />
+                                <label
+                                    htmlFor="image-upload"
+                                    className={`block w-full px-4 py-3 border-2 border-[#2A2A2A] bg-[#0D0D0D] cursor-pointer hover:border-[#BAFF00] transition-colors ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}
+                                >
+                                    <span className="font-mono text-xs text-[#F5F5F0] tracking-[0.1em]">
+                                        {uploading ? "Uploading..." : uploadedImages.length > 0 ? `✓ ${uploadedImages.length} image(s) uploaded` : "+ Upload Images"}
+                                    </span>
+                                </label>
+                                {uploadedImages.length > 0 && (
+                                    <div className="mt-4 grid grid-cols-3 gap-3">
+                                        {uploadedImages.map((url, index) => (
+                                            <div key={index} className="relative group aspect-square">
+                                                <Image
+                                                    src={url}
+                                                    alt={`Upload ${index + 1}`}
+                                                    fill
+                                                    className="object-cover border-2 border-[#2A2A2A]"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeImage(index)}
+                                                    className="absolute top-1 right-1 w-6 h-6 bg-[#BAFF00] text-[#0D0D0D] font-bold text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                <p className="font-mono text-[10px] text-[#666] tracking-[0.1em] mt-2">
+                                    Upload multiple images (JPG, PNG, WebP)
+                                </p>
+                            </div>
                             <div className="grid grid-cols-2 gap-6">
                                 <AdminInput
                                     label="Colors"
@@ -151,11 +247,22 @@ export default function DropsPage() {
                             Live Preview // Storefront Card
                         </span>
                         <div className="border-2 border-[#2A2A2A] bg-black p-6 max-w-sm">
-                            {/* Mock product image area */}
-                            <div className="aspect-[3/4] bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center mb-6">
-                                <span className="font-mono text-[10px] text-[#333] tracking-[0.2em] uppercase">
-                                    Product Image
-                                </span>
+                            {/* Product image preview */}
+                            <div className="aspect-[3/4] bg-[#1A1A1A] border border-[#2A2A2A] overflow-hidden mb-6 relative">
+                                {uploadedImages.length > 0 ? (
+                                    <Image
+                                        src={uploadedImages[0]}
+                                        alt="Preview"
+                                        fill
+                                        className="object-cover"
+                                    />
+                                ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <span className="font-mono text-[10px] text-[#333] tracking-[0.2em] uppercase">
+                                            Product Image
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                             <div className="space-y-2">
                                 <h3
