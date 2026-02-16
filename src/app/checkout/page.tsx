@@ -357,8 +357,8 @@ function StepShipping({
             <div className="flex justify-end pt-4">
                 <button
                     onClick={onNext}
-                    className="w-full md:w-auto px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
-                    style={{ fontFamily: "var(--font-space-mono)" }}
+                    className="w-full md:w-auto px-6 py-4 md:px-10 md:py-6 text-sm font-bold uppercase tracking-[0.2em] border-2 border-black transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
+                    style={{ fontFamily: "var(--font-space-mono)", backgroundColor: "black", color: "white" }}
                 >
                     CONTINUE TO PAYMENT →
                 </button>
@@ -427,8 +427,8 @@ function StepPayment({
                 </button>
                 <button
                     onClick={onNext}
-                    className="w-full sm:w-auto px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
-                    style={{ fontFamily: "var(--font-space-mono)" }}
+                    className="w-full sm:w-auto px-6 py-4 md:px-10 md:py-6 text-sm font-bold uppercase tracking-[0.2em] border-2 border-black transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
+                    style={{ fontFamily: "var(--font-space-mono)", backgroundColor: "black", color: "white" }}
                 >
                     REVIEW ORDER →
                 </button>
@@ -535,10 +535,10 @@ function StepReview({
                 </div>
 
                 {/* Total */}
-                <div className="flex justify-between items-center pt-6 mt-4 border-t-2 border-[var(--vsc-white)]">
+                <div className="flex justify-between items-center pt-6 mt-4 border-t-2 border-[var(--vsc-black)]">
                     <span
-                        className="text-sm font-bold text-[var(--vsc-white)] uppercase tracking-[0.1em]"
-                        style={{ fontFamily: "var(--font-space-grotesk)" }}
+                        className="text-sm font-bold uppercase tracking-[0.1em]"
+                        style={{ fontFamily: "var(--font-space-grotesk)", color: "black" }}
                     >
                         TOTAL
                     </span>
@@ -562,8 +562,8 @@ function StepReview({
                 </button>
                 <button
                     onClick={onPlace}
-                    className="w-full sm:w-auto px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
-                    style={{ fontFamily: "var(--font-space-mono)" }}
+                    className="w-full sm:w-auto px-6 py-4 md:px-10 md:py-6 text-sm font-bold uppercase tracking-[0.2em] border-2 border-black transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
+                    style={{ fontFamily: "var(--font-space-mono)", backgroundColor: "black", color: "white" }}
                 >
                     PLACE ORDER →
                 </button>
