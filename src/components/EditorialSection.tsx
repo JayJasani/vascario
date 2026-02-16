@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useEffect, useRef } from "react"
 
 export function EditorialSection() {
@@ -59,6 +60,14 @@ export function EditorialSection() {
                     {/* Large editorial image */}
                     <div className="md:col-span-7 reveal">
                         <div className="relative aspect-[4/5] bg-[var(--vsc-gray-900)] overflow-hidden border border-[var(--vsc-gray-700)] group">
+                            <video
+                                className="absolute inset-0 w-full h-full object-cover"
+                                src="/video/onboard2.mp4"
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                            />
                             <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
                                 <div className="absolute inset-0 opacity-[0.06]"
                                     style={{
@@ -88,6 +97,12 @@ export function EditorialSection() {
                         {/* Smaller image */}
                         <div className="reveal" style={{ transitionDelay: "100ms" }}>
                             <div className="relative aspect-square bg-[var(--vsc-gray-900)] overflow-hidden border border-[var(--vsc-gray-700)] group">
+                                <Image
+                                    src="/tshirt/closeup.png"
+                                    alt="Close-up"
+                                    fill
+                                    className="object-cover"
+                                />
                                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
                                     <div className="absolute inset-0 opacity-[0.06]"
                                         style={{
