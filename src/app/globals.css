@@ -102,67 +102,71 @@
 
 /* --------------------------------------------------------------------------
    BASE STYLES
+   Wrapped in @layer base so Tailwind utility classes (which live in
+   @layer utilities) properly override these reset values in the cascade.
    -------------------------------------------------------------------------- */
-*, *::before, *::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+@layer base {
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-html {
-  background-color: var(--vsc-black);
-  color: var(--vsc-white);
-  scroll-behavior: auto; /* Lenis handles smooth scroll */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  html {
+    background-color: var(--vsc-black);
+    color: var(--vsc-white);
+    scroll-behavior: auto; /* Lenis handles smooth scroll */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-body {
-  background-color: var(--vsc-black);
-  color: var(--vsc-white);
-  font-family: var(--font-space-mono), 'Courier New', monospace;
-  font-size: var(--text-body);
-  line-height: 1.6;
-  overflow-x: hidden;
-}
+  body {
+    background-color: var(--vsc-black);
+    color: var(--vsc-white);
+    font-family: var(--font-space-mono), 'Courier New', monospace;
+    font-size: var(--text-body);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
 
-/* Selection */
-::selection {
-  background-color: var(--vsc-accent);
-  color: var(--vsc-black);
-}
+  /* Selection */
+  ::selection {
+    background-color: var(--vsc-accent);
+    color: var(--vsc-black);
+  }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--vsc-black);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--vsc-gray-600);
-  border: none;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--vsc-accent);
-}
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--vsc-black);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--vsc-gray-600);
+    border: none;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--vsc-accent);
+  }
 
-/* --------------------------------------------------------------------------
-   NOISE OVERLAY — Screen grain texture
-   -------------------------------------------------------------------------- */
-body::after {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.04;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 128px 128px;
+  /* --------------------------------------------------------------------------
+     NOISE OVERLAY — Screen grain texture
+     -------------------------------------------------------------------------- */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 128px 128px;
+  }
 }
 
 /* --------------------------------------------------------------------------

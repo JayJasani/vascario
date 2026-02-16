@@ -321,7 +321,7 @@ export default function ProductDetailPage({
                                     </span>
                                     <button
                                         onClick={() => setQuantity(quantity + 1)}
-                                        className="px-4 py-3 text-sm text-[var(--vsc-gray-400)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-800)] transition-colors"
+                                        className="px-5 py-4 text-sm font-bold text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                     >
                                         +
