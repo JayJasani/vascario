@@ -55,7 +55,7 @@ function OrderSuccessContent() {
                 </div>
 
                 {/* Second marquee — reverse direction, smaller */}
-                <div className="relative overflow-hidden py-3 bg-[var(--vsc-black)] border-y-4 border-[var(--vsc-accent)]">
+                <div className="relative overflow-hidden py-3 bg-[var(--vsc-black)] border-y-2 md:border-y-4 border-[var(--vsc-accent)]">
                     <div
                         className="flex whitespace-nowrap"
                         style={{
@@ -293,13 +293,13 @@ function OrderSuccessContent() {
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-16">
                         <Link
                             href="/"
-                            className="w-full sm:w-auto text-center px-10 py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
+                            className="w-full sm:w-auto text-center px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
                             style={{ fontFamily: "var(--font-space-mono)" }}
                         >
                             CONTINUE SHOPPING →
                         </Link>
                         <button
-                            className="w-full sm:w-auto text-center px-10 py-6 bg-transparent text-[var(--vsc-white)] text-sm font-bold uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors duration-200 border-4 border-[var(--vsc-gray-600)] hover:border-[var(--vsc-accent)]"
+                            className="w-full sm:w-auto text-center px-6 py-4 md:px-10 md:py-6 bg-transparent text-[var(--vsc-white)] text-sm font-bold uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors duration-200 border-2 md:border-4 border-[var(--vsc-gray-600)] hover:border-[var(--vsc-accent)]"
                             style={{ fontFamily: "var(--font-space-mono)" }}
                         >
                             TRACK ORDER

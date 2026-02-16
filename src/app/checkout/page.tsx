@@ -128,7 +128,7 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* ===== STEP PROGRESS BAR ===== */}
-                <div className="flex items-center gap-0 mb-16 border-4 border-[var(--vsc-white)]">
+                <div className="flex items-center gap-0 mb-8 md:mb-16 border-2 md:border-4 border-[var(--vsc-white)]">
                     {STEPS.map((s, i) => (
                         <button
                             key={s.num}
@@ -138,16 +138,16 @@ export default function CheckoutPage() {
                                     setStep(i + 1)
                                 }
                             }}
-                            className={`flex-1 flex items-center justify-center gap-3 py-5 transition-all duration-300 ${step === i + 1
+                            className={`flex-1 flex items-center justify-center gap-2 md:gap-3 py-3 md:py-5 transition-all duration-300 ${step === i + 1
                                 ? "bg-[var(--vsc-accent)] text-[var(--vsc-black)]"
                                 : step > i + 1
                                     ? "bg-[var(--vsc-gray-800)] text-[var(--vsc-accent)] cursor-pointer hover:bg-[var(--vsc-gray-700)]"
                                     : "bg-[var(--vsc-gray-900)] text-[var(--vsc-gray-600)] cursor-default"
-                                } ${i < STEPS.length - 1 ? "border-r-4 border-[var(--vsc-white)]" : ""}`}
+                                } ${i < STEPS.length - 1 ? "border-r-2 md:border-r-4 border-[var(--vsc-white)]" : ""}`}
                             style={{ fontFamily: "var(--font-space-mono)" }}
                         >
-                            <span className="text-xl md:text-2xl font-bold">{s.num}</span>
-                            <span className="text-xs md:text-sm font-bold uppercase tracking-[0.15em]">
+                            <span className="text-base md:text-2xl font-bold">{s.num}</span>
+                            <span className="hidden sm:inline text-xs md:text-sm font-bold uppercase tracking-[0.15em]">
                                 {s.label}
                             </span>
                         </button>
@@ -157,7 +157,7 @@ export default function CheckoutPage() {
                 {/* ===== STEP CONTENT ===== */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left — Form (2 cols on lg) */}
-                    <div className="lg:col-span-2 relative pb-8" style={{ minHeight: "500px", overflowX: "clip" }}>
+                    <div className="lg:col-span-2 relative pb-8" style={{ minHeight: "400px", overflowX: "clip" }}>
                         <AnimatePresence mode="wait" custom={direction}>
                             {step === 1 && (
                                 <motion.div
@@ -357,7 +357,7 @@ function StepShipping({
             <div className="flex justify-end pt-4">
                 <button
                     onClick={onNext}
-                    className="px-10 py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
+                    className="w-full md:w-auto px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                 >
                     CONTINUE TO PAYMENT →
@@ -417,17 +417,17 @@ function StepPayment({
                 </span>
             </div>
 
-            <div className="flex justify-between pt-4 gap-4">
+            <div className="flex flex-col-reverse sm:flex-row justify-between pt-4 gap-4">
                 <button
                     onClick={onBack}
-                    className="px-8 py-6 bg-transparent text-[var(--vsc-white)] text-sm font-bold uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors duration-200 border-4 border-[var(--vsc-gray-600)] hover:border-[var(--vsc-accent)]"
+                    className="w-full sm:w-auto px-6 py-4 md:px-8 md:py-6 bg-transparent text-[var(--vsc-white)] text-sm font-bold uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors duration-200 border-2 md:border-4 border-[var(--vsc-gray-600)] hover:border-[var(--vsc-accent)]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                 >
                     ← BACK
                 </button>
                 <button
                     onClick={onNext}
-                    className="px-10 py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
+                    className="w-full sm:w-auto px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                 >
                     REVIEW ORDER →
@@ -552,17 +552,17 @@ function StepReview({
             </div>
 
             {/* CTA */}
-            <div className="flex justify-between pt-4 gap-4">
+            <div className="flex flex-col-reverse sm:flex-row justify-between pt-4 gap-4">
                 <button
                     onClick={onBack}
-                    className="px-8 py-6 bg-transparent text-[var(--vsc-white)] text-sm font-bold uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors duration-200 border-4 border-[var(--vsc-gray-600)] hover:border-[var(--vsc-accent)]"
+                    className="w-full sm:w-auto px-6 py-4 md:px-8 md:py-6 bg-transparent text-[var(--vsc-white)] text-sm font-bold uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors duration-200 border-2 md:border-4 border-[var(--vsc-gray-600)] hover:border-[var(--vsc-accent)]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                 >
                     ← BACK
                 </button>
                 <button
                     onClick={onPlace}
-                    className="px-10 py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
+                    className="w-full sm:w-auto px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                 >
                     PLACE ORDER →

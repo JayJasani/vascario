@@ -18,11 +18,10 @@ export function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
           ? "bg-[var(--vsc-black)]/95 backdrop-blur-sm border-b border-[var(--vsc-gray-700)]"
           : "bg-transparent"
-      }`}
+        }`}
     >
       <div className="flex items-center justify-between px-6 py-4 md:px-12 lg:px-20">
         {/* Logo — brutalist, cropped feeling */}
@@ -63,7 +62,7 @@ export function Navbar() {
         </div>
 
         {/* Right side — Cart + CTA */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           {/* Cart icon */}
           <Link
             href="/cart"
@@ -81,7 +80,7 @@ export function Navbar() {
           {/* Shop CTA */}
           <Link
             href="/collection"
-            className="px-8 py-4 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
+            className="hidden md:block px-8 py-4 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
             Shop →

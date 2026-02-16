@@ -98,7 +98,7 @@ export default function CartPage() {
                         </p>
                         <Link
                             href="/"
-                            className="px-10 py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
+                            className="w-full sm:w-auto text-center px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
                             style={{ fontFamily: "var(--font-space-mono)" }}
                         >
                             CONTINUE SHOPPING →
@@ -112,7 +112,7 @@ export default function CartPage() {
                                 {items.map((item, index) => (
                                     <div
                                         key={item.id}
-                                        className={`relative border-4 border-[var(--vsc-white)] bg-[var(--vsc-gray-900)] overflow-hidden group ${index === 0 ? "md:col-span-2" : ""
+                                        className={`relative border-2 md:border-4 border-[var(--vsc-white)] bg-[var(--vsc-gray-900)] overflow-hidden group ${index === 0 ? "md:col-span-2" : ""
                                             }`}
                                     >
                                         {/* Remove button */}
@@ -230,7 +230,7 @@ export default function CartPage() {
 
                         {/* ===== CART SUMMARY — DIGITAL INVOICE ===== */}
                         <div className="lg:col-span-1">
-                            <div className="sticky top-28 border-4 border-[var(--vsc-accent)] bg-[var(--vsc-gray-900)]">
+                            <div className="sticky top-28 border-2 md:border-4 border-[var(--vsc-accent)] bg-[var(--vsc-gray-900)]">
                                 {/* Summary header */}
                                 <div className="px-6 py-5 bg-[var(--vsc-accent)]">
                                     <h2
@@ -322,7 +322,7 @@ export default function CartPage() {
                                     {/* CTA */}
                                     <Link
                                         href="/checkout"
-                                        className="block w-full text-center px-10 py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
+                                        className="block w-full text-center px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                     >
                                         PROCEED TO CHECKOUT →
