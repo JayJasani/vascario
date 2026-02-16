@@ -119,7 +119,7 @@ export default function ProductDetailPage({
                         </Link>
                         <span className="text-[var(--vsc-gray-700)] text-xs">/</span>
                         <Link
-                            href="/#collection"
+                            href="/collection"
                             className="text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors"
                             style={{ fontFamily: "var(--font-space-mono)" }}
                         >
