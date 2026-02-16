@@ -8,13 +8,15 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { searchItems, type SearchItem } from "@/lib/search-data";
+import { type SearchItem } from "@/lib/search-data";
+import { searchItems } from "@/app/storefront-actions";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState<SearchItem[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const { cartCount } = useCart();
@@ -30,6 +32,7 @@ export function Navbar() {
     setSearchOpen(false);
     setSearchQuery("");
     setResults([]);
+    setIsSearching(false);
   }, []);
 
   useEffect(() => {
@@ -56,8 +59,38 @@ export function Navbar() {
   }, [closeSearch]);
 
   useEffect(() => {
-    const items = searchItems(searchQuery);
-    setResults(items);
+    let cancelled = false;
+    
+    const performSearch = async () => {
+      if (!searchQuery.trim()) {
+        setResults([]);
+        setIsSearching(false);
+        return;
+      }
+      
+      setIsSearching(true);
+      try {
+        const items = await searchItems(searchQuery);
+        if (!cancelled) {
+          setResults(items);
+          setIsSearching(false);
+        }
+      } catch (error) {
+        console.error("Search error:", error);
+        if (!cancelled) {
+          setResults([]);
+          setIsSearching(false);
+        }
+      }
+    };
+
+    // Debounce search to avoid too many requests
+    const timeoutId = setTimeout(performSearch, 300);
+    
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, [searchQuery]);
 
   useEffect(() => {
@@ -199,7 +232,7 @@ export function Navbar() {
                 type="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search collections, products..."
+                placeholder="Search products..."
                 className="flex-1 bg-transparent text-[var(--vsc-gray-900)] placeholder-[var(--vsc-gray-400)] text-base outline-none"
                 style={{ fontFamily: "var(--font-space-mono)" }}
                 autoComplete="off"
@@ -212,7 +245,14 @@ export function Navbar() {
             {/* Results */}
             <div className="max-h-[60vh] overflow-y-auto">
               {searchQuery.trim() ? (
-                results.length > 0 ? (
+                isSearching ? (
+                  <div
+                    className="py-12 px-5 text-center text-[var(--vsc-gray-500)] text-sm"
+                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  >
+                    Searching...
+                  </div>
+                ) : results.length > 0 ? (
                   <ul className="py-2">
                     {results.map((item) => (
                       <li key={`${item.type}-${item.id}`}>
@@ -223,7 +263,7 @@ export function Navbar() {
                         >
                           <div className="w-10 h-10 shrink-0 bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] flex items-center justify-center overflow-hidden">
                             <span className="text-[10px] text-[var(--vsc-gray-500)] uppercase">
-                              {item.type === "category" ? "cat" : "prod"}
+                              prod
                             </span>
                           </div>
                           <div className="flex-1 min-w-0">
@@ -265,7 +305,7 @@ export function Navbar() {
                   className="py-12 px-5 text-center text-[var(--vsc-gray-500)] text-sm"
                   style={{ fontFamily: "var(--font-space-mono)" }}
                 >
-                  Start typing to search collections and products
+                  Start typing to search products
                   <br />
                   <span className="text-[10px] mt-2 block">⌘K to open · Esc to close</span>
                 </div>
