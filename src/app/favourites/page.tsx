@@ -45,7 +45,7 @@ export default function FavouritesPage() {
           </p>
           <a
             href="/collection"
-            className="inline-flex items-center justify-center px-8 py-3 bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
+            className="inline-flex items-center justify-center px-8 py-4 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
           >
             Browse Collection →
           </a>
