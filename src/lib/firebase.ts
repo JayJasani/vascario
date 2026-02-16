@@ -35,4 +35,5 @@ export const COLLECTIONS = {
     DESIGNS: "designs",
     STOCK_LEVELS: "stockLevels",
     AUDIT_LOGS: "auditLogs",
+    CONTACT_SUBMISSIONS: "contactSubmissions",
 } as const;

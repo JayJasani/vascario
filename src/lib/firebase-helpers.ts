@@ -660,3 +660,33 @@ export async function createAuditLog(data: Omit<AuditLog, "id" | "createdAt">): 
         createdAt: now,
     };
 }
+
+// ─── CONTACT SUBMISSION HELPERS ────────────────────────────────────────────────
+
+export interface ContactSubmission {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    query: string;
+    createdAt: Date;
+}
+
+export async function createContactSubmission(data: Omit<ContactSubmission, "id" | "createdAt">): Promise<ContactSubmission> {
+    const now = new Date();
+    const ref = db.collection(COLLECTIONS.CONTACT_SUBMISSIONS).doc();
+
+    await ref.set({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        query: data.query,
+        createdAt: toTimestamp(now),
+    });
+
+    return {
+        id: ref.id,
+        ...data,
+        createdAt: now,
+    };
+}
