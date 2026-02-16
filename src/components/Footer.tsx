@@ -43,14 +43,19 @@ export function Footer() {
             Info
           </span>
           <ul className="space-y-2">
-            {["About", "Sizing Guide", "Shipping", "Returns"].map((item) => (
-              <li key={item}>
+            {[
+              { label: "About", href: "#" },
+              { label: "Sizing Guide", href: "/size-chart" },
+              { label: "Shipping", href: "#" },
+              { label: "Returns", href: "#" },
+            ].map((item) => (
+              <li key={item.label}>
                 <Link
-                  href="#"
+                  href={item.href}
                   className="text-xs text-[var(--vsc-gray-500)] uppercase tracking-[0.15em] hover:text-[var(--vsc-gray-900)] transition-colors duration-200"
                   style={{ fontFamily: "var(--font-space-mono)" }}
                 >
-                  {item}
+                  {item.label}
                 </Link>
               </li>
             ))}
