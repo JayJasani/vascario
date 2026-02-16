@@ -1,7 +1,11 @@
 "use client";
 
 import { useCart } from "@/context/CartContext";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import {
+  MagnifyingGlassIcon,
+  HeartIcon,
+  ShoppingBagIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { searchItems, type SearchItem } from "@/lib/search-data";
@@ -101,6 +105,13 @@ export function Navbar() {
             Collection
           </Link>
           <Link
+            href="/favourites"
+            className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-400)] hover:text-[var(--vsc-white)] transition-colors duration-200"
+            style={{ fontFamily: "var(--font-space-mono)" }}
+          >
+            Favourites
+          </Link>
+          <Link
             href="/#editorial"
             className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-400)] hover:text-[var(--vsc-white)] transition-colors duration-200"
             style={{ fontFamily: "var(--font-space-mono)" }}
@@ -116,7 +127,7 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* Right side — Search, Cart + CTA */}
+        {/* Right side — Search, Favourites, Cart + CTA */}
         <div className="flex items-center gap-2 md:gap-4">
           {/* Search icon */}
           <button
@@ -128,15 +139,24 @@ export function Navbar() {
             <MagnifyingGlassIcon className="w-5 h-5" strokeWidth={1.5} />
           </button>
 
+          {/* Favourites icon */}
+          <Link
+            href="/favourites"
+            className="p-3 text-[var(--vsc-gray-400)] hover:text-[var(--vsc-white)] transition-colors duration-200 border border-transparent"
+            aria-label="View favourites"
+          >
+            <HeartIcon className="w-5 h-5" strokeWidth={1.5} />
+          </Link>
+
           {/* Cart icon */}
           <Link
             href="/cart"
-            className="relative px-4 py-3 text-xs font-bold uppercase tracking-[0.2em] text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] transition-colors duration-200 border border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)]"
-            style={{ fontFamily: "var(--font-space-mono)" }}
+            className="relative p-3 text-[var(--vsc-gray-400)] hover:text-[var(--vsc-white)] transition-colors duration-200 border border-transparent"
+            aria-label="View bag"
           >
-            BAG
+            <ShoppingBagIcon className="w-5 h-5" strokeWidth={1.5} />
             {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-[10px] font-bold">
+              <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-[10px] font-bold rounded-full">
                 {cartCount}
               </span>
             )}
