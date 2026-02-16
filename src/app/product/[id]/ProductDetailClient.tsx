@@ -272,7 +272,7 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                         −
                                     </button>
                                     <span
-                                        className="px-8 py-4 text-sm font-bold text-[var(--vsc-white)] border-x border-[var(--vsc-gray-700)]"
+                                        className="px-8 py-4 text-sm font-bold text-black border-x border-[var(--vsc-gray-700)]"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                     >
                                         {String(quantity).padStart(2, "0")}
