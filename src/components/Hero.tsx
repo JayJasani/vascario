@@ -32,7 +32,7 @@ export function Hero() {
       <div className="absolute inset-0 z-0">
         <video
           className="absolute inset-0 w-full h-full object-cover"
-          src="/video/onboard.mp4"
+          src="/video/onboard1.mp4"
           autoPlay
           loop
           muted
@@ -42,7 +42,8 @@ export function Hero() {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "linear-gradient(to top, rgba(0, 0, 0, 1) 0%, transparent 80%)",
+            background:
+              "linear-gradient(to top, rgba(0, 0, 0, 1) 0%, transparent 80%)",
           }}
         />
         {/* Grid lines for digital rawness */}
@@ -91,8 +92,7 @@ export function Hero() {
           >
             Premium embroidered streetwear
             <br />
-            <span className="text-white">Season 01</span> —
-            Limited Drop
+            <span className="text-white">Season 01</span> — Limited Drop
           </p>
 
           <div className="flex items-center gap-3">
@@ -119,8 +119,7 @@ export function Hero() {
             className="hidden md:block w-px"
             style={{
               height: "120px",
-              background:
-                "linear-gradient(180deg, white 0%, transparent 100%)",
+              background: "linear-gradient(180deg, white 0%, transparent 100%)",
             }}
           />
         </div>
