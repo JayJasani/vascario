@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { SmoothScroller } from "@/components/SmoothScroller";
+import { CartProvider } from "@/context/CartContext";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -47,7 +48,9 @@ export default function RootLayout({
         className={`${spaceGrotesk.variable} ${spaceMono.variable}`}
       >
         <SmoothScroller>
-          {children}
+          <CartProvider>
+            {children}
+          </CartProvider>
         </SmoothScroller>
       </body>
     </html>
