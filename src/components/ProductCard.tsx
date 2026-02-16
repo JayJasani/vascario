@@ -15,9 +15,10 @@ interface ProductCardProps {
   product: Product
   variant?: "default" | "featured" | "grid"
   aspectClass?: string
+  href?: string
 }
 
-export function ProductCard({ product, variant = "default", aspectClass }: ProductCardProps) {
+export function ProductCard({ product, variant = "default", aspectClass, href }: ProductCardProps) {
   const isFeatured = variant === "featured"
   const isGrid = variant === "grid"
 
@@ -28,9 +29,10 @@ export function ProductCard({ product, variant = "default", aspectClass }: Produ
       : "group relative block overflow-hidden border border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] transition-colors duration-200 min-w-[300px] md:min-w-[360px]"
 
   const aspect = aspectClass ?? "aspect-[3/4]"
+  const targetHref = href ?? `/product/${product.id}`
 
   return (
-    <Link href={`/product/${product.id}`} className={linkClass}>
+    <Link href={targetHref} className={linkClass}>
       {/* Image container with chromatic aberration */}
       <div
         className={`relative overflow-hidden bg-[var(--vsc-gray-800)] chromatic-hover ${aspect}`}
@@ -73,7 +75,7 @@ export function ProductCard({ product, variant = "default", aspectClass }: Produ
         {/* Tag */}
         {product.tag && (
           <div
-            className="absolute top-3 left-3 px-3 py-1 bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-[10px] font-bold uppercase tracking-[0.15em] z-10"
+            className="absolute top-3 left-3 px-3 py-1 bg-[var(--vsc-accent)] text-[var(--vsc-white)] text-[10px] font-bold uppercase tracking-[0.15em] z-10"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
             {product.tag}
@@ -81,11 +83,11 @@ export function ProductCard({ product, variant = "default", aspectClass }: Produ
         )}
       </div>
 
-      {/* Info bar — inverts on hover */}
-      <div className="flex items-center justify-between px-5 py-4 bg-[var(--vsc-gray-900)] group-hover:bg-[var(--vsc-accent)] transition-colors duration-200">
+      {/* Info bar — stays dark with white text on hover */}
+      <div className="flex items-center justify-between px-5 py-4 bg-[var(--vsc-gray-900)] transition-colors duration-200">
         <div className="flex-1 min-w-0">
           <h3
-            className="text-sm font-bold uppercase tracking-[0.05em] text-[var(--vsc-white)] group-hover:text-[var(--vsc-black)] truncate transition-colors duration-200"
+            className="text-sm font-bold uppercase tracking-[0.05em] text-[var(--vsc-white)] truncate transition-colors duration-200"
             style={{ fontFamily: "var(--font-space-grotesk)" }}
           >
             {product.name}
@@ -93,13 +95,13 @@ export function ProductCard({ product, variant = "default", aspectClass }: Produ
         </div>
         <div className="flex items-center gap-4 ml-4 shrink-0">
           <span
-            className="text-sm font-bold text-[var(--vsc-white)] group-hover:text-[var(--vsc-black)] transition-colors duration-200"
+            className="text-sm font-bold text-[var(--vsc-white)] transition-colors duration-200"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
             ${product.price.toFixed(0)}
           </span>
           <span
-            className="text-xs font-bold text-[var(--vsc-accent)] group-hover:text-[var(--vsc-black)] tracking-[0.15em] transition-colors duration-200"
+            className="text-xs font-bold text-[var(--vsc-white)] group-hover:text-[var(--vsc-white)] tracking-[0.15em] transition-colors duration-200"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
             ADD →

@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function TermsOfServicePage() {
   return (
-    <main className="min-h-screen bg-[var(--vsc-black)] text-[var(--vsc-gray-200)]">
+    <main className="min-h-screen bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)]">
       <Navbar />
 
       <section className="pt-32 pb-24 px-6 md:px-12 lg:px-40 max-w-5xl mx-auto">
@@ -21,7 +21,7 @@ export default function TermsOfServicePage() {
             Legal
           </p>
           <h1
-            className="text-3xl md:text-4xl lg:text-5xl text-[var(--vsc-white)] leading-tight mb-4"
+          className="text-3xl md:text-4xl lg:text-5xl text-[var(--vsc-gray-900)] leading-tight mb-4"
             style={{ fontFamily: "var(--font-space-grotesk)" }}
           >
             Terms of Service
@@ -39,7 +39,7 @@ export default function TermsOfServicePage() {
           style={{ fontFamily: "var(--font-space-mono)" }}
         >
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Overview
             </h2>
             <p className="mb-3">
@@ -62,7 +62,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Online Store Terms
             </h2>
             <p className="mb-3">
@@ -82,7 +82,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               General Conditions
             </h2>
             <p className="mb-3">
@@ -99,7 +99,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Products, Pricing & Availability
             </h2>
             <p className="mb-3">
@@ -116,7 +116,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Billing & Account Information
             </h2>
             <p className="mb-3">
@@ -132,7 +132,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Third-Party Tools & Links
             </h2>
             <p className="mb-3">
@@ -149,7 +149,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               User Content & Conduct
             </h2>
             <p className="mb-3">
@@ -167,7 +167,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Prohibited Uses
             </h2>
             <p className="mb-3">
@@ -185,7 +185,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Disclaimers & Limitation of Liability
             </h2>
             <p className="mb-3">
@@ -202,7 +202,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Indemnification
             </h2>
             <p>
@@ -215,7 +215,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Governing Law & Changes
             </h2>
             <p className="mb-3">
@@ -231,7 +231,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Contact Information
             </h2>
             <p>

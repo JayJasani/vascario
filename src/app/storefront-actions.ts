@@ -4,6 +4,7 @@ import {
     getActiveProducts as getActiveProductsHelper,
     getProductById as getProductByIdHelper,
 } from "@/lib/firebase-helpers";
+import type { SearchItem } from "@/lib/search-data";
 
 // ─── PUBLIC STOREFRONT QUERIES ──────────────────────────────────────────────────
 
@@ -56,4 +57,39 @@ export async function getProductById(id: string): Promise<StorefrontProduct | nu
         sizes: product.sizes,
         sku: product.sku ?? null,
     };
+}
+
+/**
+ * Search products dynamically from Firebase.
+ * Returns search items matching the query.
+ */
+export async function searchItems(query: string): Promise<SearchItem[]> {
+    if (!query.trim()) return [];
+
+    try {
+        // Fetch active products from Firebase
+        const products = await getActiveProductsHelper();
+
+        // Convert products to search items
+        const productItems: SearchItem[] = products.map((product) => ({
+            id: product.id,
+            name: product.name,
+            type: "product" as const,
+            url: `/product/${product.id}`,
+            image: product.images[0],
+            price: product.price,
+        }));
+
+        // Filter by query
+        const q = query.toLowerCase().trim();
+        return productItems.filter(
+            (item) =>
+                item.name.toLowerCase().includes(q) ||
+                item.type.toLowerCase().includes(q) ||
+                (item.tag && item.tag.toLowerCase().includes(q))
+        );
+    } catch (error) {
+        console.error("Error searching items:", error);
+        return [];
+    }
 }
