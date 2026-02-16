@@ -18,6 +18,11 @@ export interface ProductDetailData {
     sku: string | null;
 }
 
+const HEX_COLOR = /^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/
+function isHexColor(s: string) {
+    return HEX_COLOR.test(s.trim())
+}
+
 export function ProductDetailClient({ product }: { product: ProductDetailData }) {
     const [selectedSize, setSelectedSize] = useState<string>("")
     const [selectedColor, setSelectedColor] = useState(product.colors[0] || "")
@@ -161,7 +166,7 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                         <div className="md:sticky md:top-24">
                             {/* Product name */}
                             <h1
-                                className="text-[var(--vsc-white)] mb-2"
+                                className="text-black mb-2"
                                 style={{
                                     fontFamily: "var(--font-space-grotesk)",
                                     fontSize: "clamp(1.5rem, 3vw, 2.5rem)",
@@ -210,19 +215,34 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                     >
                                         Color — {selectedColor}
                                     </span>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 flex-wrap items-center">
                                         {product.colors.map((color) => (
-                                            <button
-                                                key={color}
-                                                onClick={() => setSelectedColor(color)}
-                                                className={`px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] border transition-all duration-200 ${selectedColor === color
-                                                    ? "bg-[var(--vsc-accent)] text-[var(--vsc-black)] border-[var(--vsc-accent)]"
-                                                    : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)]"
-                                                    }`}
-                                                style={{ fontFamily: "var(--font-space-mono)" }}
-                                            >
-                                                {color}
-                                            </button>
+                                            isHexColor(color) ? (
+                                                <button
+                                                    key={color}
+                                                    type="button"
+                                                    onClick={() => setSelectedColor(color)}
+                                                    className={`w-8 h-8 shrink-0 border-2 transition-all duration-200 ${selectedColor === color
+                                                        ? "border-[var(--vsc-accent)] ring-2 ring-[var(--vsc-accent)] ring-offset-2 ring-offset-[var(--vsc-black)]"
+                                                        : "border-[var(--vsc-gray-700)] hover:border-[var(--vsc-gray-500)]"
+                                                        }`}
+                                                    style={{ backgroundColor: color }}
+                                                    title={color}
+                                                    aria-label={`Color ${color}`}
+                                                />
+                                            ) : (
+                                                <button
+                                                    key={color}
+                                                    onClick={() => setSelectedColor(color)}
+                                                    className={`px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] border transition-all duration-200 ${selectedColor === color
+                                                        ? "bg-[var(--vsc-accent)] text-[var(--vsc-black)] border-[var(--vsc-accent)]"
+                                                        : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)]"
+                                                        }`}
+                                                    style={{ fontFamily: "var(--font-space-mono)" }}
+                                                >
+                                                    {color}
+                                                </button>
+                                            )
                                         ))}
                                     </div>
                                 </div>
@@ -242,8 +262,8 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                             <button
                                                 key={size}
                                                 onClick={() => setSelectedSize(size)}
-                                                className={`px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] border transition-all duration-200 ${selectedSize === size
-                                                    ? "bg-[var(--vsc-accent)] text-[var(--vsc-black)] border-[var(--vsc-accent)]"
+                                                className={`px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] border-2 transition-all duration-200 ${selectedSize === size
+                                                    ? "bg-[var(--vsc-accent)] text-[var(--vsc-black)] border-transparent"
                                                     : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)]"
                                                     }`}
                                                 style={{ fontFamily: "var(--font-space-mono)" }}
@@ -266,20 +286,20 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                 <div className="flex items-center border border-[var(--vsc-gray-700)] inline-flex">
                                     <button
                                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                        className="px-5 py-4 text-sm font-bold text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200"
+                                        className="px-5 py-2 text-sm font-bold text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                     >
                                         −
                                     </button>
                                     <span
-                                        className="px-8 py-4 text-sm font-bold text-black border-x border-[var(--vsc-gray-700)]"
+                                        className="px-8 py-2 text-sm font-bold text-black border-x border-[var(--vsc-gray-700)]"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                     >
                                         {String(quantity).padStart(2, "0")}
                                     </span>
                                     <button
                                         onClick={() => setQuantity(quantity + 1)}
-                                        className="px-5 py-4 text-sm font-bold text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200"
+                                        className="px-5 py-2 text-sm font-bold text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                     >
                                         +
@@ -289,8 +309,8 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
 
                             {/* Add to Cart */}
                             <button
-                                className="w-full py-5 bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:text-[var(--vsc-accent)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_24px_var(--vsc-accent-dim)]"
-                                style={{ fontFamily: "var(--font-space-mono)" }}
+                                className="w-full py-3 bg-[var(--vsc-accent)] text-black text-sm font-bold uppercase tracking-[0.2em] hover:bg-black hover:text-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_24px_var(--vsc-accent-dim)]"
+                                style={{ fontFamily: "var(--font-space-mono)", border: "2px solid #000" }}
                             >
                                 Add to Cart — ${product.price * quantity}
                             </button>
