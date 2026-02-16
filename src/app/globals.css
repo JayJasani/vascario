@@ -41,6 +41,17 @@
   --space-xl: 4rem;
   --space-2xl: 8rem;
 
+  /* Admin Status Colors */
+  --status-pending: #FFD600;
+  --status-paid: #BAFF00;
+  --status-production: #00BFFF;
+  --status-shipped: #00E5FF;
+  --status-delivered: #F5F5F0;
+  --status-cancelled: #FF3333;
+  --stock-ok: #BAFF00;
+  --stock-low: #FFD600;
+  --stock-critical: #FF3333;
+
   /* Transitions */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-quart: cubic-bezier(0.25, 0.46, 0.45, 0.94);
