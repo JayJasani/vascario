@@ -186,10 +186,10 @@ export async function createProduct(formData: FormData) {
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean);
-    const sizes = (formData.get("sizes") as string)
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
+    const sizesRaw = formData.getAll("sizes");
+    const sizes = Array.isArray(sizesRaw)
+        ? (sizesRaw as string[]).map((s) => s.trim()).filter(Boolean)
+        : (formData.get("sizes") as string)?.split(",").map((s) => s.trim()).filter(Boolean) ?? [];
 
     const product = await createProductHelper({
         name,
@@ -234,6 +234,64 @@ export async function toggleProductActive(productId: string) {
     await updateProduct(productId, { isActive: !product.isActive });
 
     revalidatePath("/admin/drops");
+    revalidatePath("/admin");
+    revalidateTag(CACHE_TAGS.activeProducts, "max");
+    revalidateTag(CACHE_TAGS.product(productId), "max");
+}
+
+export async function updateProductAction(productId: string, formData: FormData) {
+    const existing = await getProductById(productId);
+    if (!existing) return;
+
+    const name = formData.get("name") as string;
+    const description = formData.get("description") as string;
+    const price = parseFloat(formData.get("price") as string);
+    const sku = (formData.get("sku") as string) || null;
+    const imagesString = formData.get("images") as string;
+    const images = imagesString
+        ? imagesString.split(",").map((s) => s.trim()).filter(Boolean)
+        : existing.images;
+    const colors = (formData.get("colors") as string)
+        ? (formData.get("colors") as string).split(",").map((s) => s.trim()).filter(Boolean)
+        : existing.colors;
+    const sizesRaw = formData.getAll("sizes");
+    const sizes = Array.isArray(sizesRaw)
+        ? (sizesRaw as string[]).map((s) => s.trim()).filter(Boolean)
+        : (formData.get("sizes") as string)?.split(",").map((s) => s.trim()).filter(Boolean) ?? [];
+
+    await updateProduct(productId, {
+        name,
+        description,
+        price,
+        sku,
+        images,
+        colors,
+        sizes,
+    });
+
+    // Create stock levels for any new sizes that don't exist yet
+    const existingStock = await getStockLevelsByProductId(productId);
+    const existingSizes = new Set(existingStock.map((s) => s.size));
+    for (const size of sizes) {
+        if (!existingSizes.has(size)) {
+            await createStockLevel({
+                productId,
+                size,
+                quantity: 0,
+                lowThreshold: 5,
+            });
+        }
+    }
+
+    await createAuditLog({
+        action: "PRODUCT_UPDATED",
+        entity: "Product",
+        entityId: productId,
+        details: { name },
+    });
+
+    revalidatePath("/admin/drops");
+    revalidatePath("/admin/inventory");
     revalidatePath("/admin");
     revalidateTag(CACHE_TAGS.activeProducts, "max");
     revalidateTag(CACHE_TAGS.product(productId), "max");
