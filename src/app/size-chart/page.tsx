@@ -41,8 +41,8 @@ export default function SizeChartPage() {
               <div
                 className="absolute top-1 bottom-1 rounded-full bg-white border border-[var(--vsc-gray-300)] transition-all duration-200 ease-out"
                 style={{
-                  width: "calc(50% - 4px)",
-                  left: gender === "men" ? "4px" : "50%",
+                  width: gender === "men" ? "calc(50% - 4px)" : "calc(50% - 6px)",
+                  left: gender === "men" ? "4px" : "calc(52% - 6px)",
                 }}
               />
               {/* Buttons */}
