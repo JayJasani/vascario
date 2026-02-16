@@ -77,6 +77,9 @@ export default async function AdminDashboard() {
                     <Link href="/admin/inventory">
                         <AdminButton variant="secondary">Inventory</AdminButton>
                     </Link>
+                    <Link href="/admin/contact">
+                        <AdminButton variant="secondary">Contact Queries</AdminButton>
+                    </Link>
                 </div>
             </div>
 

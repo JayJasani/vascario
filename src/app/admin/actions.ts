@@ -1,6 +1,7 @@
 "use server";
 
 import {
+    getContactSubmissions,
     getRecentOrdersWithItems,
     getOrdersWithItems,
     updateOrder,
@@ -125,6 +126,20 @@ export async function addTrackingInfo(
 
     revalidatePath("/admin/orders");
     revalidatePath("/admin");
+}
+
+// ─── CONTACT SUBMISSIONS ────────────────────────────────────────────────────────
+
+export async function getAdminContactSubmissions() {
+    const submissions = await getContactSubmissions();
+    return submissions.map((s) => ({
+        id: s.id,
+        firstName: s.firstName,
+        lastName: s.lastName,
+        email: s.email,
+        query: s.query,
+        createdAt: s.createdAt.toISOString(),
+    }));
 }
 
 // ─── PRODUCTS / DROPS ───────────────────────────────────────────────────────────

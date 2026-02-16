@@ -690,3 +690,23 @@ export async function createContactSubmission(data: Omit<ContactSubmission, "id"
         createdAt: now,
     };
 }
+
+export async function getContactSubmissions(limit?: number): Promise<ContactSubmission[]> {
+    let q: Query = db.collection(COLLECTIONS.CONTACT_SUBMISSIONS).orderBy("createdAt", "desc");
+    if (typeof limit === "number" && limit > 0) {
+        q = q.limit(limit);
+    }
+    const snapshot = await q.get();
+    return snapshot.docs.map((doc: DocumentSnapshot) => {
+        const data = doc.data();
+        if (!data) throw new Error(`ContactSubmission ${doc.id} has no data`);
+        return {
+            id: doc.id,
+            firstName: data.firstName as string,
+            lastName: data.lastName as string,
+            email: data.email as string,
+            query: data.query as string,
+            createdAt: toDate(data.createdAt),
+        } as ContactSubmission;
+    });
+}
