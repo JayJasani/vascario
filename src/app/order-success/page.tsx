@@ -34,13 +34,13 @@ function OrderSuccessContent() {
                         className="flex whitespace-nowrap"
                         style={{
                             width: "max-content",
-                            animation: "marquee-confirmed 20s linear infinite",
+                            animation: "marquee-confirmed 60s linear infinite",
                         }}
                     >
                         {[...Array(6)].map((_, i) => (
                             <span
                                 key={i}
-                                className="text-[var(--vsc-black)] font-bold uppercase select-none px-6"
+                                className="text-white font-bold uppercase select-none px-6"
                                 style={{
                                     fontFamily: "var(--font-space-grotesk)",
                                     fontSize: "clamp(2.5rem, 8vw, 6rem)",
@@ -60,13 +60,13 @@ function OrderSuccessContent() {
                         className="flex whitespace-nowrap"
                         style={{
                             width: "max-content",
-                            animation: "marquee-confirmed 30s linear infinite reverse",
+                            animation: "marquee-confirmed 60s linear infinite reverse",
                         }}
                     >
                         {[...Array(10)].map((_, i) => (
                             <span
                             key={i}
-                            className="text-[var(--vsc-black)] font-bold uppercase select-none px-4"
+                            className="text-white font-bold uppercase select-none px-4"
                                 style={{
                                     fontFamily: "var(--font-space-mono)",
                                     fontSize: "clamp(0.7rem, 1.2vw, 0.875rem)",
@@ -154,7 +154,7 @@ function OrderSuccessContent() {
                                     STATUS
                                 </span>
                                 <span
-                                    className="text-xs font-bold uppercase tracking-[0.1em] px-3 py-1 bg-[var(--vsc-accent)] text-[var(--vsc-black)]"
+                                    className="text-xs font-bold uppercase tracking-[0.1em] px-3 py-1 bg-[var(--vsc-accent)] !text-white"
                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                 >
                                     CONFIRMED
