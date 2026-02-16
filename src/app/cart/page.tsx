@@ -62,7 +62,7 @@ export default function CartPage() {
 
             <div className="pt-28 md:pt-36 pb-20 px-6 md:px-12 lg:px-20">
                 {/* ===== KINETIC TITLE ===== */}
-                <div className="relative mb-4 md:mb-0">
+                <div className="relative mb-8 md:mb-8">
                     <h1
                         className="text-[var(--vsc-white)] select-none relative z-10"
                         style={{
@@ -98,7 +98,7 @@ export default function CartPage() {
                         </p>
                         <Link
                             href="/"
-                            className="px-10 py-6 bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-white)] transition-colors duration-200 border-4 border-[var(--vsc-accent)] hover:border-[var(--vsc-white)]"
+                            className="px-10 py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
                             style={{ fontFamily: "var(--font-space-mono)" }}
                         >
                             CONTINUE SHOPPING →
@@ -108,7 +108,7 @@ export default function CartPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8 md:mt-0">
                         {/* ===== BENTO GRID — CART ITEMS ===== */}
                         <div className="lg:col-span-2">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 {items.map((item, index) => (
                                     <div
                                         key={item.id}
@@ -322,7 +322,7 @@ export default function CartPage() {
                                     {/* CTA */}
                                     <Link
                                         href="/checkout"
-                                        className="block w-full text-center px-10 py-6 bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-white)] transition-colors duration-200 border-2 border-[var(--vsc-accent)] hover:border-[var(--vsc-white)] active:scale-[0.97]"
+                                        className="block w-full text-center px-10 py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                     >
                                         PROCEED TO CHECKOUT →

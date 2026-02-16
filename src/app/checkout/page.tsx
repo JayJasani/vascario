@@ -81,7 +81,7 @@ export default function CheckoutPage() {
                     </p>
                     <Link
                         href="/"
-                        className="px-10 py-6 bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-white)] transition-colors duration-200 border-4 border-[var(--vsc-accent)]"
+                        className="px-10 py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
                         style={{ fontFamily: "var(--font-space-mono)" }}
                     >
                         CONTINUE SHOPPING →
@@ -357,7 +357,7 @@ function StepShipping({
             <div className="flex justify-end pt-4">
                 <button
                     onClick={onNext}
-                    className="px-10 py-6 bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-white)] transition-colors duration-200 border-4 border-[var(--vsc-accent)] hover:border-[var(--vsc-white)] active:scale-[0.97]"
+                    className="px-10 py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                 >
                     CONTINUE TO PAYMENT →
@@ -427,7 +427,7 @@ function StepPayment({
                 </button>
                 <button
                     onClick={onNext}
-                    className="px-10 py-6 bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-white)] transition-colors duration-200 border-4 border-[var(--vsc-accent)] hover:border-[var(--vsc-white)] active:scale-[0.97]"
+                    className="px-10 py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                 >
                     REVIEW ORDER →
@@ -562,7 +562,7 @@ function StepReview({
                 </button>
                 <button
                     onClick={onPlace}
-                    className="px-10 py-6 bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-white)] transition-colors duration-200 border-4 border-[var(--vsc-accent)] hover:border-[var(--vsc-white)] active:scale-[0.97]"
+                    className="px-10 py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                 >
                     PLACE ORDER →

@@ -293,7 +293,7 @@ function OrderSuccessContent() {
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-16">
                         <Link
                             href="/"
-                            className="w-full sm:w-auto text-center px-10 py-6 bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-white)] transition-colors duration-200 border-4 border-[var(--vsc-accent)] hover:border-[var(--vsc-white)] active:scale-[0.97]"
+                            className="w-full sm:w-auto text-center px-10 py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
                             style={{ fontFamily: "var(--font-space-mono)" }}
                         >
                             CONTINUE SHOPPING →
