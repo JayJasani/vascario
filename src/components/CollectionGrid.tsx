@@ -36,7 +36,7 @@ export function CollectionGrid() {
               [ 001 ] Collection
             </span>
             <h2
-              className="text-section text-[var(--vsc-white)]"
+              className="text-section text-[var(--vsc-gray-900)]"
               style={{ fontFamily: "var(--font-space-grotesk)", marginLeft: "-0.02em" }}
             >
               THE

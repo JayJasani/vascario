@@ -57,14 +57,14 @@ export default function CartPage() {
     if (!mounted) return null
 
     return (
-        <main className="min-h-screen bg-[var(--vsc-black)]">
+        <main className="min-h-screen bg-[var(--vsc-cream)]">
             <Navbar />
 
             <div className="pt-28 md:pt-36 pb-20 px-6 md:px-12 lg:px-20">
                 {/* ===== KINETIC TITLE ===== */}
                 <div className="relative mb-8 md:mb-8">
                     <h1
-                        className="text-[var(--vsc-white)] select-none relative z-10"
+                        className="text-[var(--vsc-gray-900)] select-none relative z-10"
                         style={{
                             fontFamily: "var(--font-space-grotesk)",
                             fontSize: "clamp(4rem, 12vw, 10rem)",
@@ -98,7 +98,7 @@ export default function CartPage() {
                         </p>
                         <Link
                             href="/"
-                            className="w-full sm:w-auto text-center px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
+                            className="w-full sm:w-auto text-center px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
                             style={{ fontFamily: "var(--font-space-mono)" }}
                         >
                             CONTINUE SHOPPING →
@@ -112,13 +112,13 @@ export default function CartPage() {
                                 {items.map((item, index) => (
                                     <div
                                         key={item.id}
-                                        className={`relative border-2 md:border-4 border-[var(--vsc-white)] bg-[var(--vsc-gray-900)] overflow-hidden group ${index === 0 ? "md:col-span-2" : ""
+                                        className={`relative border-2 md:border-4 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] overflow-hidden group ${index === 0 ? "md:col-span-2" : ""
                                             }`}
                                     >
                                         {/* Remove button */}
                                         <button
                                             onClick={() => removeItem(item.id)}
-                                            className="absolute top-3 right-3 z-20 w-8 h-8 flex items-center justify-center bg-[var(--vsc-black)] border-2 border-[var(--vsc-gray-600)] text-[var(--vsc-gray-400)] hover:border-[#FF3333] hover:text-[#FF3333] hover:bg-[var(--vsc-black)] transition-all duration-200 active:scale-90"
+                                            className="absolute top-3 right-3 z-20 w-8 h-8 flex items-center justify-center bg-[var(--vsc-white)] border-2 border-[var(--vsc-gray-300)] text-[var(--vsc-gray-500)] hover:border-[#ef4444] hover:text-[#ef4444] hover:bg-[var(--vsc-cream)] transition-all duration-200 active:scale-90"
                                             style={{ fontFamily: "var(--font-space-mono)" }}
                                         >
                                             ✕
@@ -126,7 +126,7 @@ export default function CartPage() {
 
                                         {/* Product image area */}
                                         <div
-                                            className={`relative bg-[var(--vsc-gray-800)] flex items-center justify-center ${index === 0 ? "h-48 md:h-64" : "h-40 md:h-52"
+                                            className={`relative bg-[var(--vsc-gray-100)] flex items-center justify-center ${index === 0 ? "h-48 md:h-64" : "h-40 md:h-52"
                                                 }`}
                                         >
                                             <div
@@ -155,7 +155,7 @@ export default function CartPage() {
                                             {/* Name + Size */}
                                             <div>
                                                 <h3
-                                                    className="text-sm md:text-base font-bold uppercase tracking-[0.05em] text-[var(--vsc-white)]"
+                                                className="text-sm md:text-base font-bold uppercase tracking-[0.05em] text-[var(--vsc-gray-900)]"
                                                     style={{ fontFamily: "var(--font-space-grotesk)" }}
                                                 >
                                                     {item.name}
@@ -172,7 +172,7 @@ export default function CartPage() {
                                             <div className="flex items-center justify-between">
                                                 {/* Price */}
                                                 <span
-                                                    className="text-lg md:text-xl font-bold text-[var(--vsc-white)]"
+                                                className="text-lg md:text-xl font-bold text-[var(--vsc-gray-900)]"
                                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                                 >
                                                     ${item.price.toFixed(0)}
@@ -186,20 +186,20 @@ export default function CartPage() {
                                                                 ? updateQuantity(item.id, item.quantity - 1)
                                                                 : removeItem(item.id)
                                                         }
-                                                        className="w-12 h-12 flex items-center justify-center bg-[var(--vsc-black)] text-[var(--vsc-white)] text-lg font-bold hover:bg-[var(--vsc-accent)] hover:text-[var(--vsc-black)] transition-all duration-150 active:scale-[0.85] select-none"
+                                                    className="w-12 h-12 flex items-center justify-center bg-[var(--vsc-gray-100)] text-[var(--vsc-gray-900)] text-lg font-bold hover:bg-[var(--vsc-gray-200)] hover:text-[var(--vsc-gray-900)] transition-all duration-150 active:scale-[0.85] select-none"
                                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                                     >
                                                         −
                                                     </button>
                                                     <span
-                                                        className="w-12 h-12 flex items-center justify-center bg-[var(--vsc-gray-900)] text-[var(--vsc-white)] text-sm font-bold border-x-2 border-[var(--vsc-white)]"
+                                                        className="w-12 h-12 flex items-center justify-center bg-[var(--vsc-white)] text-[var(--vsc-gray-900)] text-sm font-bold border-x-2 border-[var(--vsc-gray-200)]"
                                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                                     >
                                                         {item.quantity}
                                                     </span>
                                                     <button
                                                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                        className="w-12 h-12 flex items-center justify-center bg-[var(--vsc-black)] text-[var(--vsc-white)] text-lg font-bold hover:bg-[var(--vsc-accent)] hover:text-[var(--vsc-black)] transition-all duration-150 active:scale-[0.85] select-none"
+                                                        className="w-12 h-12 flex items-center justify-center bg-[var(--vsc-gray-100)] text-[var(--vsc-gray-900)] text-lg font-bold hover:bg-[var(--vsc-gray-200)] hover:text-[var(--vsc-gray-900)] transition-all duration-150 active:scale-[0.85] select-none"
                                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                                     >
                                                         +
@@ -230,11 +230,11 @@ export default function CartPage() {
 
                         {/* ===== CART SUMMARY — DIGITAL INVOICE ===== */}
                         <div className="lg:col-span-1">
-                            <div className="sticky top-28 border-2 md:border-4 border-[var(--vsc-accent)] bg-[var(--vsc-gray-900)]">
+                            <div className="sticky top-28 border-2 md:border-4 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)]">
                                 {/* Summary header */}
-                                <div className="px-6 py-5 bg-[var(--vsc-accent)]">
+                                <div className="px-6 py-5 bg-[var(--vsc-gray-900)]">
                                     <h2
-                                        className="text-lg font-bold text-[var(--vsc-black)] uppercase tracking-[0.1em]"
+                                        className="text-lg font-bold text-[var(--vsc-cream)] uppercase tracking-[0.1em]"
                                         style={{ fontFamily: "var(--font-space-grotesk)" }}
                                     >
                                         ORDER SUMMARY
@@ -250,7 +250,7 @@ export default function CartPage() {
                                         >
                                             <div className="flex-1 min-w-0 pr-4">
                                                 <span
-                                                    className="text-xs text-[var(--vsc-white)] uppercase tracking-[0.1em] block truncate"
+                                            className="text-xs text-[var(--vsc-gray-900)] uppercase tracking-[0.1em] block truncate"
                                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                                 >
                                                     {item.name}
@@ -263,7 +263,7 @@ export default function CartPage() {
                                                 </span>
                                             </div>
                                             <span
-                                                className="text-xs font-bold text-[var(--vsc-white)] shrink-0"
+                                                className="text-xs font-bold text-[var(--vsc-gray-900)] shrink-0"
                                                 style={{ fontFamily: "var(--font-space-mono)" }}
                                             >
                                                 ${(item.price * item.quantity).toFixed(0)}
@@ -280,7 +280,7 @@ export default function CartPage() {
                                             SUBTOTAL
                                         </span>
                                         <span
-                                            className="text-sm font-bold text-[var(--vsc-white)]"
+                                            className="text-sm font-bold text-[var(--vsc-gray-900)]"
                                             style={{ fontFamily: "var(--font-space-mono)" }}
                                         >
                                             ${cartTotal.toFixed(0)}
@@ -304,9 +304,9 @@ export default function CartPage() {
                                     </div>
 
                                     {/* Total */}
-                                    <div className="flex justify-between items-center pt-4 border-t-2 border-[var(--vsc-white)]">
+                                    <div className="flex justify-between items-center pt-4 border-t-2 border-[var(--vsc-gray-300)]">
                                         <span
-                                            className="text-sm font-bold text-[var(--vsc-white)] uppercase tracking-[0.1em]"
+                                            className="text-sm font-bold text-[var(--vsc-gray-900)] uppercase tracking-[0.1em]"
                                             style={{ fontFamily: "var(--font-space-grotesk)" }}
                                         >
                                             TOTAL
@@ -322,7 +322,7 @@ export default function CartPage() {
                                     {/* CTA */}
                                     <Link
                                         href="/checkout"
-                                        className="block w-full text-center px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
+                                        className="block w-full text-center px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                     >
                                         PROCEED TO CHECKOUT →

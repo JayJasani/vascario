@@ -102,7 +102,7 @@ export default function ProductDetailPage({
     const [quantity, setQuantity] = useState(1)
 
     return (
-        <main className="min-h-screen">
+        <main className="min-h-screen bg-[var(--vsc-cream)]">
             <Navbar />
 
             {/* Product section */}
@@ -208,7 +208,7 @@ export default function ProductDetailPage({
                         <div className="md:sticky md:top-24">
                             {/* Product name */}
                             <h1
-                                className="text-[var(--vsc-white)] mb-2"
+                                className="text-[var(--vsc-gray-900)] mb-2"
                                 style={{
                                     fontFamily: "var(--font-space-grotesk)",
                                     fontSize: "clamp(1.5rem, 3vw, 2.5rem)",
@@ -308,20 +308,20 @@ export default function ProductDetailPage({
                                 <div className="flex items-center border border-[var(--vsc-gray-700)] inline-flex">
                                     <button
                                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                        className="px-5 py-4 text-sm font-bold text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200"
+                                        className="px-5 py-4 text-sm font-bold text-[var(--vsc-gray-900)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-100)] transition-colors duration-200"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                     >
                                         −
                                     </button>
                                     <span
-                                        className="px-8 py-4 text-sm font-bold text-[var(--vsc-white)] border-x border-[var(--vsc-gray-700)]"
+                                        className="px-8 py-4 text-sm font-bold text-[var(--vsc-gray-900)] border-x border-[var(--vsc-gray-300)]"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                     >
                                         {String(quantity).padStart(2, "0")}
                                     </span>
                                     <button
                                         onClick={() => setQuantity(quantity + 1)}
-                                        className="px-5 py-4 text-sm font-bold text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200"
+                                        className="px-5 py-4 text-sm font-bold text-[var(--vsc-gray-900)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-100)] transition-colors duration-200"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                     >
                                         +
@@ -331,7 +331,7 @@ export default function ProductDetailPage({
 
                             {/* Add to Cart */}
                             <button
-                                className="w-full py-5 bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:text-[var(--vsc-accent)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_24px_var(--vsc-accent-dim)]"
+                                className="w-full py-5 bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_24px_var(--vsc-accent-dim)]"
                                 style={{ fontFamily: "var(--font-space-mono)" }}
                             >
                                 Add to Cart — ${product.price * quantity}
@@ -376,7 +376,7 @@ export default function ProductDetailPage({
                                 The Craft
                             </span>
                             <h2
-                                className="text-[var(--vsc-white)] mb-6"
+                                className="text-[var(--vsc-gray-900)] mb-6"
                                 style={{
                                     fontFamily: "var(--font-space-grotesk)",
                                     fontSize: "clamp(2rem, 4vw, 4rem)",

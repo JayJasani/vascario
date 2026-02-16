@@ -27,15 +27,15 @@ export function Hero() {
             className="relative h-screen flex items-end overflow-hidden"
             style={{ willChange: "opacity, transform" }}
         >
-            {/* Background — dark with editorial gradient */}
+            {/* Background — light with soft grey gradient */}
             <div className="absolute inset-0 z-0">
                 <div
                     className="absolute inset-0"
                     style={{
                         background: `
-              radial-gradient(ellipse 80% 60% at 70% 40%, rgba(186, 255, 0, 0.06) 0%, transparent 70%),
-              radial-gradient(ellipse 60% 80% at 20% 80%, rgba(186, 255, 0, 0.03) 0%, transparent 60%),
-              linear-gradient(180deg, #000000 0%, #0D0D0D 100%)
+              radial-gradient(ellipse 80% 60% at 70% 40%, rgba(17, 24, 39, 0.04) 0%, transparent 70%),
+              radial-gradient(ellipse 60% 80% at 20% 80%, rgba(17, 24, 39, 0.03) 0%, transparent 60%),
+              linear-gradient(180deg, #f9fafb 0%, #e5e7eb 100%)
             `,
                     }}
                 />
@@ -44,8 +44,8 @@ export function Hero() {
                     className="absolute inset-0 opacity-[0.04]"
                     style={{
                         backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+              linear-gradient(rgba(15,23,42,0.08) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(15,23,42,0.08) 1px, transparent 1px)
             `,
                         backgroundSize: "80px 80px",
                     }}
@@ -56,7 +56,7 @@ export function Hero() {
             <div className="relative z-10 w-full pb-16 md:pb-28 px-6 md:px-12 lg:px-20">
                 {/* Oversized title that crops off-screen */}
                 <h1
-                    className="text-hero leading-[0.85] tracking-[-0.05em] text-[var(--vsc-white)] select-none"
+                    className="text-hero leading-[0.85] tracking-[-0.05em] text-[var(--vsc-gray-900)] select-none"
                     style={{
                         fontFamily: "var(--font-space-grotesk)",
                         fontSize: "clamp(5rem, 14vw, 16rem)",

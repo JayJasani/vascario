@@ -39,7 +39,7 @@ export function EditorialSection() {
                     [ 002 ] Editorial
                 </span>
                 <h2
-                    className="text-section text-[var(--vsc-white)] leading-[0.9] reveal"
+                    className="text-section text-[var(--vsc-gray-900)] leading-[0.9] reveal"
                     style={{
                         fontFamily: "var(--font-space-grotesk)",
                         fontSize: "clamp(3rem, 8vw, 8rem)",

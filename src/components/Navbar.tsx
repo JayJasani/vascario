@@ -78,15 +78,15 @@ export function Navbar() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
-          ? "bg-[var(--vsc-black)]/95 backdrop-blur-sm border-b border-[var(--vsc-gray-700)]"
-          : "bg-transparent"
+          ? "bg-[var(--vsc-white)]/95 backdrop-blur-sm border-b border-[var(--vsc-gray-200)]"
+          : "bg-[var(--vsc-white)]/90 border-b border-transparent"
         }`}
     >
       <div className="flex items-center justify-between px-6 py-4 md:px-12 lg:px-20">
         {/* Logo — brutalist, cropped feeling */}
         <Link href="/" className="text-display">
           <span
-            className="text-2xl md:text-3xl font-bold tracking-[-0.06em] uppercase text-[var(--vsc-white)]"
+            className="text-2xl md:text-3xl font-bold tracking-[-0.06em] uppercase text-[var(--vsc-gray-900)]"
             style={{ fontFamily: "var(--font-space-grotesk)" }}
           >
             VASC
@@ -99,28 +99,28 @@ export function Navbar() {
         <div className="hidden md:flex items-center gap-8">
           <Link
             href="/collection"
-            className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-400)] hover:text-[var(--vsc-white)] transition-colors duration-200"
+            className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
             Collection
           </Link>
           <Link
             href="/favourites"
-            className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-400)] hover:text-[var(--vsc-white)] transition-colors duration-200"
+            className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
             Favourites
           </Link>
           <Link
             href="/#editorial"
-            className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-400)] hover:text-[var(--vsc-white)] transition-colors duration-200"
+            className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
             Lookbook
           </Link>
           <Link
             href="/#about"
-            className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-400)] hover:text-[var(--vsc-white)] transition-colors duration-200"
+            className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
             About
@@ -133,7 +133,7 @@ export function Navbar() {
           <button
             type="button"
             onClick={openSearch}
-            className="p-3 text-[var(--vsc-gray-400)] hover:text-[var(--vsc-white)] transition-colors duration-200 border border-transparent"
+            className="p-3 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent"
             aria-label="Search (⌘K)"
           >
             <MagnifyingGlassIcon className="w-5 h-5" strokeWidth={1.5} />
@@ -142,7 +142,7 @@ export function Navbar() {
           {/* Favourites icon */}
           <Link
             href="/favourites"
-            className="p-3 text-[var(--vsc-gray-400)] hover:text-[var(--vsc-white)] transition-colors duration-200 border border-transparent"
+            className="p-3 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent"
             aria-label="View favourites"
           >
             <HeartIcon className="w-5 h-5" strokeWidth={1.5} />
@@ -151,12 +151,12 @@ export function Navbar() {
           {/* Cart icon */}
           <Link
             href="/cart"
-            className="relative p-3 text-[var(--vsc-gray-400)] hover:text-[var(--vsc-white)] transition-colors duration-200 border border-transparent"
+            className="relative p-3 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent"
             aria-label="View bag"
           >
             <ShoppingBagIcon className="w-5 h-5" strokeWidth={1.5} />
             {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-[10px] font-bold rounded-full">
+              <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center bg-[var(--vsc-gray-900)] text-[var(--vsc-white)] text-[10px] font-bold rounded-full">
                 {cartCount}
               </span>
             )}
@@ -165,7 +165,7 @@ export function Navbar() {
           {/* Shop CTA */}
           <Link
             href="/collection"
-            className="hidden md:block px-8 py-4 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
+            className="hidden md:block px-8 py-4 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
             Shop →
@@ -178,18 +178,18 @@ export function Navbar() {
         <div
           ref={overlayRef}
           onClick={handleOverlayClick}
-          className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4 bg-[var(--vsc-black)]/80 backdrop-blur-md animate-[fade-in_0.2s_ease-out]"
+          className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4 bg-[var(--vsc-gray-900)]/40 backdrop-blur-md animate-[fade-in_0.2s_ease-out]"
           role="dialog"
           aria-modal="true"
           aria-label="Search"
         >
           <div
-            className="w-full max-w-2xl bg-[var(--vsc-gray-900)] border border-[var(--vsc-gray-700)] shadow-2xl overflow-hidden animate-[fade-in_0.15s_ease-out]"
+            className="w-full max-w-2xl bg-[var(--vsc-cream)] border border-[var(--vsc-gray-200)] shadow-2xl overflow-hidden animate-[fade-in_0.15s_ease-out]"
             style={{ animationDelay: "50ms" }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Search input row — Spotlight style */}
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--vsc-gray-700)]">
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--vsc-gray-200)]">
               <MagnifyingGlassIcon
                 className="w-5 h-5 shrink-0 text-[var(--vsc-gray-500)]"
                 strokeWidth={1.5}
@@ -200,11 +200,11 @@ export function Navbar() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search collections, products..."
-                className="flex-1 bg-transparent text-[var(--vsc-white)] placeholder-[var(--vsc-gray-500)] text-base outline-none"
+                className="flex-1 bg-transparent text-[var(--vsc-gray-900)] placeholder-[var(--vsc-gray-400)] text-base outline-none"
                 style={{ fontFamily: "var(--font-space-mono)" }}
                 autoComplete="off"
               />
-              <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-1 text-[10px] text-[var(--vsc-gray-500)] bg-[var(--vsc-gray-800)] border border-[var(--vsc-gray-700)] uppercase tracking-wider">
+              <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-1 text-[10px] text-[var(--vsc-gray-500)] bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-300)] uppercase tracking-wider">
                 esc
               </kbd>
             </div>
@@ -219,16 +219,16 @@ export function Navbar() {
                         <Link
                           href={item.url}
                           onClick={closeSearch}
-                          className="flex items-center gap-4 px-5 py-3 text-[var(--vsc-gray-300)] hover:bg-[var(--vsc-gray-800)] hover:text-[var(--vsc-white)] transition-colors duration-150 group"
+                          className="flex items-center gap-4 px-5 py-3 text-[var(--vsc-gray-700)] hover:bg-[var(--vsc-gray-100)] hover:text-[var(--vsc-gray-900)] transition-colors duration-150 group"
                         >
-                          <div className="w-10 h-10 shrink-0 bg-[var(--vsc-gray-800)] border border-[var(--vsc-gray-700)] flex items-center justify-center overflow-hidden">
-                            <span className="text-[10px] text-[var(--vsc-gray-600)] uppercase">
+                          <div className="w-10 h-10 shrink-0 bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] flex items-center justify-center overflow-hidden">
+                            <span className="text-[10px] text-[var(--vsc-gray-500)] uppercase">
                               {item.type === "category" ? "cat" : "prod"}
                             </span>
                           </div>
                           <div className="flex-1 min-w-0">
                             <span
-                              className="block truncate font-medium text-[var(--vsc-white)] group-hover:text-[var(--vsc-accent)]"
+                              className="block truncate font-medium text-[var(--vsc-gray-900)] group-hover:text-[var(--vsc-accent)]"
                               style={{ fontFamily: "var(--font-space-grotesk)" }}
                             >
                               {item.name}
@@ -242,7 +242,7 @@ export function Navbar() {
                           </div>
                           {item.price != null && (
                             <span
-                              className="text-sm font-bold text-[var(--vsc-accent)]"
+                              className="text-sm font-bold text-[var(--vsc-gray-900)]"
                               style={{ fontFamily: "var(--font-space-mono)" }}
                             >
                               ${item.price}

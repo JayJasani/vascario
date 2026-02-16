@@ -70,7 +70,7 @@ export default function CheckoutPage() {
 
     if (items.length === 0) {
         return (
-            <main className="min-h-screen bg-[var(--vsc-black)]">
+            <main className="min-h-screen bg-[var(--vsc-cream)]">
                 <Navbar />
                 <div className="flex flex-col items-center justify-center min-h-screen gap-8">
                     <p
@@ -81,7 +81,7 @@ export default function CheckoutPage() {
                     </p>
                     <Link
                         href="/"
-                        className="px-10 py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
+                        className="px-10 py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
                         style={{ fontFamily: "var(--font-space-mono)" }}
                     >
                         CONTINUE SHOPPING →
@@ -99,14 +99,14 @@ export default function CheckoutPage() {
     ]
 
     return (
-        <main className="min-h-screen bg-[var(--vsc-black)]">
+        <main className="min-h-screen bg-[var(--vsc-cream)]">
             <Navbar />
 
             <div className="pt-28 md:pt-36 pb-20 px-6 md:px-12 lg:px-20">
                 {/* ===== TERMINAL TITLE ===== */}
                 <div className="mb-12">
                     <h1
-                        className="text-[var(--vsc-white)] select-none"
+                        className="text-[var(--vsc-gray-900)] select-none"
                         style={{
                             fontFamily: "var(--font-space-grotesk)",
                             fontSize: "clamp(3rem, 8vw, 7rem)",
@@ -128,7 +128,7 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* ===== STEP PROGRESS BAR ===== */}
-                <div className="flex items-center gap-0 mb-8 md:mb-16 border-2 md:border-4 border-[var(--vsc-white)]">
+                <div className="flex items-center gap-0 mb-8 md:mb-16 border-2 md:border-4 border-[var(--vsc-gray-200)]">
                     {STEPS.map((s, i) => (
                         <button
                             key={s.num}
@@ -139,11 +139,11 @@ export default function CheckoutPage() {
                                 }
                             }}
                             className={`flex-1 flex items-center justify-center gap-2 md:gap-3 py-3 md:py-5 transition-all duration-300 ${step === i + 1
-                                ? "bg-[var(--vsc-accent)] text-[var(--vsc-black)]"
+                                ? "bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)]"
                                 : step > i + 1
-                                    ? "bg-[var(--vsc-gray-800)] text-[var(--vsc-accent)] cursor-pointer hover:bg-[var(--vsc-gray-700)]"
-                                    : "bg-[var(--vsc-gray-900)] text-[var(--vsc-gray-600)] cursor-default"
-                                } ${i < STEPS.length - 1 ? "border-r-2 md:border-r-4 border-[var(--vsc-white)]" : ""}`}
+                                    ? "bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)] cursor-pointer hover:bg-[var(--vsc-gray-200)]"
+                                    : "bg-[var(--vsc-white)] text-[var(--vsc-gray-500)] cursor-default"
+                                } ${i < STEPS.length - 1 ? "border-r-2 md:border-r-4 border-[var(--vsc-gray-200)]" : ""}`}
                             style={{ fontFamily: "var(--font-space-mono)" }}
                         >
                             <span className="text-base md:text-2xl font-bold">{s.num}</span>
@@ -214,8 +214,8 @@ export default function CheckoutPage() {
 
                     {/* Right — Order summary mini */}
                     <div className="lg:col-span-1">
-                        <div className="sticky top-28 border-2 border-[var(--vsc-gray-700)] bg-[var(--vsc-gray-900)]">
-                            <div className="px-5 py-4 border-b-2 border-[var(--vsc-gray-700)]">
+                        <div className="sticky top-28 border-2 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)]">
+                            <div className="px-5 py-4 border-b-2 border-[var(--vsc-gray-200)]">
                                 <h3
                                     className="text-xs font-bold text-[var(--vsc-accent)] uppercase tracking-[0.2em]"
                                     style={{ fontFamily: "var(--font-space-mono)" }}
@@ -231,7 +231,7 @@ export default function CheckoutPage() {
                                     >
                                         <div className="flex-1 min-w-0 pr-3">
                                             <span
-                                                className="text-xs text-[var(--vsc-white)] uppercase tracking-[0.05em] block truncate"
+                                                className="text-xs text-[var(--vsc-gray-900)] uppercase tracking-[0.05em] block truncate"
                                                 style={{ fontFamily: "var(--font-space-mono)" }}
                                             >
                                                 {item.name}
@@ -244,16 +244,16 @@ export default function CheckoutPage() {
                                             </span>
                                         </div>
                                         <span
-                                            className="text-xs font-bold text-[var(--vsc-white)] shrink-0"
+                                            className="text-xs font-bold text-[var(--vsc-gray-900)] shrink-0"
                                             style={{ fontFamily: "var(--font-space-mono)" }}
                                         >
                                             ${(item.price * item.quantity).toFixed(0)}
                                         </span>
                                     </div>
                                 ))}
-                                <div className="flex justify-between items-center pt-2 border-t-2 border-[var(--vsc-white)]">
+                                <div className="flex justify-between items-center pt-2 border-t-2 border-[var(--vsc-gray-300)]">
                                     <span
-                                        className="text-xs font-bold text-[var(--vsc-white)] uppercase tracking-[0.1em]"
+                                        className="text-xs font-bold text-[var(--vsc-gray-900)] uppercase tracking-[0.1em]"
                                         style={{ fontFamily: "var(--font-space-grotesk)" }}
                                     >
                                         TOTAL
@@ -306,7 +306,7 @@ function InputField({
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
-                className="w-full px-5 py-4 bg-[var(--vsc-gray-900)] border-2 border-[var(--vsc-gray-600)] text-[var(--vsc-white)] text-sm uppercase tracking-[0.1em] placeholder:text-[var(--vsc-gray-600)] focus:outline-none focus:border-[var(--vsc-accent)] transition-colors duration-200"
+                className="w-full px-5 py-4 bg-[var(--vsc-cream)] border-2 border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-sm uppercase tracking-[0.1em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)] transition-colors duration-200"
                 style={{ fontFamily: "var(--font-space-mono)" }}
             />
         </div>
@@ -357,7 +357,7 @@ function StepShipping({
             <div className="flex justify-end pt-4">
                 <button
                     onClick={onNext}
-                    className="w-full md:w-auto px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
+                    className="w-full md:w-auto px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                 >
                     CONTINUE TO PAYMENT →
@@ -407,7 +407,7 @@ function StepPayment({
             </div>
 
             {/* Security note */}
-            <div className="flex items-center gap-3 py-4 px-5 bg-[var(--vsc-gray-800)] border border-dashed border-[var(--vsc-gray-600)]">
+                <div className="flex items-center gap-3 py-4 px-5 bg-[var(--vsc-gray-100)] border border-dashed border-[var(--vsc-gray-300)]">
                 <span className="text-[var(--vsc-accent)] text-lg">🔒</span>
                 <span
                     className="text-[10px] text-[var(--vsc-gray-400)] uppercase tracking-[0.2em]"
@@ -420,14 +420,14 @@ function StepPayment({
             <div className="flex flex-col-reverse sm:flex-row justify-between pt-4 gap-4">
                 <button
                     onClick={onBack}
-                    className="w-full sm:w-auto px-6 py-4 md:px-8 md:py-6 bg-transparent text-[var(--vsc-white)] text-sm font-bold uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors duration-200 border-2 md:border-4 border-[var(--vsc-gray-600)] hover:border-[var(--vsc-accent)]"
+                    className="w-full sm:w-auto px-6 py-4 md:px-8 md:py-6 bg-transparent text-[var(--vsc-gray-900)] text-sm font-bold uppercase tracking-[0.2em] hover:text-[var(--vsc-gray-700)] transition-colors duration-200 border-2 md:border-4 border-[var(--vsc-gray-300)] hover:border-[var(--vsc-gray-600)]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                 >
                     ← BACK
                 </button>
                 <button
                     onClick={onNext}
-                    className="w-full sm:w-auto px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
+                    className="w-full sm:w-auto px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                 >
                     REVIEW ORDER →
@@ -562,7 +562,7 @@ function StepReview({
                 </button>
                 <button
                     onClick={onPlace}
-                    className="w-full sm:w-auto px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
+                    className="w-full sm:w-auto px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                 >
                     PLACE ORDER →

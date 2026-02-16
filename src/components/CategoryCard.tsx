@@ -57,8 +57,8 @@ export function CategoryCard({
         </div>
 
         {category.tag && (
-          <div
-            className="absolute top-3 left-3 px-3 py-1 bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-[10px] font-bold uppercase tracking-[0.15em] z-10"
+        <div
+          className="absolute top-3 left-3 px-3 py-1 bg-[var(--vsc-accent)] text-[var(--vsc-white)] text-[10px] font-bold uppercase tracking-[0.15em] z-10"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
             {category.tag}
@@ -66,9 +66,10 @@ export function CategoryCard({
         )}
       </div>
 
-      <div className="flex items-center justify-between px-5 py-4 bg-[var(--vsc-gray-900)] group-hover:bg-[var(--vsc-accent)] transition-colors duration-200">
+      {/* Info bar — keep dark background with white text on hover */}
+      <div className="flex items-center justify-between px-5 py-4 bg-[var(--vsc-gray-900)] transition-colors duration-200">
         <h3
-          className="text-sm font-bold uppercase tracking-[0.05em] text-[var(--vsc-white)] group-hover:text-[var(--vsc-black)] truncate transition-colors duration-200"
+          className="text-sm font-bold uppercase tracking-[0.05em] text-[var(--vsc-white)] truncate transition-colors duration-200"
           style={{ fontFamily: "var(--font-space-grotesk)" }}
         >
           {category.name}

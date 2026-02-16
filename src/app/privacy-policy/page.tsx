@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <main className="min-h-screen bg-[var(--vsc-black)] text-[var(--vsc-gray-200)]">
+    <main className="min-h-screen bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)]">
       <Navbar />
 
       <section className="pt-32 pb-24 px-6 md:px-12 lg:px-40 max-w-5xl mx-auto">
@@ -21,7 +21,7 @@ export default function PrivacyPolicyPage() {
             Legal
           </p>
           <h1
-            className="text-3xl md:text-4xl lg:text-5xl text-[var(--vsc-white)] leading-tight mb-4"
+            className="text-3xl md:text-4xl lg:text-5xl text-[var(--vsc-gray-900)] leading-tight mb-4"
             style={{ fontFamily: "var(--font-space-grotesk)" }}
           >
             Privacy Policy
@@ -39,7 +39,7 @@ export default function PrivacyPolicyPage() {
           style={{ fontFamily: "var(--font-space-mono)" }}
         >
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Introduction
             </h2>
             <p className="mb-3">
@@ -65,7 +65,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               What information do we collect?
             </h2>
             <p className="mb-3">
@@ -142,7 +142,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Use of demographic / profile data / your information
             </h2>
             <p className="mb-3">
@@ -181,7 +181,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Sharing of personal information
             </h2>
             <p className="mb-3">
@@ -218,7 +218,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Security precautions
             </h2>
             <p>
@@ -231,7 +231,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Your consent
             </h2>
             <p className="mb-3">

@@ -90,7 +90,7 @@ export default async function CategoryProductListPage({
             </div>
 
             <h1
-              className="text-section text-[var(--vsc-white)] uppercase"
+              className="text-section text-[var(--vsc-gray-900)] uppercase"
               style={{ fontFamily: "var(--font-space-grotesk)" }}
             >
               {category.name}

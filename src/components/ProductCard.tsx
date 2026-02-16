@@ -73,7 +73,7 @@ export function ProductCard({ product, variant = "default", aspectClass }: Produ
         {/* Tag */}
         {product.tag && (
           <div
-            className="absolute top-3 left-3 px-3 py-1 bg-[var(--vsc-accent)] text-[var(--vsc-black)] text-[10px] font-bold uppercase tracking-[0.15em] z-10"
+            className="absolute top-3 left-3 px-3 py-1 bg-[var(--vsc-accent)] text-[var(--vsc-white)] text-[10px] font-bold uppercase tracking-[0.15em] z-10"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
             {product.tag}
@@ -81,11 +81,11 @@ export function ProductCard({ product, variant = "default", aspectClass }: Produ
         )}
       </div>
 
-      {/* Info bar — inverts on hover */}
-      <div className="flex items-center justify-between px-5 py-4 bg-[var(--vsc-gray-900)] group-hover:bg-[var(--vsc-accent)] transition-colors duration-200">
+      {/* Info bar — stays dark with white text on hover */}
+      <div className="flex items-center justify-between px-5 py-4 bg-[var(--vsc-gray-900)] transition-colors duration-200">
         <div className="flex-1 min-w-0">
           <h3
-            className="text-sm font-bold uppercase tracking-[0.05em] text-[var(--vsc-white)] group-hover:text-[var(--vsc-black)] truncate transition-colors duration-200"
+            className="text-sm font-bold uppercase tracking-[0.05em] text-[var(--vsc-white)] truncate transition-colors duration-200"
             style={{ fontFamily: "var(--font-space-grotesk)" }}
           >
             {product.name}
@@ -93,13 +93,13 @@ export function ProductCard({ product, variant = "default", aspectClass }: Produ
         </div>
         <div className="flex items-center gap-4 ml-4 shrink-0">
           <span
-            className="text-sm font-bold text-[var(--vsc-white)] group-hover:text-[var(--vsc-black)] transition-colors duration-200"
+            className="text-sm font-bold text-[var(--vsc-white)] transition-colors duration-200"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
             ${product.price.toFixed(0)}
           </span>
           <span
-            className="text-xs font-bold text-[var(--vsc-accent)] group-hover:text-[var(--vsc-black)] tracking-[0.15em] transition-colors duration-200"
+            className="text-xs font-bold text-[var(--vsc-white)] group-hover:text-[var(--vsc-white)] tracking-[0.15em] transition-colors duration-200"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
             ADD →
