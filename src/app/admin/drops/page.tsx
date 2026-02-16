@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { HexColorPicker } from "react-colorful";
+import { Palette } from "lucide-react";
 import { AdminButton } from "@/components/admin/AdminButton";
 import { AdminInput, AdminTextarea } from "@/components/admin/AdminInput";
 import { createProduct, toggleProductActive, updateProductAction } from "../actions";
@@ -22,6 +24,55 @@ interface Product {
 
 const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
 
+function rgbToHex(r: number, g: number, b: number): string {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+async function extractPaletteFromImage(imageUrl: string, count = 6): Promise<string[]> {
+    return new Promise((resolve, reject) => {
+        const img = new window.Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+            try {
+                const canvas = document.createElement("canvas");
+                const scale = Math.min(1, 150 / img.width, 150 / img.height);
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
+                const ctx = canvas.getContext("2d");
+                if (!ctx) {
+                    reject(new Error("Canvas not supported"));
+                    return;
+                }
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                const colorCount: Record<string, number> = {};
+                const step = 5;
+                for (let i = 0; i < data.length; i += 4 * step) {
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+                    const a = data[i + 3];
+                    if (a < 128 || (r > 245 && g > 245 && b > 245)) continue;
+                    const bucket = `${Math.round(r / 32) * 32},${Math.round(g / 32) * 32},${Math.round(b / 32) * 32}`;
+                    colorCount[bucket] = (colorCount[bucket] || 0) + 1;
+                }
+                const sorted = Object.entries(colorCount)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, count)
+                    .map(([key]) => {
+                        const [r, g, b] = key.split(",").map(Number);
+                        return rgbToHex(r, g, b);
+                    });
+                resolve(sorted.length > 0 ? sorted : ["#000000"]);
+            } catch (e) {
+                reject(e);
+            }
+        };
+        img.onerror = () => reject(new Error("Failed to load image"));
+        img.src = imageUrl;
+    });
+}
+
 async function fetchProducts(): Promise<Product[]> {
     const res = await fetch("/admin/drops/api");
     return res.json();
@@ -36,10 +87,55 @@ export default function DropsPage() {
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [preview, setPreview] = useState({ name: "", price: "", description: "" });
     const [formImages, setFormImages] = useState<string[]>([]);
+    const [formColors, setFormColors] = useState<string[]>(["#000000"]);
+    const [editingColor, setEditingColor] = useState<{ index: number; originalHex: string } | null>(null);
+    const [pickerPlacement, setPickerPlacement] = useState<"top" | "bottom">("bottom");
     const [uploading, setUploading] = useState(false);
+    const [extractingPalette, setExtractingPalette] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const colorPickerRef = useRef<HTMLDivElement>(null);
 
     const isFormOpen = showForm || !!editingProduct;
+
+    useLayoutEffect(() => {
+        if (!editingColor) return;
+        function updatePlacement() {
+            const el = colorPickerRef.current;
+            if (!el) return;
+            const rect = el.getBoundingClientRect();
+            const pickerHeight = 280;
+            const spaceBelow = typeof window !== "undefined" ? window.innerHeight - rect.bottom : pickerHeight;
+            setPickerPlacement(spaceBelow < pickerHeight ? "top" : "bottom");
+        }
+        updatePlacement();
+        document.addEventListener("scroll", updatePlacement, true);
+        window.addEventListener("resize", updatePlacement);
+        return () => {
+            document.removeEventListener("scroll", updatePlacement, true);
+            window.removeEventListener("resize", updatePlacement);
+        };
+    }, [editingColor]);
+
+    useEffect(() => {
+        const ec = editingColor;
+        if (!ec) return;
+        const { index, originalHex } = ec;
+        function handleOutside(e: MouseEvent | TouchEvent) {
+            const target = e.target as Node;
+            if (colorPickerRef.current && !colorPickerRef.current.contains(target)) {
+                setFormColors((prev) =>
+                    prev.map((c, i) => (i === index ? originalHex : c))
+                );
+                setEditingColor(null);
+            }
+        }
+        document.addEventListener("mousedown", handleOutside);
+        document.addEventListener("touchstart", handleOutside, { passive: true });
+        return () => {
+            document.removeEventListener("mousedown", handleOutside);
+            document.removeEventListener("touchstart", handleOutside);
+        };
+    }, [editingColor]);
     const isEditMode = !!editingProduct;
 
     async function handleFileUpload(files: FileList | null) {
@@ -64,16 +160,33 @@ export default function DropsPage() {
         setFormImages((prev) => prev.filter((_, i) => i !== index));
     }
 
+    async function handleExtractPalette(imageIndex = 0) {
+        if (formImages.length === 0 || !formImages[imageIndex]) return;
+        setExtractingPalette(true);
+        try {
+            const palette = await extractPaletteFromImage(formImages[imageIndex]);
+            setFormColors(palette);
+        } catch (e) {
+            console.error("Palette extraction failed:", e);
+            alert("Could not extract palette. Ensure the image is accessible (CORS).");
+        } finally {
+            setExtractingPalette(false);
+        }
+    }
+
     function closeForm() {
         setShowForm(false);
         setEditingProduct(null);
         setPreview({ name: "", price: "", description: "" });
         setFormImages([]);
+        setFormColors(["#000000"]);
+        setEditingColor(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
     }
 
     async function handleSubmit(formData: FormData) {
         formData.set("images", formImages.join(","));
+        formData.set("colors", formColors.join(","));
         if (isEditMode && editingProduct) {
             await updateProductAction(editingProduct.id, formData);
         } else {
@@ -92,6 +205,11 @@ export default function DropsPage() {
         setEditingProduct(product);
         setShowForm(true);
         setFormImages(product.images ?? []);
+        setFormColors(
+            product.colors?.length
+                ? product.colors.map((c) => (c.startsWith("#") ? c : `#${c}`))
+                : ["#000000"]
+        );
         setPreview({ name: product.name, price: product.price, description: product.description });
         if (fileInputRef.current) fileInputRef.current.value = "";
     }
@@ -121,6 +239,7 @@ export default function DropsPage() {
                             setEditingProduct(null);
                             setPreview({ name: "", price: "", description: "" });
                             setFormImages([]);
+                            setFormColors(["#000000"]);
                         }
                     }}
                 >
@@ -194,7 +313,7 @@ export default function DropsPage() {
                                 />
                                 <label
                                     htmlFor="image-upload"
-                                    className={`block w-full px-4 py-3 border-2 border-[#2A2A2A] bg-[#0D0D0D] cursor-pointer hover:border-[#BAFF00] transition-colors ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    className={`block w-full px-4 py-3 border-2 border-[#2A2A2A] bg-[#0D0D0D] cursor-pointer hover:border-[#BAFF00] transition-colors flex items-center justify-center ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}
                                 >
                                     <span className="font-mono text-xs text-[#F5F5F0] tracking-[0.1em]">
                                         {uploading ? "Uploading..." : formImages.length > 0 ? `✓ ${formImages.length} image(s) uploaded` : "+ Upload Images"}
@@ -210,6 +329,15 @@ export default function DropsPage() {
                                                     fill
                                                     className="object-cover border-2 border-[#2A2A2A]"
                                                 />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleExtractPalette(index)}
+                                                    disabled={extractingPalette}
+                                                    className="absolute top-1 left-1 w-8 h-8 bg-[#0D0D0D]/90 border-2 border-[#2A2A2A] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:border-[#BAFF00] disabled:opacity-50"
+                                                    title="Generate palette from this image"
+                                                >
+                                                    <Palette className="w-4 h-4 text-[#BAFF00]" />
+                                                </button>
                                                 <button
                                                     type="button"
                                                     onClick={() => removeImage(index)}
@@ -255,14 +383,109 @@ export default function DropsPage() {
                                     Select one or more sizes
                                 </p>
                             </div>
-                            <div>
-                                <AdminInput
-                                    label="Colors"
-                                    name="colors"
-                                    placeholder="#000000, #333333"
-                                    hint="Hex codes"
-                                    defaultValue={isEditMode ? (editingProduct?.colors?.join(", ") ?? "") : undefined}
-                                />
+                            <div ref={colorPickerRef} className="relative">
+                                <label className="block font-mono text-[10px] text-[#999] tracking-[0.2em] uppercase mb-2">
+                                    Colors
+                                </label>
+                                <div className="flex flex-wrap items-center gap-4 pt-2">
+                                    {formColors.map((hex, index) => (
+                                        <div
+                                            key={`${hex}-${index}`}
+                                            className="flex items-center gap-2 p-2 border-2 border-[#2A2A2A] bg-[#0D0D0D]"
+                                        >
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditingColor({ index, originalHex: hex })}
+                                                className={`w-10 h-10 shrink-0 cursor-pointer border-2 rounded-sm transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#BAFF00] ${
+                                                    editingColor?.index === index
+                                                        ? "border-[#BAFF00] ring-2 ring-[#BAFF00]"
+                                                        : "border-[#2A2A2A]"
+                                                }`}
+                                                style={{ backgroundColor: hex }}
+                                                title="Tap to open picker, then drag to select color"
+                                            />
+                                            <span className="font-mono text-[10px] text-[#999] tracking-[0.1em] min-w-[4.5rem]">
+                                                {hex.toUpperCase()}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setFormColors((prev) =>
+                                                        prev.length > 1 ? prev.filter((_, i) => i !== index) : prev
+                                                    )
+                                                }
+                                                className="font-mono text-xs text-[#666] hover:text-[#FF3333] transition-colors cursor-pointer"
+                                                title="Remove color"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormColors((prev) => [...prev, "#000000"])}
+                                        className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-[#2A2A2A] font-mono text-[10px] text-[#666] tracking-[0.1em] uppercase hover:border-[#BAFF00] hover:text-[#BAFF00] transition-colors"
+                                    >
+                                        + Add color
+                                    </button>
+                                </div>
+                                {editingColor !== null && (
+                                    <div
+                                        role="dialog"
+                                        aria-label="Pick color"
+                                        className={`absolute left-0 z-50 border-2 border-[#2A2A2A] bg-[#0D0D0D] p-4 shadow-lg min-w-[220px] ${
+                                            pickerPlacement === "top"
+                                                ? "bottom-full mb-2"
+                                                : "top-full mt-2"
+                                        }`}
+                                    >
+                                        <span className="font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase block mb-3">
+                                            Pick Color
+                                        </span>
+                                        <div className="[&_.react-colorful]:h-36 [&_.react-colorful]:w-full">
+                                                <HexColorPicker
+                                                    color={formColors[editingColor.index] ?? "#000000"}
+                                                    onChange={(newHex) =>
+                                                        setFormColors((prev) =>
+                                                            prev.map((c, i) =>
+                                                                i === editingColor.index ? newHex : c
+                                                            )
+                                                        )
+                                                    }
+                                            />
+                                        </div>
+                                        <div className="flex gap-2 mt-3">
+                                            <AdminButton
+                                                type="button"
+                                                variant="primary"
+                                                size="sm"
+                                                className="flex-1"
+                                                onClick={() => setEditingColor(null)}
+                                            >
+                                                Done
+                                            </AdminButton>
+                                            <AdminButton
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                className="flex-1"
+                                                onClick={() => {
+                                                    setFormColors((prev) =>
+                                                        prev.map((c, i) =>
+                                                            i === editingColor.index ? editingColor.originalHex : c
+                                                        )
+                                                    );
+                                                    setEditingColor(null);
+                                                }}
+                                            >
+                                                Cancel
+                                            </AdminButton>
+                                        </div>
+                                    </div>
+                                )}
+                                <p className="font-mono text-[10px] text-[#666] tracking-[0.1em] mt-2">
+                                    Tap swatch → drag on picker to select → Done
+                                </p>
                             </div>
                             <div className="pt-4">
                                 <AdminButton type="submit" variant="primary">
