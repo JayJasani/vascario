@@ -106,7 +106,9 @@
    @layer utilities) properly override these reset values in the cascade.
    -------------------------------------------------------------------------- */
 @layer base {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -123,7 +125,7 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: var(--font-space-mono), 'Courier New', monospace;
+    font-family: var(--font-space-mono), "Courier New", monospace;
     font-size: var(--text-body);
     line-height: 1.6;
     overflow-x: hidden;
@@ -132,7 +134,11 @@
   /* Selection */
   ::selection {
     background-color: var(--vsc-accent);
-    color: var(--vsc-black);
+    color: var(--vsc-white);
+  }
+  ::-moz-selection {
+    background-color: var(--vsc-accent);
+    color: var(--vsc-white);
   }
 
   /* Custom Scrollbar */
@@ -154,7 +160,7 @@
      NOISE OVERLAY — Screen grain texture
      -------------------------------------------------------------------------- */
   body::after {
-    content: '';
+    content: "";
     position: fixed;
     top: 0;
     left: 0;
@@ -175,8 +181,12 @@
 
 /* Marquee — Infinite horizontal scroll */
 @keyframes marquee-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 /* Reveal — Scroll-triggered slide up */
@@ -193,48 +203,106 @@
 
 /* Fade in */
 @keyframes fade-in {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 /* Glitch flicker */
 @keyframes glitch {
-  0%, 100% { opacity: 1; }
-  33% { opacity: 0.8; }
-  66% { opacity: 0.95; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  33% {
+    opacity: 0.8;
+  }
+  66% {
+    opacity: 0.95;
+  }
 }
 
 /* Float */
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 /* Pulse glow */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 var(--vsc-accent-dim); }
-  50% { box-shadow: 0 0 20px 4px var(--vsc-accent-dim); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--vsc-accent-dim);
+  }
+  50% {
+    box-shadow: 0 0 20px 4px var(--vsc-accent-dim);
+  }
 }
 
 /* CRT Flicker — Order confirmation */
 @keyframes crt-flicker {
-  0% { opacity: 1; transform: scale(1); }
-  10% { opacity: 0.6; transform: scale(1.002, 0.998); }
-  20% { opacity: 1; transform: scale(1); }
-  30% { opacity: 0.8; transform: scale(0.999, 1.001); }
-  40% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.001, 0.999); }
-  60% { opacity: 1; transform: scale(1); }
-  70% { opacity: 0.85; transform: scale(1); }
-  80% { opacity: 1; transform: scale(1); }
-  90% { opacity: 0.9; transform: scale(1); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  10% {
+    opacity: 0.6;
+    transform: scale(1.002, 0.998);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  30% {
+    opacity: 0.8;
+    transform: scale(0.999, 1.001);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.001, 0.999);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  70% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  90% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Confirmed marquee — faster */
 @keyframes marquee-confirmed {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -270,7 +338,7 @@
 }
 
 .text-mono {
-  font-family: var(--font-space-mono), 'Courier New', monospace;
+  font-family: var(--font-space-mono), "Courier New", monospace;
 }
 
 .text-display {
@@ -278,16 +346,23 @@
 }
 
 /* Accent utilities */
-.accent-text { color: var(--vsc-accent); }
-.accent-bg { background-color: var(--vsc-accent); }
-.accent-border { border-color: var(--vsc-accent); }
+.accent-text {
+  color: var(--vsc-accent);
+}
+.accent-bg {
+  background-color: var(--vsc-accent);
+}
+.accent-border {
+  border-color: var(--vsc-accent);
+}
 
 /* Animate on scroll reveal */
 .reveal {
   opacity: 0;
   transform: translateY(40px);
-  transition: opacity var(--duration-slow) var(--ease-out-expo),
-              transform var(--duration-slow) var(--ease-out-expo);
+  transition:
+    opacity var(--duration-slow) var(--ease-out-expo),
+    transform var(--duration-slow) var(--ease-out-expo);
 }
 .reveal.visible {
   opacity: 1;
@@ -310,7 +385,7 @@
 }
 .chromatic-hover::before,
 .chromatic-hover::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   opacity: 0;
