@@ -18,7 +18,8 @@ import {
     createStockLevel,
     type OrderStatus,
 } from "@/lib/firebase-helpers";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/storefront-cache";
 
 // ─── DASHBOARD STATS ───────────────────────────────────────────────────────────
 
@@ -208,6 +209,7 @@ export async function createProduct(formData: FormData) {
     revalidatePath("/admin/drops");
     revalidatePath("/admin/inventory");
     revalidatePath("/admin");
+    revalidateTag(CACHE_TAGS.activeProducts, "max");
 }
 
 export async function toggleProductActive(productId: string) {
@@ -218,6 +220,8 @@ export async function toggleProductActive(productId: string) {
 
     revalidatePath("/admin/drops");
     revalidatePath("/admin");
+    revalidateTag(CACHE_TAGS.activeProducts, "max");
+    revalidateTag(CACHE_TAGS.product(productId), "max");
 }
 
 // ─── INVENTORY ──────────────────────────────────────────────────────────────────
