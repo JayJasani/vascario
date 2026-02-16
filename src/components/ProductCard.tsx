@@ -13,22 +13,27 @@ interface Product {
 
 interface ProductCardProps {
   product: Product
-  variant?: "default" | "featured"
+  variant?: "default" | "featured" | "grid"
+  aspectClass?: string
 }
 
-export function ProductCard({ product, variant = "default" }: ProductCardProps) {
+export function ProductCard({ product, variant = "default", aspectClass }: ProductCardProps) {
   const isFeatured = variant === "featured"
+  const isGrid = variant === "grid"
+
+  const linkClass = isGrid
+    ? "group relative block w-full overflow-hidden border border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] transition-colors duration-200"
+    : isFeatured
+      ? "group relative block overflow-hidden border border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] transition-colors duration-200 min-w-[380px] md:min-w-[480px]"
+      : "group relative block overflow-hidden border border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] transition-colors duration-200 min-w-[300px] md:min-w-[360px]"
+
+  const aspect = aspectClass ?? "aspect-[3/4]"
 
   return (
-    <Link
-      href={`/product/${product.id}`}
-      className={`group relative block overflow-hidden border border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] transition-colors duration-200 ${isFeatured ? "min-w-[380px] md:min-w-[480px]" : "min-w-[300px] md:min-w-[360px]"
-        }`}
-    >
+    <Link href={`/product/${product.id}`} className={linkClass}>
       {/* Image container with chromatic aberration */}
       <div
-        className={`relative overflow-hidden bg-[var(--vsc-gray-800)] chromatic-hover ${isFeatured ? "aspect-[3/4]" : "aspect-[3/4]"
-          }`}
+        className={`relative overflow-hidden bg-[var(--vsc-gray-800)] chromatic-hover ${aspect}`}
       >
         <div className="absolute inset-0 bg-[var(--vsc-gray-900)] flex items-center justify-center">
           {/* Placeholder pattern when no real image is available */}

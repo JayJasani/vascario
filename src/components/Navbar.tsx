@@ -37,7 +37,7 @@ export function Navbar() {
                 {/* Nav Links — monospace, minimal */}
                 <div className="hidden md:flex items-center gap-8">
                     <Link
-                        href="#collection"
+                        href="/collection"
                         className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-400)] hover:text-[var(--vsc-white)] transition-colors duration-200"
                         style={{ fontFamily: "var(--font-space-mono)" }}
                     >
@@ -61,7 +61,7 @@ export function Navbar() {
 
                 {/* CTA */}
                 <Link
-                    href="#collection"
+                    href="/collection"
                     className="px-8 py-4 bg-[var(--vsc-accent)] !text-[var(--vsc-black)] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-black)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                 >
