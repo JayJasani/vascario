@@ -36,6 +36,11 @@ export const metadata: Metadata = {
     description: "Premium embroidered streetwear. Limited drops.",
     type: "website",
   },
+  icons: {
+    icon: "/v.png",
+    shortcut: "/v.png",
+    apple: "/v.png",
+  },
 };
 
 export default function RootLayout({
