@@ -4,52 +4,18 @@ import { useCart } from "@/context/CartContext"
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
 import Link from "next/link"
+import Image from "next/image"
 import { useEffect, useState } from "react"
-
-// Seed demo items on first load if cart is empty
-const DEMO_ITEMS = [
-    {
-        id: "prod_1",
-        name: "Signature Tee — Onyx",
-        price: 85,
-        image: "/placeholder-tee-black.png",
-        size: "L",
-        quantity: 1,
-    },
-    {
-        id: "prod_2",
-        name: "Heavyweight — Charcoal",
-        price: 95,
-        image: "/placeholder-tee-charcoal.png",
-        size: "M",
-        quantity: 2,
-    },
-    {
-        id: "prod_3",
-        name: "Gold Edition",
-        price: 120,
-        image: "/placeholder-tee-gold.png",
-        size: "XL",
-        quantity: 1,
-    },
-]
+import { useAuth } from "@/context/AuthContext"
 
 export default function CartPage() {
-    const { items, updateQuantity, removeItem, cartTotal, cartCount, addItem } = useCart()
+    const { user } = useAuth()
+    const { items, updateQuantity, removeItem, cartTotal, cartCount } = useCart()
     const [mounted, setMounted] = useState(false)
 
-    // Seed demo items on mount if cart is empty
     useEffect(() => {
         setMounted(true)
     }, [])
-
-    useEffect(() => {
-        if (mounted && items.length === 0) {
-            DEMO_ITEMS.forEach((item) => addItem(item))
-        }
-        // Only run once on mount
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [mounted])
 
     const shipping = cartTotal > 0 ? 0 : 0
     const total = cartTotal + shipping
@@ -87,7 +53,23 @@ export default function CartPage() {
                     </span>
                 </div>
 
-                {items.length === 0 ? (
+                {!user ? (
+                    <div className="flex flex-col items-center justify-center py-32 gap-8">
+                        <p
+                            className="text-2xl md:text-4xl font-bold text-[var(--vsc-gray-600)] uppercase tracking-[0.1em]"
+                            style={{ fontFamily: "var(--font-space-grotesk)" }}
+                        >
+                            SIGN IN TO VIEW YOUR BAG
+                        </p>
+                        <Link
+                            href="/login?redirect=/cart"
+                            className="w-full sm:w-auto text-center px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
+                            style={{ fontFamily: "var(--font-space-mono)" }}
+                        >
+                            SIGN IN →
+                        </Link>
+                    </div>
+                ) : items.length === 0 ? (
                     /* ===== EMPTY STATE ===== */
                     <div className="flex flex-col items-center justify-center py-32 gap-8">
                         <p
@@ -111,13 +93,13 @@ export default function CartPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 {items.map((item, index) => (
                                     <div
-                                        key={item.id}
+                                        key={`${item.id}-${item.size}-${index}`}
                                         className={`relative border-2 md:border-4 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] overflow-hidden group ${index === 0 ? "md:col-span-2" : ""
                                             }`}
                                     >
                                         {/* Remove button */}
                                         <button
-                                            onClick={() => removeItem(item.id)}
+                                            onClick={() => removeItem(item.id, item.size)}
                                             className="absolute top-3 right-3 z-20 w-8 h-8 flex items-center justify-center bg-[var(--vsc-white)] border-2 border-[var(--vsc-gray-300)] text-[var(--vsc-gray-500)] hover:border-[#ef4444] hover:text-[#ef4444] hover:bg-[var(--vsc-cream)] transition-all duration-200 active:scale-90"
                                             style={{ fontFamily: "var(--font-space-mono)" }}
                                         >
@@ -126,11 +108,19 @@ export default function CartPage() {
 
                                         {/* Product image area */}
                                         <div
-                                            className={`relative bg-[var(--vsc-gray-100)] flex items-center justify-center ${index === 0 ? "h-48 md:h-64" : "h-40 md:h-52"
+                                            className={`relative bg-[var(--vsc-gray-100)] flex items-center justify-center overflow-hidden ${index === 0 ? "h-48 md:h-64" : "h-40 md:h-52"
                                                 }`}
                                         >
+                                            {item.image && (
+                                                <Image
+                                                    src={item.image}
+                                                    alt={item.name}
+                                                    fill
+                                                    className="object-cover object-center"
+                                                />
+                                            )}
                                             <div
-                                                className="absolute inset-0 opacity-10"
+                                                className="absolute inset-0 opacity-10 z-10"
                                                 style={{
                                                     backgroundImage: `
                             linear-gradient(45deg, var(--vsc-gray-700) 25%, transparent 25%),
@@ -143,7 +133,7 @@ export default function CartPage() {
                                                 }}
                                             />
                                             <span
-                                                className="text-[var(--vsc-gray-600)] text-xs uppercase tracking-[0.3em] z-10"
+                                                className="text-[var(--vsc-gray-600)] text-xs uppercase tracking-[0.3em] z-20 px-4 text-center"
                                                 style={{ fontFamily: "var(--font-space-mono)" }}
                                             >
                                                 {item.name}
@@ -175,7 +165,7 @@ export default function CartPage() {
                                                 className="text-lg md:text-xl font-bold text-[var(--vsc-gray-900)]"
                                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                                 >
-                                                    ${item.price.toFixed(0)}
+                                                    ₹{item.price.toLocaleString("en-IN")}
                                                 </span>
 
                                                 {/* Quantity Controls — Squishy */}
@@ -183,8 +173,8 @@ export default function CartPage() {
                                                     <button
                                                         onClick={() =>
                                                             item.quantity > 1
-                                                                ? updateQuantity(item.id, item.quantity - 1)
-                                                                : removeItem(item.id)
+                                                                ? updateQuantity(item.id, item.size, item.quantity - 1)
+                                                                : removeItem(item.id, item.size)
                                                         }
                                                     className="w-12 h-12 flex items-center justify-center bg-[var(--vsc-gray-100)] text-[var(--vsc-gray-900)] text-lg font-bold hover:bg-[var(--vsc-gray-200)] hover:text-[var(--vsc-gray-900)] transition-all duration-150 active:scale-[0.85] select-none"
                                                         style={{ fontFamily: "var(--font-space-mono)" }}
@@ -198,7 +188,7 @@ export default function CartPage() {
                                                         {item.quantity}
                                                     </span>
                                                     <button
-                                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                        onClick={() => updateQuantity(item.id, item.size, item.quantity + 1)}
                                                         className="w-12 h-12 flex items-center justify-center bg-[var(--vsc-gray-100)] text-[var(--vsc-gray-900)] text-lg font-bold hover:bg-[var(--vsc-gray-200)] hover:text-[var(--vsc-gray-900)] transition-all duration-150 active:scale-[0.85] select-none"
                                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                                     >
@@ -219,7 +209,7 @@ export default function CartPage() {
                                                     className="text-sm font-bold text-[var(--vsc-accent)]"
                                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                                 >
-                                                    ${(item.price * item.quantity).toFixed(0)}
+                                                    ₹{(item.price * item.quantity).toLocaleString("en-IN")}
                                                 </span>
                                             </div>
                                         </div>
@@ -245,28 +235,41 @@ export default function CartPage() {
                                     {/* Line items */}
                                     {items.map((item) => (
                                         <div
-                                            key={item.id}
+                                            key={`${item.id}-${item.size}`}
                                             className="flex justify-between items-start pb-4 border-b border-dashed border-[var(--vsc-gray-700)]"
                                         >
-                                            <div className="flex-1 min-w-0 pr-4">
-                                                <span
-                                            className="text-xs text-[var(--vsc-gray-900)] uppercase tracking-[0.1em] block truncate"
-                                                    style={{ fontFamily: "var(--font-space-mono)" }}
-                                                >
-                                                    {item.name}
-                                                </span>
-                                                <span
-                                                    className="text-[10px] text-[var(--vsc-gray-400)] uppercase tracking-[0.2em]"
-                                                    style={{ fontFamily: "var(--font-space-mono)" }}
-                                                >
-                                                    QTY: {item.quantity} × ${item.price}
-                                                </span>
+                                            <div className="flex items-start gap-3 flex-1 min-w-0 pr-4">
+                                                {item.image && (
+                                                    <div className="relative w-10 h-10 rounded-sm overflow-hidden bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] shrink-0">
+                                                        <Image
+                                                            src={item.image}
+                                                            alt={item.name}
+                                                            fill
+                                                            className="object-cover"
+                                                        />
+                                                    </div>
+                                                )}
+                                                <div className="flex-1 min-w-0">
+                                                    <span
+                                                        className="text-xs text-[var(--vsc-gray-900)] uppercase tracking-[0.1em] block truncate"
+                                                        style={{ fontFamily: "var(--font-space-mono)" }}
+                                                    >
+                                                        {item.name}
+                                                    </span>
+                                                    <span
+                                                        className="text-[10px] text-[var(--vsc-gray-400)] uppercase tracking-[0.2em]"
+                                                        style={{ fontFamily: "var(--font-space-mono)" }}
+                                                    >
+                                                        SIZE: {item.size} · QTY: {item.quantity} × ₹
+                                                        {Number(item.price).toLocaleString("en-IN")}
+                                                    </span>
+                                                </div>
                                             </div>
                                             <span
                                                 className="text-xs font-bold text-[var(--vsc-gray-900)] shrink-0"
                                                 style={{ fontFamily: "var(--font-space-mono)" }}
                                             >
-                                                ${(item.price * item.quantity).toFixed(0)}
+                                                ₹{Number(item.price * item.quantity).toLocaleString("en-IN")}
                                             </span>
                                         </div>
                                     ))}
@@ -283,7 +286,7 @@ export default function CartPage() {
                                             className="text-sm font-bold text-[var(--vsc-gray-900)]"
                                             style={{ fontFamily: "var(--font-space-mono)" }}
                                         >
-                                            ${cartTotal.toFixed(0)}
+                                            ₹{cartTotal.toLocaleString("en-IN")}
                                         </span>
                                     </div>
 
@@ -299,7 +302,9 @@ export default function CartPage() {
                                             className="text-xs font-bold text-[var(--vsc-accent)] uppercase tracking-[0.15em]"
                                             style={{ fontFamily: "var(--font-space-mono)" }}
                                         >
-                                            {shipping === 0 ? "FREE" : `$${shipping}`}
+                                            {shipping === 0
+                                                ? "FREE"
+                                                : `₹${Number(shipping).toLocaleString("en-IN")}`}
                                         </span>
                                     </div>
 
@@ -315,7 +320,7 @@ export default function CartPage() {
                                             className="text-xl md:text-2xl font-bold text-[var(--vsc-accent)]"
                                             style={{ fontFamily: "var(--font-space-mono)" }}
                                         >
-                                            ${total.toFixed(0)}
+                                            ₹{total.toLocaleString("en-IN")}
                                         </span>
                                     </div>
 

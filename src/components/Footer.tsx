@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NewsletterForm } from "@/components/NewsletterForm";
 
 export function Footer() {
   return (
@@ -44,11 +45,11 @@ export function Footer() {
           </span>
           <ul className="space-y-2">
             {[
-              { label: "About", href: "#" },
+              { label: "About", href: "/about" },
               { label: "Contact", href: "/contact" },
               { label: "Sizing Guide", href: "/size-chart" },
-              { label: "Shipping", href: "#" },
-              { label: "Returns", href: "#" },
+              { label: "Shipping", href: "/shipping" },
+              { label: "Returns", href: "/returns" },
             ].map((item) => (
               <li key={item.label}>
                 <Link
@@ -130,20 +131,7 @@ export function Footer() {
           >
             Get early access to drops and exclusive content.
           </p>
-          <div className="flex" suppressHydrationWarning>
-            <input
-              type="email"
-              placeholder="your@email.com"
-              className="flex-1 px-5 py-4 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-xs uppercase tracking-[0.15em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]"
-              style={{ fontFamily: "var(--font-space-mono)" }}
-            />
-            <button
-              className="px-6 py-4 bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.15em] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200"
-              style={{ fontFamily: "var(--font-space-mono)" }}
-            >
-              →
-            </button>
-          </div>
+          <NewsletterForm />
         </div>
       </div>
 

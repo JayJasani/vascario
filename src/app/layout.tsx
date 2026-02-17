@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { SmoothScroller } from "@/components/SmoothScroller";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
+import { FavouritesProvider } from "@/context/FavouritesContext";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -54,10 +56,14 @@ export default function RootLayout({
         className={`${spaceGrotesk.variable} ${spaceMono.variable}`}
       >
         <SmoothScroller>
-          <CartProvider>
-            <ScrollToTop />
-            {children}
-          </CartProvider>
+          <AuthProvider>
+            <CartProvider>
+              <FavouritesProvider>
+                <ScrollToTop />
+                {children}
+              </FavouritesProvider>
+            </CartProvider>
+          </AuthProvider>
         </SmoothScroller>
       </body>
     </html>

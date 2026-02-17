@@ -1,10 +1,12 @@
 "use client";
 
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import {
   MagnifyingGlassIcon,
   HeartIcon,
   ShoppingBagIcon,
+  ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -20,6 +22,13 @@ export function Navbar() {
   const inputRef = useRef<HTMLInputElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const { cartCount } = useCart();
+  const { user, logout } = useAuth();
+
+  const displayName =
+    user?.displayName || user?.email?.split("@")[0] || "";
+  const userInitial = displayName
+    ? displayName.charAt(0).toUpperCase()
+    : "?";
 
   const openSearch = useCallback(() => {
     setSearchOpen(true);
@@ -152,7 +161,7 @@ export function Navbar() {
             Lookbook
           </Link>
           <Link
-            href="/#about"
+            href="/about"
             className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
@@ -160,7 +169,7 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* Right side — Search, Favourites, Cart + CTA */}
+        {/* Right side — Search, Favourites, Cart + User */}
         <div className="flex items-center gap-2 md:gap-4">
           {/* Search icon */}
           <button
@@ -194,15 +203,39 @@ export function Navbar() {
               </span>
             )}
           </Link>
-
-          {/* Shop CTA */}
-          {/* <Link
-            href="/collection"
-            className="hidden md:block px-8 py-4 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
-            style={{ fontFamily: "var(--font-space-mono)" }}
-          >
-            Shop →
-          </Link> */}
+          {/* User */}
+          <div className="hidden md:flex items-center gap-2 pl-3 ml-1 border-l border-[var(--vsc-gray-200)]">
+            {user ? (
+              <>
+                <div className="w-7 h-7 rounded-full bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] flex items-center justify-center text-xs font-bold">
+                  {userInitial}
+                </div>
+                <span
+                  className="text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.18em] max-w-[12ch] truncate"
+                  style={{ fontFamily: "var(--font-space-mono)" }}
+                  title={displayName || user?.email || undefined}
+                >
+                  {displayName}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => logout()}
+                  className="p-3 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-accent)] transition-colors duration-200 border border-transparent"
+                  aria-label="Logout"
+                >
+                  <ArrowRightOnRectangleIcon className="w-5 h-5" strokeWidth={1.5} />
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className="text-[10px] text-[var(--vsc-gray-500)] uppercase tracking-[0.18em] hover:text-[var(--vsc-accent)]"
+                style={{ fontFamily: "var(--font-space-mono)" }}
+              >
+                Sign in
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 
@@ -285,7 +318,7 @@ export function Navbar() {
                               className="text-sm font-bold text-[var(--vsc-gray-900)]"
                               style={{ fontFamily: "var(--font-space-mono)" }}
                             >
-                              ${item.price}
+                              ₹{item.price.toLocaleString("en-IN")}
                             </span>
                           )}
                         </Link>

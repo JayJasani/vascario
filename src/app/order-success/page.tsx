@@ -225,7 +225,7 @@ function OrderSuccessContent() {
                       className="text-xs font-bold text-[var(--vsc-black)]"
                       style={{ fontFamily: "var(--font-space-mono)" }}
                     >
-                      ${(item.price * item.qty).toFixed(0)}
+                      ₹{(item.price * item.qty).toLocaleString("en-IN")}
                     </span>
                   </div>
                 ))}
@@ -244,7 +244,7 @@ function OrderSuccessContent() {
                     className="text-xs font-bold text-[var(--vsc-black)]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                   >
-                    $395
+                    ₹395
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -272,7 +272,7 @@ function OrderSuccessContent() {
                     className="text-xl font-bold text-[var(--vsc-black)]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                   >
-                    $395
+                    ₹395
                   </span>
                 </div>
               </div>

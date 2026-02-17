@@ -7,6 +7,7 @@ import Link from "next/link"
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/context/AuthContext"
 
 const stepVariants = {
     enter: (direction: number) => ({
@@ -24,6 +25,7 @@ const stepVariants = {
 }
 
 export default function CheckoutPage() {
+    const { user } = useAuth()
     const { items, cartTotal, clearCart } = useCart()
     const [step, setStep] = useState(1)
     const [direction, setDirection] = useState(1)
@@ -67,6 +69,30 @@ export default function CheckoutPage() {
     }
 
     if (!mounted) return null
+
+    if (!user) {
+        return (
+            <main className="min-h-screen bg-[var(--vsc-cream)]">
+                <Navbar />
+                <div className="flex flex-col items-center justify-center min-h-screen gap-8">
+                    <p
+                        className="text-2xl md:text-4xl font-bold text-[var(--vsc-gray-600)] uppercase tracking-[0.1em]"
+                        style={{ fontFamily: "var(--font-space-grotesk)" }}
+                    >
+                        SIGN IN TO CHECK OUT
+                    </p>
+                    <Link
+                        href="/login?redirect=/checkout"
+                        className="px-10 py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
+                        style={{ fontFamily: "var(--font-space-mono)" }}
+                    >
+                        SIGN IN →
+                    </Link>
+                </div>
+                <Footer />
+            </main>
+        )
+    }
 
     if (items.length === 0) {
         return (
@@ -243,12 +269,12 @@ export default function CheckoutPage() {
                                                 {item.size} × {item.quantity}
                                             </span>
                                         </div>
-                                        <span
-                                            className="text-xs font-bold text-[var(--vsc-gray-900)] shrink-0"
-                                            style={{ fontFamily: "var(--font-space-mono)" }}
-                                        >
-                                            ${(item.price * item.quantity).toFixed(0)}
-                                        </span>
+                                <span
+                                    className="text-xs font-bold text-[var(--vsc-gray-900)] shrink-0"
+                                    style={{ fontFamily: "var(--font-space-mono)" }}
+                                >
+                                    ₹{(item.price * item.quantity).toLocaleString("en-IN")}
+                                </span>
                                     </div>
                                 ))}
                                 <div className="flex justify-between items-center pt-2 border-t-2 border-[var(--vsc-gray-300)]">
@@ -258,12 +284,12 @@ export default function CheckoutPage() {
                                     >
                                         TOTAL
                                     </span>
-                                    <span
-                                        className="text-lg font-bold text-[var(--vsc-accent)]"
-                                        style={{ fontFamily: "var(--font-space-mono)" }}
-                                    >
-                                        ${cartTotal.toFixed(0)}
-                                    </span>
+                                <span
+                                    className="text-lg font-bold text-[var(--vsc-accent)]"
+                                    style={{ fontFamily: "var(--font-space-mono)" }}
+                                >
+                                    ₹{cartTotal.toLocaleString("en-IN")}
+                                </span>
                                 </div>
                             </div>
                         </div>

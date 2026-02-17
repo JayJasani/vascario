@@ -17,6 +17,7 @@ import {
     updateStockLevel,
     getLowStockAlerts,
     createStockLevel,
+    getNewsletterSubscriptions,
     type OrderStatus,
 } from "@/lib/firebase-helpers";
 import { revalidatePath, revalidateTag } from "next/cache";
@@ -220,6 +221,22 @@ export async function createProduct(formData: FormData) {
         entityId: product.id,
         details: { name },
     });
+
+    // Notify newsletter subscribers about the new drop (log placeholder).
+    // To hook up a real email service, use these emails with your provider (Resend, SendGrid, etc.).
+    try {
+        const subscribers = await getNewsletterSubscriptions();
+        const emails = subscribers.map((s) => s.email);
+        console.log(
+            "[Newsletter] New drop created:",
+            name,
+            "would be announced to",
+            emails.length,
+            "subscribers."
+        );
+    } catch (err) {
+        console.error("Failed to load newsletter subscribers for new drop notification:", err);
+    }
 
     revalidatePath("/admin/drops");
     revalidatePath("/admin/inventory");

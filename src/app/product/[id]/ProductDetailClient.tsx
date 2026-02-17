@@ -1,11 +1,15 @@
 "use client"
 
-import { useState, type ReactNode } from "react"
+import { useState, useEffect, type ReactNode } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
 import { MarqueeStrip } from "@/components/MarqueeStrip"
+import { useCart } from "@/context/CartContext"
+import { useAuth } from "@/context/AuthContext"
+import { useFavourites } from "@/context/FavouritesContext"
 
 export interface ProductDetailData {
     id: string;
@@ -76,9 +80,35 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
     const [selectedColor, setSelectedColor] = useState(product.colors[0] || "")
     const [quantity, setQuantity] = useState(1)
     const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+    const { addItem } = useCart()
+    const { user, loading } = useAuth()
+    const { toggleFavourite, isFavourite } = useFavourites()
+    const router = useRouter()
 
     const currentImage = product.images[selectedImageIndex] || product.images[0]
     const hasMultipleImages = product.images.length > 1
+
+    // Restore cart intent from sessionStorage after login
+    useEffect(() => {
+        if (loading || !user) return
+        
+        const intentKey = `vascario:cart-intent:${product.id}`
+        if (typeof window === "undefined") return
+        
+        try {
+            const stored = sessionStorage.getItem(intentKey)
+            if (stored) {
+                const intent = JSON.parse(stored)
+                if (intent.size) setSelectedSize(intent.size)
+                if (intent.color) setSelectedColor(intent.color)
+                if (intent.quantity) setQuantity(intent.quantity)
+                // Clear the intent - don't auto-add, let user click button
+                sessionStorage.removeItem(intentKey)
+            }
+        } catch (err) {
+            console.error("Failed to restore cart intent", err)
+        }
+    }, [user, loading, product.id])
 
     const showPrevImage = () => {
         if (!hasMultipleImages) return
@@ -269,13 +299,13 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                     className="text-2xl text-[var(--vsc-accent)] font-bold"
                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                 >
-                                    ${product.price}
+                                    ₹{product.price.toLocaleString("en-IN")}
                                 </span>
                                 <span
                                     className="text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.2em]"
                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                 >
-                                    USD
+                                    INR
                                 </span>
                             </div>
 
@@ -393,10 +423,69 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
 
                             {/* Add to Cart */}
                             <button
+                                onClick={() => {
+                                    if (!user) {
+                                        // Store cart intent before redirecting
+                                        const intentKey = `vascario:cart-intent:${product.id}`
+                                        if (typeof window !== "undefined") {
+                                            try {
+                                                sessionStorage.setItem(intentKey, JSON.stringify({
+                                                    size: selectedSize,
+                                                    color: selectedColor,
+                                                    quantity,
+                                                }))
+                                            } catch (err) {
+                                                console.error("Failed to store cart intent", err)
+                                            }
+                                        }
+                                        router.push(`/login?redirect=/product/${product.id}`)
+                                        return
+                                    }
+                                    // Require size selection if sizes are available
+                                    if (product.sizes.length > 0 && !selectedSize) {
+                                        alert("Please select a size before adding to cart.")
+                                        return
+                                    }
+                                    // Require color selection if colors are available
+                                    if (product.colors.length > 0 && !selectedColor) {
+                                        alert("Please select a color before adding to cart.")
+                                        return
+                                    }
+
+                                    addItem({
+                                        id: product.id,
+                                        name: product.name,
+                                        price: product.price,
+                                        image: product.images[0] ?? "",
+                                        size: selectedSize || "OS", // Only "OS" if no sizes available
+                                        quantity,
+                                    })
+                                }}
                                 className="w-full py-3 bg-[var(--vsc-accent)] text-black text-sm font-bold uppercase tracking-[0.2em] hover:bg-black hover:text-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_24px_var(--vsc-accent-dim)]"
                                 style={{ fontFamily: "var(--font-space-mono)", border: "2px solid #000" }}
                             >
-                                Add to Cart — ${product.price * quantity}
+                                Add to Cart — ₹{(product.price * quantity).toLocaleString("en-IN")}
+                            </button>
+
+                            {/* Favourite toggle */}
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if (!user) {
+                                        router.push(`/login?redirect=/product/${product.id}`)
+                                        return
+                                    }
+                                    toggleFavourite({
+                                        id: product.id,
+                                        name: product.name,
+                                        price: product.price,
+                                        image: product.images[0] ?? "",
+                                    })
+                                }}
+                                className="mt-3 w-full py-2 border border-[var(--vsc-gray-700)] text-xs font-bold uppercase tracking-[0.18em] text-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors duration-200"
+                                style={{ fontFamily: "var(--font-space-mono)" }}
+                            >
+                                {isFavourite(product.id) ? "Remove from favourites" : "Add to favourites"}
                             </button>
 
                             {/* SKU */}

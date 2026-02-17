@@ -226,7 +226,7 @@ export default function DropsPage() {
                         Drop Manager
                     </h2>
                     <p className="font-mono text-xs text-[#666] tracking-[0.15em] uppercase mt-1">
-            // Product Uploads &amp; Management
+                        Product Uploads &amp; Management
                     </p>
                 </div>
                 <AdminButton
@@ -269,7 +269,7 @@ export default function DropsPage() {
                             <AdminTextarea
                                 label="Description"
                                 name="description"
-                                placeholder="Heavy 300GSM cotton with precision-stitched embroidery..."
+                                placeholder="Heavy 240GSM cotton with precision-stitched embroidery..."
                                 required
                                 defaultValue={isEditMode ? editingProduct?.description : undefined}
                                 onChange={(e) =>
@@ -396,11 +396,10 @@ export default function DropsPage() {
                                             <button
                                                 type="button"
                                                 onClick={() => setEditingColor({ index, originalHex: hex })}
-                                                className={`w-10 h-10 shrink-0 cursor-pointer border-2 rounded-sm transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#BAFF00] ${
-                                                    editingColor?.index === index
+                                                className={`w-10 h-10 shrink-0 cursor-pointer border-2 rounded-sm transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#BAFF00] ${editingColor?.index === index
                                                         ? "border-[#BAFF00] ring-2 ring-[#BAFF00]"
                                                         : "border-[#2A2A2A]"
-                                                }`}
+                                                    }`}
                                                 style={{ backgroundColor: hex }}
                                                 title="Tap to open picker, then drag to select color"
                                             />
@@ -433,25 +432,24 @@ export default function DropsPage() {
                                     <div
                                         role="dialog"
                                         aria-label="Pick color"
-                                        className={`absolute left-0 z-50 border-2 border-[#2A2A2A] bg-[#0D0D0D] p-4 shadow-lg min-w-[220px] ${
-                                            pickerPlacement === "top"
+                                        className={`absolute left-0 z-50 border-2 border-[#2A2A2A] bg-[#0D0D0D] p-4 shadow-lg min-w-[220px] ${pickerPlacement === "top"
                                                 ? "bottom-full mb-2"
                                                 : "top-full mt-2"
-                                        }`}
+                                            }`}
                                     >
                                         <span className="font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase block mb-3">
                                             Pick Color
                                         </span>
                                         <div className="[&_.react-colorful]:h-36 [&_.react-colorful]:w-full">
-                                                <HexColorPicker
-                                                    color={formColors[editingColor.index] ?? "#000000"}
-                                                    onChange={(newHex) =>
-                                                        setFormColors((prev) =>
-                                                            prev.map((c, i) =>
-                                                                i === editingColor.index ? newHex : c
-                                                            )
+                                            <HexColorPicker
+                                                color={formColors[editingColor.index] ?? "#000000"}
+                                                onChange={(newHex) =>
+                                                    setFormColors((prev) =>
+                                                        prev.map((c, i) =>
+                                                            i === editingColor.index ? newHex : c
                                                         )
-                                                    }
+                                                    )
+                                                }
                                             />
                                         </div>
                                         <div className="flex gap-2 mt-3">

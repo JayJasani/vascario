@@ -98,7 +98,7 @@ export function ProductCard({ product, variant = "default", aspectClass, href }:
             className="text-sm font-bold text-[var(--vsc-white)] transition-colors duration-200"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
-            ${product.price.toFixed(0)}
+            ₹{product.price.toLocaleString("en-IN")}
           </span>
           <span
             className="text-xs font-bold text-[var(--vsc-white)] group-hover:text-[var(--vsc-white)] tracking-[0.15em] transition-colors duration-200"
