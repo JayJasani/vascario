@@ -71,13 +71,13 @@ export function Hero() {
           }}
         >
           VASC
-          <span className="relative inline-flex items-baseline mx-[0.02em]">
+          <span className="relative inline-flex items-baseline mx-[0.02em] -mr-[0.04em] -ml-[0.04em]">
             <Image
-              src="/logo/Alogo.png"
+              src="/logo/arlogo.png"
               alt="VASCARIO A logo"
-              width={200}
-              height={200}
-              className="block h-[0.75em] w-auto translate-y-[0.03em]"
+              width={250}
+              height={250}
+              className="block h-[.89em] w-auto translate-y-[0.11em]"
               priority
             />
           </span>
