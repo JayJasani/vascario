@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Navbar } from "@/components/Navbar"
@@ -27,7 +27,7 @@ function renderDescription(text: string) {
     if (!text) return null
 
     const lines = text.split(/\r?\n/)
-    const blocks: JSX.Element[] = []
+    const blocks: ReactNode[] = []
     let currentList: string[] = []
 
     const flushList = () => {
