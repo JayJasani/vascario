@@ -527,9 +527,14 @@ export default function DropsPage() {
                                 >
                                     {preview.name || "DROP NAME"}
                                 </h3>
-                                <p className="font-mono text-[10px] text-[#666] tracking-[0.05em] line-clamp-2">
-                                    {preview.description || "Product description will appear here..."}
-                                </p>
+                                <div className="font-mono text-[10px] text-[#666] tracking-[0.05em] space-y-1 line-clamp-3">
+                                    {(preview.description || "Product description will appear here...")
+                                        .split(/\r?\n/)
+                                        .filter(Boolean)
+                                        .map((line, idx) => (
+                                            <p key={idx}>{line}</p>
+                                        ))}
+                                </div>
                                 <p className="font-mono text-lg text-[#BAFF00] font-bold tracking-[0.02em]">
                                     {preview.price ? `₹${Number(preview.price).toLocaleString("en-IN")}` : "₹0"}
                                 </p>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { SmoothScroller } from "@/components/SmoothScroller";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import { CartProvider } from "@/context/CartContext";
 import "./globals.css";
 
@@ -49,6 +50,7 @@ export default function RootLayout({
       >
         <SmoothScroller>
           <CartProvider>
+            <ScrollToTop />
             {children}
           </CartProvider>
         </SmoothScroller>

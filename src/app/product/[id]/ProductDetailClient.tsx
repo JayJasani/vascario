@@ -23,13 +23,76 @@ function isHexColor(s: string) {
     return HEX_COLOR.test(s.trim())
 }
 
+function renderDescription(text: string) {
+    if (!text) return null
+
+    const lines = text.split(/\r?\n/)
+    const blocks: JSX.Element[] = []
+    let currentList: string[] = []
+
+    const flushList = () => {
+        if (!currentList.length) return
+        const listIndex = blocks.length
+        blocks.push(
+            <ul
+                key={`ul-${listIndex}`}
+                className="list-disc pl-5 space-y-1"
+            >
+                {currentList.map((item, idx) => (
+                    <li key={`li-${listIndex}-${idx}`}>{item}</li>
+                ))}
+            </ul>
+        )
+        currentList = []
+    }
+
+    lines.forEach((raw, lineIndex) => {
+        const line = raw.trim()
+        if (!line) {
+            flushList()
+            return
+        }
+
+        // Bullet line: "- point" or "• point"
+        if (/^[-•]\s+/.test(line)) {
+            const content = line.replace(/^[-•]\s+/, "")
+            currentList.push(content)
+        } else {
+            flushList()
+            blocks.push(
+                <p key={`p-${lineIndex}`} className="mb-2 last:mb-0">
+                    {line}
+                </p>
+            )
+        }
+    })
+
+    flushList()
+    return blocks
+}
+
 export function ProductDetailClient({ product }: { product: ProductDetailData }) {
     const [selectedSize, setSelectedSize] = useState<string>("")
     const [selectedColor, setSelectedColor] = useState(product.colors[0] || "")
     const [quantity, setQuantity] = useState(1)
     const [selectedImageIndex, setSelectedImageIndex] = useState(0)
-    
+
     const currentImage = product.images[selectedImageIndex] || product.images[0]
+    const hasMultipleImages = product.images.length > 1
+
+    const showPrevImage = () => {
+        if (!hasMultipleImages) return
+        setSelectedImageIndex((prev) =>
+            prev === 0 ? product.images.length - 1 : prev - 1
+        )
+    }
+
+    const showNextImage = () => {
+        if (!hasMultipleImages) return
+        setSelectedImageIndex((prev) =>
+            prev === product.images.length - 1 ? 0 : prev + 1
+        )
+    }
 
     return (
         <main className="min-h-screen">
@@ -65,11 +128,12 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                     </div>
                 </div>
 
-                {/* Main content — asymmetric 2-panel */}
-                <div className="px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
-                    {/* Left — Image Gallery (7 cols) */}
-                    <div className="md:col-span-7">
-                        <div className="relative aspect-[3/4] bg-[var(--vsc-gray-900)] overflow-hidden border border-[var(--vsc-gray-700)] group">
+                {/* Main content — layout */}
+                <div className="px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-8">
+                    {/* Left — Image Gallery (slightly wider) */}
+                    <div className="md:col-span-4 lg:col-span-4">
+                        {/* Main image – slightly smaller so details panel can grow */}
+                        <div className="relative aspect-[4/5] max-h-[70vh] bg-[var(--vsc-gray-900)] overflow-hidden border border-[var(--vsc-gray-700)] group">
                             {currentImage ? (
                                 <>
                                     <Image
@@ -80,6 +144,27 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                         priority
                                         sizes="(max-width: 768px) 100vw, 60vw"
                                     />
+                                    {/* Prev/Next controls */}
+                                    {hasMultipleImages && (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={showPrevImage}
+                                                className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 md:h-10 md:w-10 rounded-full bg-[var(--vsc-black)]/60 border border-[var(--vsc-gray-600)] text-[var(--vsc-white)] flex items-center justify-center hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors"
+                                                aria-label="Previous image"
+                                            >
+                                                ‹
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={showNextImage}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 md:h-10 md:w-10 rounded-full bg-[var(--vsc-black)]/60 border border-[var(--vsc-gray-600)] text-[var(--vsc-white)] flex items-center justify-center hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors"
+                                                aria-label="Next image"
+                                            >
+                                                ›
+                                            </button>
+                                        </>
+                                    )}
                                     {/* Image number indicator */}
                                     <div className="absolute bottom-4 left-4 flex items-center gap-2 z-10 bg-[var(--vsc-black)]/50 px-3 py-1.5 backdrop-blur-sm">
                                         <div className="w-8 h-px bg-[var(--vsc-accent)]" />
@@ -135,18 +220,17 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                             )}
                         </div>
 
-                        {/* Thumbnail strip */}
+                        {/* Thumbnail strip — smaller images to click through */}
                         {product.images.length > 0 && (
-                            <div className="flex gap-2 mt-2">
+                            <div className="flex gap-2 mt-3">
                                 {product.images.map((image, i) => (
                                     <button
                                         key={i}
                                         onClick={() => setSelectedImageIndex(i)}
-                                        className={`relative flex-1 aspect-square overflow-hidden border-2 transition-colors ${
-                                            selectedImageIndex === i
-                                                ? "border-[var(--vsc-accent)]"
-                                                : "border-[var(--vsc-gray-700)] hover:border-[var(--vsc-gray-600)]"
-                                        }`}
+                                        className={`relative w-16 h-16 md:w-20 md:h-20 overflow-hidden border-2 transition-colors ${selectedImageIndex === i
+                                            ? "border-[var(--vsc-accent)]"
+                                            : "border-[var(--vsc-gray-700)] hover:border-[var(--vsc-gray-600)]"
+                                            }`}
                                     >
                                         <Image
                                             src={image}
@@ -161,8 +245,8 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                         )}
                     </div>
 
-                    {/* Right — Product Info (5 cols) — Sticky */}
-                    <div className="md:col-span-5">
+                    {/* Right — Product Info (still wide) — Sticky */}
+                    <div className="md:col-span-7 lg:col-span-7">
                         <div className="md:sticky md:top-24">
                             {/* Product name */}
                             <h1
@@ -199,12 +283,12 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                             <div className="h-px bg-[var(--vsc-gray-700)] mb-6" />
 
                             {/* Description */}
-                            <p
-                                className="text-sm text-[var(--vsc-gray-400)] leading-relaxed mb-8"
+                            <div
+                                className="text-sm text-[var(--vsc-gray-400)] leading-relaxed mb-8 space-y-2"
                                 style={{ fontFamily: "var(--font-space-mono)" }}
                             >
-                                {product.description}
-                            </p>
+                                {renderDescription(product.description)}
+                            </div>
 
                             {/* Color selector */}
                             {product.colors.length > 0 && (

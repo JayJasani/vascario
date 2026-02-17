@@ -130,10 +130,10 @@ export function Footer() {
           >
             Get early access to drops and exclusive content.
           </p>
-          <div className="flex">
+          <div className="flex" suppressHydrationWarning>
             <input
               type="email"
-              placeholder="YOUR@EMAIL.COM"
+              placeholder="your@email.com"
               className="flex-1 px-5 py-4 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-xs uppercase tracking-[0.15em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]"
               style={{ fontFamily: "var(--font-space-mono)" }}
             />
