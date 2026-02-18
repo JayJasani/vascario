@@ -12,8 +12,8 @@ import type { Metadata } from "next"
 export const SEO_BASE = {
   siteName: "VASCARIO",
   siteUrl: "https://www.vascario.com",
-  defaultTitle: "Premium Embroidered Streetwear | Vascario Luxury Embroidery Clothing India",
-  defaultDescription: "Discover Vascario premium embroidered streetwear — luxury cotton tees, hoodies & limited drops. High-quality handcrafted embroidery clothing designed for modern culture. Shop India's finest artisanal streetwear with traditional embroidery techniques.",
+  defaultTitle: "Buy Premium Embroidered Streetwear Online India | Vascario Luxury Embroidery Clothing",
+  defaultDescription: "Shop best embroidered streetwear online India. Buy premium embroidered t-shirts, hoodies & limited drops from Vascario. Luxury cotton, handcrafted embroidery, free shipping. Best price guarantee on designer embroidered clothing.",
   brandName: "VASCARIO",
   logo: "/v.png",
   twitterHandle: "@vascario", // Update with actual handle if available
@@ -31,9 +31,22 @@ export const SEO_BASE = {
 }
 
 // ─── KEYWORDS ───────────────────────────────────────────────────────────────
+// 
+// POWERFUL KEYWORD STRATEGY FOR #1 RANKINGS
+// 
+// Strategy:
+// - High-intent buyer keywords (buy, shop, best, online)
+// - Location-specific (India, Mumbai, Delhi, Bangalore)
+// - Brand + product combinations
+// - Comparison keywords (best, top, vs)
+// - Price-sensitive keywords
+// - Trending fashion keywords
+// - Long-tail high-conversion phrases
 
 export const SEO_KEYWORDS = {
+  // PRIMARY: High-volume, high-intent keywords targeting #1 rankings
   primary: [
+    // Core product keywords
     "embroidered clothing",
     "luxury streetwear India",
     "embroidered t-shirts",
@@ -46,7 +59,29 @@ export const SEO_KEYWORDS = {
     "embroidered cotton t-shirts",
     "limited edition streetwear",
     "artisanal embroidery fashion",
+    
+    // High-intent buyer keywords (HIGH CONVERSION)
+    "buy embroidered t-shirts online",
+    "shop luxury streetwear India",
+    "best embroidered clothing India",
+    "premium streetwear online India",
+    "luxury embroidered hoodies online",
+    "designer embroidered t-shirts India",
+    
+    // Location-specific (HIGH LOCAL SEO VALUE)
+    "embroidered streetwear Mumbai",
+    "luxury streetwear Delhi",
+    "premium embroidery clothing Bangalore",
+    "embroidered t-shirts online India",
+    "luxury menswear India",
+    
+    // Brand positioning keywords
+    "best luxury streetwear brand India",
+    "top embroidered clothing brand",
+    "premium embroidery fashion brand",
   ],
+  
+  // SECONDARY: Supporting keywords with good search volume
   secondary: [
     "handcrafted embroidery fashion",
     "luxury cotton streetwear",
@@ -66,21 +101,135 @@ export const SEO_KEYWORDS = {
     "premium embroidered hoodies",
     "limited drop embroidered clothing",
     "handcrafted luxury streetwear",
+    
+    // Additional high-value keywords
+    "embroidered streetwear brand",
+    "luxury embroidery clothing online",
+    "premium cotton streetwear",
+    "designer streetwear India",
+    "artisanal menswear India",
+    "handcrafted streetwear brand",
+    "limited edition embroidery",
+    "premium embroidered apparel",
+    "luxury casual wear India",
+    "embroidered designer wear",
   ],
+  
+  // LONG-TAIL: High-conversion, low-competition keywords
   longTail: [
+    // Buy intent keywords (HIGHEST CONVERSION)
     "buy embroidered t-shirts online India",
+    "buy luxury streetwear online India",
+    "shop premium embroidered hoodies India",
+    "buy designer embroidered t-shirts",
+    "purchase luxury embroidery clothing",
+    "order embroidered streetwear online",
+    
+    // Best/Top comparison keywords (HIGH INTENT)
+    "best embroidered clothing India",
+    "best luxury streetwear brand India",
+    "top embroidered t-shirt brands",
+    "best premium streetwear online",
+    "top luxury embroidery fashion",
+    "best handcrafted embroidery clothing",
+    
+    // Location + product combinations (LOCAL SEO POWER)
+    "embroidered t-shirts Mumbai",
+    "luxury streetwear Delhi online",
+    "premium embroidery Bangalore",
+    "embroidered hoodies Chennai",
+    "luxury streetwear Hyderabad",
+    "designer embroidery Pune",
+    "premium streetwear Kolkata",
+    
+    // Price-sensitive keywords (CONVERSION FOCUSED)
+    "affordable luxury streetwear India",
+    "premium embroidered t-shirts price",
+    "luxury streetwear online sale",
+    "embroidered clothing best price",
+    
+    // Specific product + intent
     "luxury embroidered streetwear India",
     "premium embroidered hoodies online",
     "handcrafted embroidery clothing brand",
     "limited edition embroidered streetwear",
-    "best embroidered clothing India",
     "luxury cotton embroidered t-shirts",
     "premium streetwear with embroidery",
     "artisanal embroidery menswear India",
     "designer embroidered streetwear online",
+    
+    // Brand + product combinations
+    "VASCARIO embroidered t-shirts",
+    "VASCARIO luxury streetwear",
+    "VASCARIO premium embroidery",
+    "VASCARIO embroidered hoodies",
+    
+    // Style/trend keywords
+    "trendy embroidered streetwear",
+    "modern luxury embroidery fashion",
+    "contemporary embroidered clothing",
+    "stylish premium streetwear",
+    
+    // Quality/technique keywords
+    "handcrafted kantha embroidery clothing",
+    "traditional Godhri embroidery fashion",
+    "artisanal hand-embroidered streetwear",
+    "premium Italian cotton embroidery",
+    
+    // Occasion-based keywords
+    "luxury streetwear for men",
+    "premium embroidered casual wear",
+    "designer embroidery for everyday",
+    "luxury casual embroidery clothing",
   ],
+  
+  // HIGH-INTENT: Keywords with strongest buyer intent (PRIORITY FOR #1 RANKINGS)
+  highIntent: [
+    "buy embroidered t-shirts online India",
+    "shop luxury streetwear India",
+    "best embroidered clothing India",
+    "premium streetwear online India",
+    "buy designer embroidered t-shirts",
+    "luxury embroidered hoodies online",
+    "order embroidered streetwear online",
+    "purchase luxury embroidery clothing",
+    "best luxury streetwear brand India",
+    "top embroidered clothing brand",
+    "embroidered t-shirts Mumbai",
+    "luxury streetwear Delhi online",
+    "premium embroidery Bangalore",
+    "affordable luxury streetwear India",
+    "VASCARIO embroidered t-shirts",
+    "VASCARIO luxury streetwear",
+  ],
+  
+  // BRAND KEYWORDS: For brand dominance
+  brand: [
+    "VASCARIO",
+    "VASCARIO embroidered clothing",
+    "VASCARIO streetwear",
+    "VASCARIO luxury",
+    "VASCARIO premium",
+    "VASCARIO India",
+    "VASCARIO brand",
+    "VASCARIO online",
+  ],
+  
+  // All keywords combined
   all: function() {
     return [...this.primary, ...this.secondary, ...this.longTail]
+  },
+  
+  // Get high-intent keywords (for conversion-focused pages)
+  highIntentKeywords: function() {
+    return [...this.highIntent, ...this.primary.filter(k => 
+      k.includes("buy") || k.includes("shop") || k.includes("best") || k.includes("online")
+    )]
+  },
+  
+  // Get location-specific keywords
+  locationKeywords: function(location: string = "India") {
+    return this.all().filter(k => k.toLowerCase().includes(location.toLowerCase()))
   },
 }
 
@@ -88,18 +237,30 @@ export const SEO_KEYWORDS = {
 
 export const SEO_PAGES = {
   home: {
-    title: "Premium Embroidered Streetwear | Vascario Luxury Embroidery Clothing India",
-    description: "Discover Vascario premium embroidered streetwear — luxury cotton tees, hoodies & limited drops. High-quality handcrafted embroidery clothing designed for modern culture. Shop India's finest artisanal streetwear with traditional kantha and Godhri embroidery techniques.",
-    keywords: SEO_KEYWORDS.all(),
+    title: "Buy Premium Embroidered Streetwear Online India | Vascario Luxury Embroidery Clothing",
+    description: "Shop Vascario premium embroidered streetwear online — luxury cotton tees, hoodies & limited drops. Best handcrafted embroidery clothing in India. Buy designer embroidered t-shirts, premium streetwear with traditional kantha and Godhri embroidery. Free shipping across India.",
+    keywords: [
+      ...SEO_KEYWORDS.highIntentKeywords(),
+      ...SEO_KEYWORDS.primary,
+      ...SEO_KEYWORDS.brand,
+    ],
     openGraph: {
       type: "website" as const,
     },
   },
 
   collection: {
-    title: "Embroidered T-Shirts & Hoodies | Premium Streetwear Collection – Vascario",
-    description: "Shop premium embroidered t-shirts, hoodies and streetwear from Vascario. Limited drops, luxury Italian cotton fabrics, handcrafted kantha and Godhri embroidery designs. India's finest artisanal streetwear collection.",
+    title: "Buy Embroidered T-Shirts & Hoodies Online | Best Premium Streetwear Collection India – Vascario",
+    description: "Shop best embroidered t-shirts and hoodies online India. Buy premium streetwear from Vascario — limited drops, luxury Italian cotton, handcrafted kantha embroidery. Top luxury streetwear collection with free shipping. Order designer embroidered clothing today.",
     keywords: [
+      // High-intent keywords
+      "buy embroidered t-shirts online India",
+      "shop luxury streetwear India",
+      "best embroidered clothing India",
+      "premium streetwear online India",
+      "buy designer embroidered t-shirts",
+      "luxury embroidered hoodies online",
+      // Product keywords
       "embroidered t-shirts",
       "embroidered hoodies",
       "premium streetwear",
@@ -107,6 +268,12 @@ export const SEO_PAGES = {
       "luxury embroidery",
       "handcrafted embroidery collection",
       "artisanal streetwear India",
+      "designer embroidered clothing",
+      "premium embroidered apparel",
+      // Location keywords
+      "embroidered t-shirts Mumbai",
+      "luxury streetwear Delhi",
+      "premium embroidery Bangalore",
       ...SEO_KEYWORDS.all(),
     ],
     introText: "Vascario embroidered streetwear combines premium cotton fabrics with luxury embroidery craftsmanship. Our collection features limited drop hoodies and t-shirts designed for comfort, culture and premium style. Each piece showcases handcrafted embroidery techniques, Italian cotton quality, and the attention to detail that defines luxury streetwear.",
@@ -114,26 +281,27 @@ export const SEO_PAGES = {
 
   product: {
     titleTemplate: (productName: string) => 
-      `${productName} | Premium Embroidered Streetwear — Vascario`,
+      `Buy ${productName} Online India | Premium Embroidered Streetwear — Vascario`,
     descriptionTemplate: (productName: string, productDescription?: string) => 
       productDescription 
-        ? `${productDescription.substring(0, 155)}...`
-        : `Shop ${productName} — premium embroidered streetwear from Vascario. Luxury cotton, handcrafted embroidery, limited drop.`,
+        ? `Buy ${productName} online India. ${productDescription.substring(0, 120)}... Premium embroidered streetwear from Vascario. Free shipping, best price guarantee.`
+        : `Buy ${productName} online India — premium embroidered streetwear from Vascario. Luxury cotton, handcrafted embroidery, limited drop. Best price, free shipping across India.`,
   },
 
   about: {
-    title: "About Vascario | Premium Embroidered Streetwear Brand India",
-    description: "Discover the story behind Vascario — premium embroidered streetwear crafted with Italian cotton, traditional kantha and Godhri embroidery techniques, and limited drop philosophy. Learn about our artisanal craftsmanship process, vision, and commitment to luxury Indian streetwear.",
+    title: "About Vascario | Best Premium Embroidered Streetwear Brand India",
+    description: "Discover Vascario — India's best premium embroidered streetwear brand. Handcrafted luxury clothing with Italian cotton, traditional kantha and Godhri embroidery. Learn about our artisanal craftsmanship, limited drop philosophy, and commitment to luxury Indian streetwear.",
     keywords: [
-      "embroidered clothing brand",
+      "best embroidered clothing brand India",
       "luxury streetwear India",
-      "embroidery craftsmanship",
+      "top embroidery craftsmanship",
       "Italian cotton fashion",
       "premium embroidery process",
       "artisanal streetwear brand",
       "handcrafted embroidery techniques",
       "kantha embroidery",
       "Godhri embroidery",
+      "best luxury streetwear brand",
       ...SEO_KEYWORDS.all(),
     ],
   },
