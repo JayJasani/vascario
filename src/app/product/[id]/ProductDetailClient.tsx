@@ -1,11 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, type ReactNode } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
 import { MarqueeStrip } from "@/components/MarqueeStrip"
+import { useCart } from "@/context/CartContext"
+import { useAuth } from "@/context/AuthContext"
+import { useCurrency } from "@/context/CurrencyContext"
+import { useFavourites } from "@/context/FavouritesContext"
+
+export interface StockBySize {
+    size: string;
+    quantity: number;
+}
 
 export interface ProductDetailData {
     id: string;
@@ -16,6 +26,8 @@ export interface ProductDetailData {
     colors: string[];
     images: string[];
     sku: string | null;
+    totalStock: number;
+    stockBySize: StockBySize[];
 }
 
 const HEX_COLOR = /^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/
@@ -23,13 +35,118 @@ function isHexColor(s: string) {
     return HEX_COLOR.test(s.trim())
 }
 
+function renderDescription(text: string) {
+    if (!text) return null
+
+    const lines = text.split(/\r?\n/)
+    const blocks: ReactNode[] = []
+    let currentList: string[] = []
+
+    const flushList = () => {
+        if (!currentList.length) return
+        const listIndex = blocks.length
+        blocks.push(
+            <ul
+                key={`ul-${listIndex}`}
+                className="list-disc pl-5 space-y-1"
+            >
+                {currentList.map((item, idx) => (
+                    <li key={`li-${listIndex}-${idx}`}>{item}</li>
+                ))}
+            </ul>
+        )
+        currentList = []
+    }
+
+    lines.forEach((raw, lineIndex) => {
+        const line = raw.trim()
+        if (!line) {
+            flushList()
+            return
+        }
+
+        // Bullet line: "- point" or "• point"
+        if (/^[-•]\s+/.test(line)) {
+            const content = line.replace(/^[-•]\s+/, "")
+            currentList.push(content)
+        } else {
+            flushList()
+            blocks.push(
+                <p key={`p-${lineIndex}`} className="mb-2 last:mb-0">
+                    {line}
+                </p>
+            )
+        }
+    })
+
+    flushList()
+    return blocks
+}
+
 export function ProductDetailClient({ product }: { product: ProductDetailData }) {
     const [selectedSize, setSelectedSize] = useState<string>("")
     const [selectedColor, setSelectedColor] = useState(product.colors[0] || "")
     const [quantity, setQuantity] = useState(1)
     const [selectedImageIndex, setSelectedImageIndex] = useState(0)
-    
+    const { addItem } = useCart()
+    const { user, loading } = useAuth()
+    const { formatPrice, currencyCode } = useCurrency()
+    const { toggleFavourite, isFavourite } = useFavourites()
+    const router = useRouter()
+
     const currentImage = product.images[selectedImageIndex] || product.images[0]
+    const hasMultipleImages = product.images.length > 1
+
+    const stockForSelectedSize =
+        product.sizes.length > 0 && selectedSize
+            ? (product.stockBySize.find((s) => s.size === selectedSize)?.quantity ?? 0)
+            : product.totalStock
+    const hasRequiredSelections = product.sizes.length === 0 || !!selectedSize
+    const canAddToCart =
+        hasRequiredSelections && stockForSelectedSize > 0 && quantity <= stockForSelectedSize
+
+    // Cap quantity to available stock when size or stock changes
+    useEffect(() => {
+        if (stockForSelectedSize > 0 && quantity > stockForSelectedSize) {
+            setQuantity(stockForSelectedSize)
+        }
+    }, [stockForSelectedSize, quantity])
+
+    // Restore cart intent from sessionStorage after login
+    useEffect(() => {
+        if (loading || !user) return
+        
+        const intentKey = `vascario:cart-intent:${product.id}`
+        if (typeof window === "undefined") return
+        
+        try {
+            const stored = sessionStorage.getItem(intentKey)
+            if (stored) {
+                const intent = JSON.parse(stored)
+                if (intent.size) setSelectedSize(intent.size)
+                if (intent.color) setSelectedColor(intent.color)
+                if (intent.quantity) setQuantity(intent.quantity)
+                // Clear the intent - don't auto-add, let user click button
+                sessionStorage.removeItem(intentKey)
+            }
+        } catch (err) {
+            console.error("Failed to restore cart intent", err)
+        }
+    }, [user, loading, product.id])
+
+    const showPrevImage = () => {
+        if (!hasMultipleImages) return
+        setSelectedImageIndex((prev) =>
+            prev === 0 ? product.images.length - 1 : prev - 1
+        )
+    }
+
+    const showNextImage = () => {
+        if (!hasMultipleImages) return
+        setSelectedImageIndex((prev) =>
+            prev === product.images.length - 1 ? 0 : prev + 1
+        )
+    }
 
     return (
         <main className="min-h-screen">
@@ -65,11 +182,12 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                     </div>
                 </div>
 
-                {/* Main content — asymmetric 2-panel */}
-                <div className="px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
-                    {/* Left — Image Gallery (7 cols) */}
-                    <div className="md:col-span-7">
-                        <div className="relative aspect-[3/4] bg-[var(--vsc-gray-900)] overflow-hidden border border-[var(--vsc-gray-700)] group">
+                {/* Main content — layout */}
+                <div className="px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-8">
+                    {/* Left — Image Gallery (slightly wider) */}
+                    <div className="md:col-span-4 lg:col-span-4">
+                        {/* Main image – slightly smaller so details panel can grow */}
+                        <div className="relative aspect-[4/5] max-h-[70vh] bg-[var(--vsc-gray-900)] overflow-hidden border border-[var(--vsc-gray-700)] group">
                             {currentImage ? (
                                 <>
                                     <Image
@@ -80,6 +198,27 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                         priority
                                         sizes="(max-width: 768px) 100vw, 60vw"
                                     />
+                                    {/* Prev/Next controls */}
+                                    {hasMultipleImages && (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={showPrevImage}
+                                                className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 md:h-10 md:w-10 rounded-full bg-[var(--vsc-black)]/60 border border-[var(--vsc-gray-600)] text-[var(--vsc-white)] flex items-center justify-center hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors"
+                                                aria-label="Previous image"
+                                            >
+                                                ‹
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={showNextImage}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 md:h-10 md:w-10 rounded-full bg-[var(--vsc-black)]/60 border border-[var(--vsc-gray-600)] text-[var(--vsc-white)] flex items-center justify-center hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors"
+                                                aria-label="Next image"
+                                            >
+                                                ›
+                                            </button>
+                                        </>
+                                    )}
                                     {/* Image number indicator */}
                                     <div className="absolute bottom-4 left-4 flex items-center gap-2 z-10 bg-[var(--vsc-black)]/50 px-3 py-1.5 backdrop-blur-sm">
                                         <div className="w-8 h-px bg-[var(--vsc-accent)]" />
@@ -135,18 +274,17 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                             )}
                         </div>
 
-                        {/* Thumbnail strip */}
+                        {/* Thumbnail strip — smaller images to click through */}
                         {product.images.length > 0 && (
-                            <div className="flex gap-2 mt-2">
+                            <div className="flex gap-2 mt-3">
                                 {product.images.map((image, i) => (
                                     <button
                                         key={i}
                                         onClick={() => setSelectedImageIndex(i)}
-                                        className={`relative flex-1 aspect-square overflow-hidden border-2 transition-colors ${
-                                            selectedImageIndex === i
-                                                ? "border-[var(--vsc-accent)]"
-                                                : "border-[var(--vsc-gray-700)] hover:border-[var(--vsc-gray-600)]"
-                                        }`}
+                                        className={`relative w-16 h-16 md:w-20 md:h-20 overflow-hidden border-2 transition-colors ${selectedImageIndex === i
+                                            ? "border-[var(--vsc-accent)]"
+                                            : "border-[var(--vsc-gray-700)] hover:border-[var(--vsc-gray-600)]"
+                                            }`}
                                     >
                                         <Image
                                             src={image}
@@ -161,8 +299,8 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                         )}
                     </div>
 
-                    {/* Right — Product Info (5 cols) — Sticky */}
-                    <div className="md:col-span-5">
+                    {/* Right — Product Info (still wide) — Sticky */}
+                    <div className="md:col-span-7 lg:col-span-7">
                         <div className="md:sticky md:top-24">
                             {/* Product name */}
                             <h1
@@ -185,13 +323,13 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                     className="text-2xl text-[var(--vsc-accent)] font-bold"
                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                 >
-                                    ${product.price}
+                                    {formatPrice(product.price)}
                                 </span>
                                 <span
                                     className="text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.2em]"
                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                 >
-                                    USD
+                                    {currencyCode}
                                 </span>
                             </div>
 
@@ -199,12 +337,12 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                             <div className="h-px bg-[var(--vsc-gray-700)] mb-6" />
 
                             {/* Description */}
-                            <p
-                                className="text-sm text-[var(--vsc-gray-400)] leading-relaxed mb-8"
+                            <div
+                                className="text-sm text-[var(--vsc-gray-400)] leading-relaxed mb-8 space-y-2"
                                 style={{ fontFamily: "var(--font-space-mono)" }}
                             >
-                                {product.description}
-                            </p>
+                                {renderDescription(product.description)}
+                            </div>
 
                             {/* Color selector */}
                             {product.colors.length > 0 && (
@@ -258,22 +396,54 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                         Size {selectedSize && `— ${selectedSize}`}
                                     </span>
                                     <div className="flex gap-2 flex-wrap">
-                                        {product.sizes.map((size) => (
-                                            <button
-                                                key={size}
-                                                onClick={() => setSelectedSize(size)}
-                                                className={`px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] border-2 transition-all duration-200 ${selectedSize === size
-                                                    ? "bg-[var(--vsc-accent)] text-[var(--vsc-black)] border-transparent"
-                                                    : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)]"
-                                                    }`}
-                                                style={{ fontFamily: "var(--font-space-mono)" }}
-                                            >
-                                                {size}
-                                            </button>
-                                        ))}
+                                        {product.sizes.map((size) => {
+                                            const sizeStock = product.stockBySize.find((s) => s.size === size)?.quantity ?? 0
+                                            const inStock = sizeStock > 0
+                                            return (
+                                                <button
+                                                    key={size}
+                                                    type="button"
+                                                    disabled={!inStock}
+                                                    onClick={() => inStock && setSelectedSize(size)}
+                                                    className={`px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] border-2 transition-all duration-200 ${!inStock
+                                                        ? "opacity-50 cursor-not-allowed border-[var(--vsc-gray-700)] text-[var(--vsc-gray-500)]"
+                                                        : selectedSize === size
+                                                            ? "bg-[var(--vsc-accent)] text-[var(--vsc-black)] border-transparent"
+                                                            : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)]"
+                                                        }`}
+                                                    style={{ fontFamily: "var(--font-space-mono)" }}
+                                                    title={inStock ? `${sizeStock} in stock` : "Out of stock"}
+                                                >
+                                                    {size}
+                                                    {!inStock && " (0)"}
+                                                </button>
+                                            )
+                                        })}
                                     </div>
                                 </div>
                             )}
+
+                            {/* Stock */}
+                            <div className="mb-6">
+                                <span
+                                    className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.3em] block mb-1"
+                                    style={{ fontFamily: "var(--font-space-mono)" }}
+                                >
+                                    Stock
+                                </span>
+                                <span
+                                    className={`text-sm font-bold ${stockForSelectedSize > 0 ? "text-[var(--vsc-accent)]" : "text-[var(--vsc-gray-500)]"}`}
+                                    style={{ fontFamily: "var(--font-space-mono)" }}
+                                >
+                                    {product.sizes.length > 0 && selectedSize
+                                        ? stockForSelectedSize > 0
+                                            ? `${stockForSelectedSize} in stock for ${selectedSize}`
+                                            : `Out of stock for ${selectedSize}`
+                                        : product.totalStock > 0
+                                            ? `${product.totalStock} in stock`
+                                            : "Out of stock"}
+                                </span>
+                            </div>
 
                             {/* Quantity */}
                             <div className="mb-8">
@@ -298,8 +468,10 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                         {String(quantity).padStart(2, "0")}
                                     </span>
                                     <button
-                                        onClick={() => setQuantity(quantity + 1)}
-                                        className="px-5 py-2 text-sm font-bold text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200"
+                                        type="button"
+                                        onClick={() => setQuantity(Math.min(quantity + 1, stockForSelectedSize))}
+                                        disabled={quantity >= stockForSelectedSize}
+                                        className="px-5 py-2 text-sm font-bold text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                     >
                                         +
@@ -309,10 +481,81 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
 
                             {/* Add to Cart */}
                             <button
-                                className="w-full py-3 bg-[var(--vsc-accent)] text-black text-sm font-bold uppercase tracking-[0.2em] hover:bg-black hover:text-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_24px_var(--vsc-accent-dim)]"
+                                type="button"
+                                disabled={!canAddToCart}
+                                onClick={() => {
+                                    if (!user) {
+                                        // Store cart intent before redirecting
+                                        const intentKey = `vascario:cart-intent:${product.id}`
+                                        if (typeof window !== "undefined") {
+                                            try {
+                                                sessionStorage.setItem(intentKey, JSON.stringify({
+                                                    size: selectedSize,
+                                                    color: selectedColor,
+                                                    quantity,
+                                                }))
+                                            } catch (err) {
+                                                console.error("Failed to store cart intent", err)
+                                            }
+                                        }
+                                        router.push(`/login?redirect=/product/${product.id}`)
+                                        return
+                                    }
+                                    // Require size selection if sizes are available
+                                    if (product.sizes.length > 0 && !selectedSize) {
+                                        alert("Please select a size before adding to cart.")
+                                        return
+                                    }
+                                    // Require color selection if colors are available
+                                    if (product.colors.length > 0 && !selectedColor) {
+                                        alert("Please select a color before adding to cart.")
+                                        return
+                                    }
+                                    if (!canAddToCart) return
+
+                                    addItem({
+                                        id: product.id,
+                                        name: product.name,
+                                        price: product.price,
+                                        image: product.images[0] ?? "",
+                                        size: selectedSize || "OS", // Only "OS" if no sizes available
+                                        quantity,
+                                    })
+                                }}
+                                className={`w-full py-3 text-sm font-bold uppercase tracking-[0.2em] transition-all duration-200 ${canAddToCart
+                                    ? "bg-[var(--vsc-accent)] text-black hover:bg-black hover:text-[var(--vsc-accent)] hover:shadow-[0_0_24px_var(--vsc-accent-dim)] cursor-pointer"
+                                    : "bg-[var(--vsc-gray-700)] text-[var(--vsc-gray-500)] cursor-not-allowed"
+                                    }`}
                                 style={{ fontFamily: "var(--font-space-mono)", border: "2px solid #000" }}
                             >
-                                Add to Cart — ${product.price * quantity}
+                                {canAddToCart
+                                    ? `Add to Cart — ${formatPrice(product.price * quantity)}`
+                                    : !hasRequiredSelections
+                                        ? "Select a size"
+                                        : stockForSelectedSize === 0
+                                            ? "Out of stock"
+                                            : `Max ${stockForSelectedSize} available`}
+                            </button>
+
+                            {/* Favourite toggle */}
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if (!user) {
+                                        router.push(`/login?redirect=/product/${product.id}`)
+                                        return
+                                    }
+                                    toggleFavourite({
+                                        id: product.id,
+                                        name: product.name,
+                                        price: product.price,
+                                        image: product.images[0] ?? "",
+                                    })
+                                }}
+                                className="mt-3 w-full py-2 border border-[var(--vsc-gray-700)] text-xs font-bold uppercase tracking-[0.18em] text-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors duration-200"
+                                style={{ fontFamily: "var(--font-space-mono)" }}
+                            >
+                                {isFavourite(product.id) ? "Remove from favourites" : "Add to favourites"}
                             </button>
 
                             {/* SKU */}

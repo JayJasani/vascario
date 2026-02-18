@@ -142,7 +142,7 @@ export function EditorialSection() {
                                     className="text-sm text-[var(--vsc-gray-400)] leading-relaxed"
                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                 >
-                                    Each piece is embroidered with precision on premium 300 GSM cotton.
+                                    Each piece is embroidered with precision on premium 240 GSM cotton.
                                     Not printed. Not transferred. Stitched thread by thread.
                                     Because real culture deserves real craftsmanship.
                                 </p>
@@ -153,7 +153,7 @@ export function EditorialSection() {
                                     className="text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.2em]"
                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                 >
-                                    300 GSM · Italian Cotton · Hand-finished
+                                    240 GSM · Italian Cotton · Hand-finished
                                 </span>
                             </div>
                         </div>

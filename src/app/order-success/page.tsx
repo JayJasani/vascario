@@ -2,6 +2,7 @@
 
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
+import { useCurrency } from "@/context/CurrencyContext";
 import { Printer } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -9,6 +10,7 @@ import { Suspense, useEffect, useState } from "react";
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
+  const { formatPrice } = useCurrency();
   const orderId = searchParams.get("order") || "0000";
   const [flickered, setFlickered] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -225,7 +227,7 @@ function OrderSuccessContent() {
                       className="text-xs font-bold text-[var(--vsc-black)]"
                       style={{ fontFamily: "var(--font-space-mono)" }}
                     >
-                      ${(item.price * item.qty).toFixed(0)}
+                      {formatPrice(item.price * item.qty)}
                     </span>
                   </div>
                 ))}
@@ -244,7 +246,7 @@ function OrderSuccessContent() {
                     className="text-xs font-bold text-[var(--vsc-black)]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                   >
-                    $395
+                    {formatPrice(395)}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -272,7 +274,7 @@ function OrderSuccessContent() {
                     className="text-xl font-bold text-[var(--vsc-black)]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                   >
-                    $395
+                    {formatPrice(395)}
                   </span>
                 </div>
               </div>

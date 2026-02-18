@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import { useCurrency } from "@/context/CurrencyContext"
 
 interface Product {
   id: string
@@ -9,6 +10,8 @@ interface Product {
   price: number
   images: string[]
   tag?: string
+  /** Total stock across all sizes. If 0, card shows "Out of stock". */
+  totalStock?: number
 }
 
 interface ProductCardProps {
@@ -19,8 +22,11 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, variant = "default", aspectClass, href }: ProductCardProps) {
+  const { formatPrice } = useCurrency()
   const isFeatured = variant === "featured"
   const isGrid = variant === "grid"
+  // Only show "Out of stock" when total stock is explicitly 0 (not when undefined). If any size has stock, don't show.
+  const outOfStock = product.totalStock !== undefined && product.totalStock <= 0
 
   const linkClass = isGrid
     ? "group relative block w-full overflow-hidden border border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] transition-colors duration-200"
@@ -81,30 +87,41 @@ export function ProductCard({ product, variant = "default", aspectClass, href }:
             {product.tag}
           </div>
         )}
+        {/* Out of stock overlay */}
+        {outOfStock && (
+          <div
+            className="absolute inset-0 bg-[var(--vsc-gray-900)]/70 flex items-center justify-center z-10"
+            style={{ fontFamily: "var(--font-space-mono)" }}
+          >
+            <span className="text-[var(--vsc-white)] text-xs font-bold uppercase tracking-[0.2em]">
+              Out of stock
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Info bar — stays dark with white text on hover */}
-      <div className="flex items-center justify-between px-5 py-4 bg-[var(--vsc-gray-900)] transition-colors duration-200">
+      <div className="flex items-center justify-between px-4 py-3 md:px-5 md:py-4 bg-[var(--vsc-gray-900)] transition-colors duration-200">
         <div className="flex-1 min-w-0">
           <h3
-            className="text-sm font-bold uppercase tracking-[0.05em] text-[var(--vsc-white)] truncate transition-colors duration-200"
+            className="text-xs md:text-sm font-bold uppercase tracking-[0.05em] text-[var(--vsc-white)] truncate transition-colors duration-200"
             style={{ fontFamily: "var(--font-space-grotesk)" }}
           >
             {product.name}
           </h3>
         </div>
-        <div className="flex items-center gap-4 ml-4 shrink-0">
+        <div className="flex items-center gap-2 md:gap-4 ml-3 md:ml-4 shrink-0">
           <span
-            className="text-sm font-bold text-[var(--vsc-white)] transition-colors duration-200"
+            className="text-xs md:text-sm font-bold text-[var(--vsc-white)] transition-colors duration-200"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
-            ${product.price.toFixed(0)}
+            {formatPrice(product.price)}
           </span>
           <span
-            className="text-xs font-bold text-[var(--vsc-white)] group-hover:text-[var(--vsc-white)] tracking-[0.15em] transition-colors duration-200"
+            className={`text-[10px] md:text-xs font-bold tracking-[0.12em] md:tracking-[0.15em] transition-colors duration-200 ${outOfStock ? "text-[var(--vsc-gray-500)]" : "text-[var(--vsc-white)] group-hover:text-[var(--vsc-white)]"}`}
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
-            ADD →
+            {outOfStock ? "OUT OF STOCK" : "ADD →"}
           </span>
         </div>
       </div>

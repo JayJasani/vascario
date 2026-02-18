@@ -197,6 +197,17 @@ export async function deleteProduct(id: string): Promise<void> {
     await db.collection(COLLECTIONS.PRODUCTS).doc(id).delete();
 }
 
+/** Delete all stock level documents for a product. Call before or after deleteProduct. */
+export async function deleteStockLevelsByProductId(productId: string): Promise<void> {
+    const snapshot = await db
+        .collection(COLLECTIONS.STOCK_LEVELS)
+        .where("productId", "==", productId)
+        .get();
+    const batch = db.batch();
+    snapshot.docs.forEach((doc) => batch.delete(doc.ref));
+    if (!snapshot.empty) await batch.commit();
+}
+
 // ─── STOCK LEVEL HELPERS ────────────────────────────────────────────────────────
 
 export async function getStockLevelsByProductId(productId: string): Promise<StockLevel[]> {
@@ -235,6 +246,15 @@ export async function getAllStockLevels(): Promise<StockLevel[]> {
             lowThreshold: data.lowThreshold as number,
         } as StockLevel;
     });
+}
+
+/** Returns total stock per product (sum of all sizes). Used by storefront for cards. */
+export async function getStockTotalsByProduct(): Promise<Record<string, number>> {
+    const levels = await getAllStockLevels();
+    return levels.reduce<Record<string, number>>((acc, level) => {
+        acc[level.productId] = (acc[level.productId] ?? 0) + level.quantity;
+        return acc;
+    }, {});
 }
 
 export async function createStockLevel(data: Omit<StockLevel, "id">): Promise<StockLevel> {
@@ -708,5 +728,57 @@ export async function getContactSubmissions(limit?: number): Promise<ContactSubm
             query: data.query as string,
             createdAt: toDate(data.createdAt),
         } as ContactSubmission;
+    });
+}
+
+// ─── NEWSLETTER SUBSCRIPTIONS ────────────────────────────────────────────────────
+
+export interface NewsletterSubscription {
+    id: string;
+    email: string;
+    createdAt: Date;
+}
+
+export async function createNewsletterSubscription(emailRaw: string): Promise<NewsletterSubscription> {
+    const email = emailRaw.toLowerCase();
+    const now = new Date();
+    const ref = db.collection(COLLECTIONS.NEWSLETTER_SUBSCRIPTIONS).doc(email);
+
+    const existing = await ref.get();
+    if (existing.exists) {
+        const data = existing.data()!;
+        return {
+            id: ref.id,
+            email: data.email as string,
+            createdAt: toDate(data.createdAt),
+        };
+    }
+
+    await ref.set({
+        email,
+        createdAt: toTimestamp(now),
+    });
+
+    return {
+        id: ref.id,
+        email,
+        createdAt: now,
+    };
+}
+
+export async function getNewsletterSubscriptions(): Promise<NewsletterSubscription[]> {
+    const snapshot = await db
+        .collection(COLLECTIONS.NEWSLETTER_SUBSCRIPTIONS)
+        .orderBy("createdAt", "desc")
+        .get();
+
+    return snapshot.docs.map((doc: DocumentSnapshot) => {
+        const data = doc.data();
+        if (!data) throw new Error(`NewsletterSubscription ${doc.id} has no data`);
+        return {
+            id: doc.id,
+            email: data.email as string,
+            createdAt: toDate(data.createdAt),
+        } as NewsletterSubscription;
     });
 }

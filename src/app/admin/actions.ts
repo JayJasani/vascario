@@ -12,11 +12,14 @@ import {
     getActiveProducts,
     createProduct as createProductHelper,
     updateProduct,
+    deleteProduct,
+    deleteStockLevelsByProductId,
     getProductById,
     getStockLevelsByProductId,
     updateStockLevel,
     getLowStockAlerts,
     createStockLevel,
+    getNewsletterSubscriptions,
     type OrderStatus,
 } from "@/lib/firebase-helpers";
 import { revalidatePath, revalidateTag } from "next/cache";
@@ -142,6 +145,17 @@ export async function getAdminContactSubmissions() {
     }));
 }
 
+// ─── NEWSLETTER SUBSCRIPTIONS ────────────────────────────────────────────────────
+
+export async function getAdminNewsletterSubscriptions() {
+    const list = await getNewsletterSubscriptions();
+    return list.map((s) => ({
+        id: s.id,
+        email: s.email,
+        createdAt: s.createdAt.toISOString(),
+    }));
+}
+
 // ─── PRODUCTS / DROPS ───────────────────────────────────────────────────────────
 
 export async function getProducts() {
@@ -221,6 +235,22 @@ export async function createProduct(formData: FormData) {
         details: { name },
     });
 
+    // Notify newsletter subscribers about the new drop (log placeholder).
+    // To hook up a real email service, use these emails with your provider (Resend, SendGrid, etc.).
+    try {
+        const subscribers = await getNewsletterSubscriptions();
+        const emails = subscribers.map((s) => s.email);
+        console.log(
+            "[Newsletter] New drop created:",
+            name,
+            "would be announced to",
+            emails.length,
+            "subscribers."
+        );
+    } catch (err) {
+        console.error("Failed to load newsletter subscribers for new drop notification:", err);
+    }
+
     revalidatePath("/admin/drops");
     revalidatePath("/admin/inventory");
     revalidatePath("/admin");
@@ -234,6 +264,27 @@ export async function toggleProductActive(productId: string) {
     await updateProduct(productId, { isActive: !product.isActive });
 
     revalidatePath("/admin/drops");
+    revalidatePath("/admin");
+    revalidateTag(CACHE_TAGS.activeProducts, "max");
+    revalidateTag(CACHE_TAGS.product(productId), "max");
+}
+
+export async function deleteDropAction(productId: string) {
+    const product = await getProductById(productId);
+    if (!product) return;
+
+    await deleteStockLevelsByProductId(productId);
+    await deleteProduct(productId);
+
+    await createAuditLog({
+        action: "PRODUCT_DELETED",
+        entity: "Product",
+        entityId: productId,
+        details: { name: product.name },
+    });
+
+    revalidatePath("/admin/drops");
+    revalidatePath("/admin/inventory");
     revalidatePath("/admin");
     revalidateTag(CACHE_TAGS.activeProducts, "max");
     revalidateTag(CACHE_TAGS.product(productId), "max");

@@ -55,8 +55,8 @@ export default function ContactPage() {
             </p>
             <a
               href="mailto:wear@vascario.com"
-              className="inline-block px-6 py-4 bg-[var(--vsc-gray-900)] text-xs font-bold uppercase tracking-[0.15em] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200"
-              style={{ fontFamily: "var(--font-space-mono)", color: "white" }}
+              className="inline-block px-6 py-4 bg-[var(--vsc-gray-900)] text-xs font-bold tracking-[0.08em] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200"
+              style={{ fontFamily: "var(--font-space-mono)", color: "white", textTransform: "none" }}
             >
               wear@vascario.com
             </a>
