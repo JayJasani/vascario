@@ -36,8 +36,8 @@ export function CollectionGrid({ products }: CollectionGridProps) {
   }, [])
 
   return (
-    <section ref={sectionRef} className="reveal py-24 md:py-32">
-      <div className="px-6 md:px-12 lg:px-20 mb-14">
+    <section ref={sectionRef} className="reveal py-16 sm:py-24 md:py-32">
+      <div className="px-4 sm:px-6 md:px-12 lg:px-20 mb-10 sm:mb-14">
         <div className="flex items-end justify-between">
           <div>
             <span
@@ -70,12 +70,12 @@ export function CollectionGrid({ products }: CollectionGridProps) {
 
       {/* Masonry / staggered grid */}
       <div
-        className="columns-2 md:columns-3 lg:columns-4 gap-6 px-6 md:px-12 lg:px-20"
+        className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 sm:gap-6 px-4 sm:px-6 md:px-12 lg:px-20"
         style={{ columnFill: "balance" }}
       >
         {products.length > 0 ? (
           products.map((product, index) => (
-            <div key={product.id} className="break-inside-avoid mb-6">
+            <div key={product.id} className="break-inside-avoid mb-4 sm:mb-6">
               <ProductCard
                 product={product}
                 variant="grid"
@@ -84,8 +84,8 @@ export function CollectionGrid({ products }: CollectionGridProps) {
             </div>
           ))
         ) : (
-          <div className="break-inside-avoid mb-6 col-span-full">
-            <div className="w-full min-h-[280px] flex flex-col items-center justify-center border border-dashed border-[var(--vsc-gray-700)] p-8">
+          <div className="break-inside-avoid mb-4 sm:mb-6 col-span-full">
+            <div className="w-full min-h-[200px] sm:min-h-[280px] flex flex-col items-center justify-center border border-dashed border-[var(--vsc-gray-700)] p-6 sm:p-8">
               <span
                 className="text-xs text-[var(--vsc-gray-600)] uppercase tracking-[0.2em] block mb-2"
                 style={{ fontFamily: "var(--font-space-mono)" }}
@@ -103,8 +103,8 @@ export function CollectionGrid({ products }: CollectionGridProps) {
         )}
         {/* Coming Soon placeholder */}
         {products.length > 0 && (
-          <div className="break-inside-avoid mb-6">
-            <div className="w-full min-h-[280px] flex flex-col items-center justify-center border border-dashed border-[var(--vsc-gray-700)] p-8">
+          <div className="break-inside-avoid mb-4 sm:mb-6">
+            <div className="w-full min-h-[200px] sm:min-h-[280px] flex flex-col items-center justify-center border border-dashed border-[var(--vsc-gray-700)] p-6 sm:p-8">
               <span
                 className="text-xs text-[var(--vsc-gray-600)] uppercase tracking-[0.2em] block mb-2"
                 style={{ fontFamily: "var(--font-space-mono)" }}
@@ -122,7 +122,7 @@ export function CollectionGrid({ products }: CollectionGridProps) {
         )}
       </div>
 
-      <div className="px-6 md:px-12 lg:px-20 mt-10">
+      <div className="px-4 sm:px-6 md:px-12 lg:px-20 mt-6 sm:mt-10">
         <div className="w-full h-px bg-[var(--vsc-gray-800)] relative">
           <div className="absolute left-0 top-0 w-1/4 h-px bg-[var(--vsc-accent)]" />
         </div>

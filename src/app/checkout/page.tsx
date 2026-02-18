@@ -76,16 +76,16 @@ export default function CheckoutPage() {
         return (
             <main className="min-h-screen bg-[var(--vsc-cream)]">
                 <Navbar />
-                <div className="flex flex-col items-center justify-center min-h-screen gap-8">
+                <div className="flex flex-col items-center justify-center min-h-screen gap-6 sm:gap-8 px-4">
                     <p
-                        className="text-2xl md:text-4xl font-bold text-[var(--vsc-gray-600)] uppercase tracking-[0.1em]"
+                        className="text-xl sm:text-2xl md:text-4xl font-bold text-[var(--vsc-gray-600)] uppercase tracking-[0.1em] text-center"
                         style={{ fontFamily: "var(--font-space-grotesk)" }}
                     >
                         SIGN IN TO CHECK OUT
                     </p>
                     <Link
                         href="/login?redirect=/checkout"
-                        className="px-10 py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
+                        className="w-full sm:w-auto text-center px-6 sm:px-10 py-4 sm:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-xs sm:text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
                         style={{ fontFamily: "var(--font-space-mono)" }}
                     >
                         SIGN IN →
@@ -100,16 +100,16 @@ export default function CheckoutPage() {
         return (
             <main className="min-h-screen bg-[var(--vsc-cream)]">
                 <Navbar />
-                <div className="flex flex-col items-center justify-center min-h-screen gap-8">
+                <div className="flex flex-col items-center justify-center min-h-screen gap-6 sm:gap-8 px-4">
                     <p
-                        className="text-2xl md:text-4xl font-bold text-[var(--vsc-gray-600)] uppercase tracking-[0.1em]"
+                        className="text-xl sm:text-2xl md:text-4xl font-bold text-[var(--vsc-gray-600)] uppercase tracking-[0.1em] text-center"
                         style={{ fontFamily: "var(--font-space-grotesk)" }}
                     >
                         YOUR BAG IS EMPTY
                     </p>
                     <Link
                         href="/"
-                        className="px-10 py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
+                        className="w-full sm:w-auto text-center px-6 sm:px-10 py-4 sm:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-xs sm:text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
                         style={{ fontFamily: "var(--font-space-mono)" }}
                     >
                         CONTINUE SHOPPING →
@@ -130,9 +130,9 @@ export default function CheckoutPage() {
         <main className="min-h-screen bg-[var(--vsc-cream)]">
             <Navbar />
 
-            <div className="pt-28 md:pt-36 pb-20 px-6 md:px-12 lg:px-20">
+            <div className="pt-24 sm:pt-28 md:pt-36 pb-12 sm:pb-20 px-4 sm:px-6 md:px-12 lg:px-20">
                 {/* ===== TERMINAL TITLE ===== */}
-                <div className="mb-12">
+                <div className="mb-8 sm:mb-12">
                     <h1
                         className="text-[var(--vsc-gray-900)] select-none"
                         style={{
@@ -156,7 +156,7 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* ===== STEP PROGRESS BAR ===== */}
-                <div className="flex items-center gap-0 mb-8 md:mb-16 border-2 md:border-4 border-[var(--vsc-gray-200)]">
+                <div className="flex items-center gap-0 mb-6 sm:mb-8 md:mb-16 border-2 sm:border-3 md:border-4 border-[var(--vsc-gray-200)]">
                     {STEPS.map((s, i) => (
                         <button
                             key={s.num}
@@ -166,15 +166,15 @@ export default function CheckoutPage() {
                                     setStep(i + 1)
                                 }
                             }}
-                            className={`flex-1 flex items-center justify-center gap-2 md:gap-3 py-3 md:py-5 transition-all duration-300 ${step === i + 1
+                            className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 md:gap-3 py-2.5 sm:py-3 md:py-5 transition-all duration-300 ${step === i + 1
                                 ? "bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)]"
                                 : step > i + 1
                                     ? "bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)] cursor-pointer hover:bg-[var(--vsc-gray-200)]"
                                     : "bg-[var(--vsc-white)] text-[var(--vsc-gray-500)] cursor-default"
-                                } ${i < STEPS.length - 1 ? "border-r-2 md:border-r-4 border-[var(--vsc-gray-200)]" : ""}`}
+                                } ${i < STEPS.length - 1 ? "border-r-2 sm:border-r-3 md:border-r-4 border-[var(--vsc-gray-200)]" : ""}`}
                             style={{ fontFamily: "var(--font-space-mono)" }}
                         >
-                            <span className="text-base md:text-2xl font-bold">{s.num}</span>
+                            <span className="text-sm sm:text-base md:text-2xl font-bold">{s.num}</span>
                             <span className="hidden sm:inline text-xs md:text-sm font-bold uppercase tracking-[0.15em]">
                                 {s.label}
                             </span>
@@ -183,9 +183,9 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* ===== STEP CONTENT ===== */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
                     {/* Left — Form (2 cols on lg) */}
-                    <div className="lg:col-span-2 relative pb-8" style={{ minHeight: "400px", overflowX: "clip" }}>
+                    <div className="lg:col-span-2 relative pb-6 sm:pb-8" style={{ minHeight: "350px", overflowX: "clip" }}>
                         <AnimatePresence mode="wait" custom={direction}>
                             {step === 1 && (
                                 <motion.div
@@ -242,8 +242,8 @@ export default function CheckoutPage() {
 
                     {/* Right — Order summary mini */}
                     <div className="lg:col-span-1">
-                        <div className="sticky top-28 border-2 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)]">
-                            <div className="px-5 py-4 border-b-2 border-[var(--vsc-gray-200)]">
+                        <div className="sticky top-20 sm:top-24 md:top-28 border-2 sm:border-3 md:border-4 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)]">
+                            <div className="px-4 sm:px-5 py-3 sm:py-4 border-b-2 border-[var(--vsc-gray-200)]">
                                 <h3
                                     className="text-xs font-bold text-[var(--vsc-accent)] uppercase tracking-[0.2em]"
                                     style={{ fontFamily: "var(--font-space-mono)" }}

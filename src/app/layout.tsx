@@ -6,6 +6,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { FavouritesProvider } from "@/context/FavouritesContext";
+import { UserProfileProvider } from "@/context/UserProfileContext";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -58,14 +59,16 @@ export default function RootLayout({
       >
         <SmoothScroller>
           <AuthProvider>
-            <CurrencyProvider>
-              <CartProvider>
-                <FavouritesProvider>
-                  <ScrollToTop />
-                  {children}
-                </FavouritesProvider>
-              </CartProvider>
-            </CurrencyProvider>
+            <UserProfileProvider>
+              <CurrencyProvider>
+                <CartProvider>
+                  <FavouritesProvider>
+                    <ScrollToTop />
+                    {children}
+                  </FavouritesProvider>
+                </CartProvider>
+              </CurrencyProvider>
+            </UserProfileProvider>
           </AuthProvider>
         </SmoothScroller>
       </body>

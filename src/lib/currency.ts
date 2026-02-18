@@ -12,6 +12,7 @@ export interface CurrencyOption {
   /** Rate to convert from INR to this currency (1 INR = rate * this currency) */
   rateFromINR: number;
   locale: string;
+  flag: string;
 }
 
 export const CURRENCIES: Record<string, CurrencyOption> = {
@@ -21,6 +22,7 @@ export const CURRENCIES: Record<string, CurrencyOption> = {
     name: "Indian Rupee",
     rateFromINR: 1,
     locale: "en-IN",
+    flag: "🇮🇳",
   },
   USD: {
     code: "USD",
@@ -28,6 +30,7 @@ export const CURRENCIES: Record<string, CurrencyOption> = {
     name: "US Dollar",
     rateFromINR: 0.012,
     locale: "en-US",
+    flag: "🇺🇸",
   },
   EUR: {
     code: "EUR",
@@ -35,6 +38,7 @@ export const CURRENCIES: Record<string, CurrencyOption> = {
     name: "Euro",
     rateFromINR: 0.011,
     locale: "de-DE",
+    flag: "🇪🇺",
   },
   GBP: {
     code: "GBP",
@@ -42,6 +46,7 @@ export const CURRENCIES: Record<string, CurrencyOption> = {
     name: "British Pound",
     rateFromINR: 0.0095,
     locale: "en-GB",
+    flag: "🇬🇧",
   },
 };
 
