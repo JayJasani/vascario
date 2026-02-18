@@ -2,53 +2,38 @@
 
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
-import { useCurrency } from "@/context/CurrencyContext";
 import {
   MagnifyingGlassIcon,
   HeartIcon,
   ShoppingBagIcon,
-  ArrowRightOnRectangleIcon,
   ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { type SearchItem } from "@/lib/search-data";
-import { searchItems } from "@/app/storefront-actions";
+import { useEffect, useRef, useState } from "react";
 import { CURRENCIES } from "@/lib/currency";
+import { useCurrency } from "@/context/CurrencyContext";
+import { SearchPanel } from "@/components/SearchPanel";
+import { AccountDrawer } from "@/components/AccountDrawer";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [currencyOpen, setCurrencyOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [results, setResults] = useState<SearchItem[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [profileDisplayName, setProfileDisplayName] = useState<string>("");
   const currencyRef = useRef<HTMLDivElement>(null);
   const { cartCount } = useCart();
   const { user, logout } = useAuth();
-  const { currencyCode, currency, setCurrency, formatPrice } = useCurrency();
+  const { currencyCode, setCurrency } = useCurrency();
 
   const displayName =
-    user?.displayName || user?.email?.split("@")[0] || "";
+    profileDisplayName ||
+    user?.displayName ||
+    user?.email?.split("@")[0] ||
+    "";
   const userInitial = displayName
     ? displayName.charAt(0).toUpperCase()
     : "?";
-
-  const openSearch = useCallback(() => {
-    setSearchOpen(true);
-    setSearchQuery("");
-    setResults([]);
-    setTimeout(() => inputRef.current?.focus(), 0);
-  }, []);
-
-  const closeSearch = useCallback(() => {
-    setSearchOpen(false);
-    setSearchQuery("");
-    setResults([]);
-    setIsSearching(false);
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -74,66 +59,63 @@ export function Navbar() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setSearchOpen((open) => {
-          if (!open) setTimeout(() => inputRef.current?.focus(), 0);
-          return !open;
-        });
+        setSearchOpen((open) => !open);
       }
-      if (e.key === "Escape") closeSearch();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [closeSearch]);
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    const performSearch = async () => {
-      if (!searchQuery.trim()) {
-        setResults([]);
-        setIsSearching(false);
+    const loadProfile = async () => {
+      if (!user) {
+        setProfileDisplayName("");
         return;
       }
-
-      setIsSearching(true);
       try {
-        const items = await searchItems(searchQuery);
-        if (!cancelled) {
-          setResults(items);
-          setIsSearching(false);
+        const token = await user.getIdToken();
+        const res = await fetch("/api/users", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const fromDb =
+          (data.displayName as string | undefined) ||
+          [data.firstName, data.lastName].filter(Boolean).join(" ").trim();
+        if (fromDb) {
+          setProfileDisplayName(fromDb);
         }
-      } catch (error) {
-        console.error("Search error:", error);
-        if (!cancelled) {
-          setResults([]);
-          setIsSearching(false);
-        }
+      } catch {
+        // ignore, fall back to auth displayName/email
       }
     };
 
-    // Debounce search to avoid too many requests
-    const timeoutId = setTimeout(performSearch, 300);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timeoutId);
+    const handleProfileUpdated = (event: Event) => {
+      const detail = (event as CustomEvent<{
+        displayName?: string;
+        firstName?: string;
+        lastName?: string;
+      }>).detail;
+      const fromEvent =
+        detail.displayName?.trim() ||
+        [detail.firstName, detail.lastName].filter(Boolean).join(" ").trim();
+      if (fromEvent) {
+        setProfileDisplayName(fromEvent);
+      }
     };
-  }, [searchQuery]);
 
-  useEffect(() => {
-    if (searchOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    loadProfile();
+    window.addEventListener(
+      "vascario:profile-updated",
+      handleProfileUpdated as EventListener
+    );
     return () => {
-      document.body.style.overflow = "";
+      window.removeEventListener(
+        "vascario:profile-updated",
+        handleProfileUpdated as EventListener
+      );
     };
-  }, [searchOpen]);
-
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === overlayRef.current) closeSearch();
-  };
+  }, [user]);
 
   return (
     <nav
@@ -233,7 +215,7 @@ export function Navbar() {
           {/* Search icon */}
           <button
             type="button"
-            onClick={openSearch}
+            onClick={() => setSearchOpen(true)}
             className="p-3 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent"
             aria-label="Search (⌘K)"
           >
@@ -262,29 +244,51 @@ export function Navbar() {
               </span>
             )}
           </Link>
-          {/* User */}
+
+          {/* User — mobile: avatar opens drawer; desktop: avatar + name */}
+          {user && (
+            <button
+              type="button"
+              onClick={() => setMenuOpen(true)}
+              className="md:hidden p-2 text-[var(--vsc-gray-600)] hover:text-[var(--vsc-gray-900)] transition-colors rounded-full"
+              aria-label="Account menu"
+              aria-expanded={menuOpen}
+            >
+              <div className="w-8 h-8 rounded-full bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] flex items-center justify-center text-xs font-bold">
+                {userInitial}
+              </div>
+            </button>
+          )}
+          {!user && (
+            <Link
+              href="/login"
+              className="md:hidden p-3 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-accent)] text-[10px] uppercase tracking-[0.18em]"
+              style={{ fontFamily: "var(--font-space-mono)" }}
+            >
+              Sign in
+            </Link>
+          )}
           <div className="hidden md:flex items-center gap-2 pl-3 ml-1 border-l border-[var(--vsc-gray-200)]">
             {user ? (
-              <>
+              <button
+                type="button"
+                onClick={() => setMenuOpen(true)}
+                className="flex items-center gap-2 p-1 -m-1 rounded text-[var(--vsc-gray-600)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent"
+                aria-label="Account menu"
+                aria-expanded={menuOpen}
+              >
                 <div className="w-7 h-7 rounded-full bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] flex items-center justify-center text-xs font-bold">
                   {userInitial}
                 </div>
                 <span
-                  className="text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.18em] max-w-[12ch] truncate"
+                  className="text-[10px] uppercase tracking-[0.18em] max-w-[12ch] truncate"
                   style={{ fontFamily: "var(--font-space-mono)" }}
                   title={displayName || user?.email || undefined}
                 >
                   {displayName}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => logout()}
-                  className="p-3 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-accent)] transition-colors duration-200 border border-transparent"
-                  aria-label="Logout"
-                >
-                  <ArrowRightOnRectangleIcon className="w-5 h-5" strokeWidth={1.5} />
-                </button>
-              </>
+                <ChevronDownIcon className={`w-4 h-4 transition-transform ${menuOpen ? "rotate-180" : ""}`} />
+              </button>
             ) : (
               <Link
                 href="/login"
@@ -298,114 +302,17 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Spotlight-style Search Panel */}
-      {searchOpen && (
-        <div
-          ref={overlayRef}
-          onClick={handleOverlayClick}
-          className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4 bg-[var(--vsc-gray-900)]/40 backdrop-blur-md animate-[fade-in_0.2s_ease-out]"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Search"
-        >
-          <div
-            className="w-full max-w-2xl bg-[var(--vsc-cream)] border border-[var(--vsc-gray-200)] shadow-2xl overflow-hidden animate-[fade-in_0.15s_ease-out]"
-            style={{ animationDelay: "50ms" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Search input row — Spotlight style */}
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--vsc-gray-200)]">
-              <MagnifyingGlassIcon
-                className="w-5 h-5 shrink-0 text-[var(--vsc-gray-500)]"
-                strokeWidth={1.5}
-              />
-              <input
-                ref={inputRef}
-                type="search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products..."
-                className="flex-1 bg-transparent text-[var(--vsc-gray-900)] placeholder-[var(--vsc-gray-400)] text-base outline-none"
-                style={{ fontFamily: "var(--font-space-mono)" }}
-                autoComplete="off"
-              />
-              <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-1 text-[10px] text-[var(--vsc-gray-500)] bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-300)] uppercase tracking-wider">
-                esc
-              </kbd>
-            </div>
+      <AccountDrawer
+        open={menuOpen && !!user}
+        onClose={() => setMenuOpen(false)}
+        displayName={displayName}
+        userEmail={user?.email ?? ""}
+        userInitial={userInitial}
+        cartCount={cartCount}
+        onLogout={logout}
+      />
 
-            {/* Results */}
-            <div className="max-h-[60vh] overflow-y-auto">
-              {searchQuery.trim() ? (
-                isSearching ? (
-                  <div
-                    className="py-12 px-5 text-center text-[var(--vsc-gray-500)] text-sm"
-                    style={{ fontFamily: "var(--font-space-mono)" }}
-                  >
-                    Searching...
-                  </div>
-                ) : results.length > 0 ? (
-                  <ul className="py-2">
-                    {results.map((item) => (
-                      <li key={`${item.type}-${item.id}`}>
-                        <Link
-                          href={item.url}
-                          onClick={closeSearch}
-                          className="flex items-center gap-4 px-5 py-3 text-[var(--vsc-gray-700)] hover:bg-[var(--vsc-gray-100)] hover:text-[var(--vsc-gray-900)] transition-colors duration-150 group"
-                        >
-                          <div className="w-10 h-10 shrink-0 bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] flex items-center justify-center overflow-hidden">
-                            <span className="text-[10px] text-[var(--vsc-gray-500)] uppercase">
-                              prod
-                            </span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <span
-                              className="block truncate font-medium text-[var(--vsc-gray-900)] group-hover:text-[var(--vsc-accent)]"
-                              style={{ fontFamily: "var(--font-space-grotesk)" }}
-                            >
-                              {item.name}
-                            </span>
-                            <span
-                              className="text-[10px] text-[var(--vsc-gray-500)] uppercase tracking-wider"
-                              style={{ fontFamily: "var(--font-space-mono)" }}
-                            >
-                              {item.type} {item.tag && `· ${item.tag}`}
-                            </span>
-                          </div>
-                          {item.price != null && (
-                            <span
-                              className="text-sm font-bold text-[var(--vsc-gray-900)]"
-                              style={{ fontFamily: "var(--font-space-mono)" }}
-                            >
-                              {formatPrice(item.price)}
-                            </span>
-                          )}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div
-                    className="py-12 px-5 text-center text-[var(--vsc-gray-500)] text-sm"
-                    style={{ fontFamily: "var(--font-space-mono)" }}
-                  >
-                    No results for &quot;{searchQuery}&quot;
-                  </div>
-                )
-              ) : (
-                <div
-                  className="py-12 px-5 text-center text-[var(--vsc-gray-500)] text-sm"
-                  style={{ fontFamily: "var(--font-space-mono)" }}
-                >
-                  Start typing to search products
-                  <br />
-                  <span className="text-[10px] mt-2 block">⌘K to open · Esc to close</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <SearchPanel open={searchOpen} onClose={() => setSearchOpen(false)} />
     </nav>
   );
 }

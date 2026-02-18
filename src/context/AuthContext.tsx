@@ -20,7 +20,11 @@ interface AuthContextValue {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    options?: { firstName?: string; lastName?: string }
+  ) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -42,8 +46,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signInWithEmailAndPassword(auth, email, password);
   };
 
-  const register = async (email: string, password: string) => {
-    await createUserWithEmailAndPassword(auth, email, password);
+  const register = async (
+    email: string,
+    password: string,
+    options?: { firstName?: string; lastName?: string }
+  ) => {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const token = await userCredential.user.getIdToken();
+    const res = await fetch("/api/users", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        firstName: options?.firstName ?? "",
+        lastName: options?.lastName ?? "",
+      }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data?.error ?? "Failed to save profile");
+    }
   };
 
   const logout = async () => {

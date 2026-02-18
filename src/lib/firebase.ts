@@ -37,4 +37,5 @@ export const COLLECTIONS = {
     AUDIT_LOGS: "auditLogs",
     CONTACT_SUBMISSIONS: "contactSubmissions",
     NEWSLETTER_SUBSCRIPTIONS: "newsletterSubscriptions",
+    USERS: "users",
 } as const;

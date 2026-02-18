@@ -2,6 +2,8 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { EyeIcon, ViewOffIcon } from "@hugeicons/core-free-icons";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
@@ -13,8 +15,11 @@ function LoginForm() {
   const redirectTo = searchParams.get("redirect") || "/";
 
   const [mode, setMode] = useState<"login" | "register">("login");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -32,7 +37,7 @@ function LoginForm() {
       if (mode === "login") {
         await login(email, password);
       } else {
-        await register(email, password);
+        await register(email, password, { firstName, lastName });
       }
       router.replace(redirectTo);
     } catch (err: any) {
@@ -78,6 +83,36 @@ function LoginForm() {
               className="space-y-6"
               style={{ fontFamily: "var(--font-space-mono)" }}
             >
+              {mode === "register" && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase tracking-[0.25em] text-[var(--vsc-gray-600)]">
+                        First name
+                      </label>
+                      <input
+                        type="text"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className="w-full px-5 py-3.5 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-sm tracking-[0.1em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]"
+                        placeholder="First name"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase tracking-[0.25em] text-[var(--vsc-gray-600)]">
+                        Last name
+                      </label>
+                      <input
+                        type="text"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        className="w-full px-5 py-3.5 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-sm tracking-[0.1em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]"
+                        placeholder="Last name"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-[0.25em] text-[var(--vsc-gray-600)]">
                   Email
@@ -96,15 +131,28 @@ function LoginForm() {
                 <label className="text-[10px] uppercase tracking-[0.25em] text-[var(--vsc-gray-600)]">
                   Password
                 </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-5 py-3.5 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-sm tracking-[0.1em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]"
-                  placeholder="••••••••"
-                  required
-                  minLength={6}
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pr-14 px-5 py-3.5 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-sm tracking-[0.1em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]"
+                    placeholder="••••••••"
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] focus:outline-none focus:text-[var(--vsc-gray-900)]"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    <HugeiconsIcon
+                      icon={showPassword ? ViewOffIcon : EyeIcon}
+                      size={24}
+                    />
+                  </button>
+                </div>
               </div>
 
               {error && (

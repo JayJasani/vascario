@@ -222,6 +222,16 @@
   }
 }
 
+/* Slide in from right (drawer) */
+@keyframes slide-in-right {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
 /* Glitch flicker */
 @keyframes glitch {
   0%,
