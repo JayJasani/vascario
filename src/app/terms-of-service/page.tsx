@@ -43,8 +43,8 @@ export default function TermsOfServicePage() {
               Overview
             </h2>
             <p className="mb-3">
-              This website is operated by Hamshi Wonders. Throughout the site, the terms &quot;we&quot;,
-              &quot;us&quot; and &quot;our&quot; refer to Hamshi Wonders. Hamshi Wonders offers this website,
+              This website is operated by VASCARIO. Throughout the site, the terms &quot;we&quot;,
+              &quot;us&quot; and &quot;our&quot; refer to VASCARIO. VASCARIO offers this website,
               including all information, tools and services available from this site to you, the user,
               conditioned upon your acceptance of all terms, conditions, policies and notices stated here.
             </p>
@@ -194,7 +194,7 @@ export default function TermsOfServicePage() {
               that your use of, or inability to use, the Service is at your sole risk.
             </p>
             <p>
-              To the fullest extent permitted by law, Hamshi Wonders and its affiliates shall not be liable for
+              To the fullest extent permitted by law, VASCARIO and its affiliates shall not be liable for
               any indirect, incidental, punitive, special, or consequential damages, including lost profits,
               lost revenue, lost savings, loss of data, or replacement costs, arising from your use of the
               Service or any products purchased using the Service.
@@ -206,7 +206,7 @@ export default function TermsOfServicePage() {
               Indemnification
             </h2>
             <p>
-              You agree to indemnify, defend and hold harmless Hamshi Wonders and our parent, subsidiaries,
+              You agree to indemnify, defend and hold harmless VASCARIO and our parent, subsidiaries,
               affiliates, partners, officers, directors, agents, contractors, licensors, service providers,
               subcontractors, suppliers, interns and employees from any claim or demand, including reasonable
               attorneys&apos; fees, made by any third-party due to or arising out of your breach of these Terms

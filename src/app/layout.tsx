@@ -24,7 +24,11 @@ const spaceMono = Space_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = getHomeMetadata();
+// Root layout metadata with metadataBase for proper OG image URLs
+export const metadata: Metadata = {
+  ...getHomeMetadata(),
+  metadataBase: new URL("https://www.vascario.com"),
+};
 
 export default function RootLayout({
   children,
