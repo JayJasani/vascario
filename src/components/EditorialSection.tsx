@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import { useEffect, useRef } from "react"
+import { getImageAlt } from "@/lib/seo-utils"
 
 export function EditorialSection() {
     const sectionRef = useRef<HTMLElement>(null)
@@ -99,7 +100,7 @@ export function EditorialSection() {
                             <div className="relative aspect-square bg-[var(--vsc-gray-900)] overflow-hidden border border-[var(--vsc-gray-700)] group">
                                 <Image
                                     src="/tshirt/closeup.png"
-                                    alt="Close-up"
+                                    alt={getImageAlt("editorial")}
                                     fill
                                     className="object-cover"
                                 />

@@ -4,6 +4,7 @@ import { MarqueeStrip } from "@/components/MarqueeStrip"
 import { ProductShowcase } from "@/components/ProductShowcase"
 import { EditorialSection } from "@/components/EditorialSection"
 import { Footer } from "@/components/Footer"
+import { OrganizationStructuredDataServer, WebsiteStructuredDataServer } from "@/components/StructuredDataServer"
 import { getActiveProducts } from "./storefront-actions"
 
 export default async function Home() {
@@ -11,6 +12,8 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen">
+      <OrganizationStructuredDataServer />
+      <WebsiteStructuredDataServer searchUrl="https://www.vascario.com/collection?search={search_term_string}" />
       <Navbar />
       <Hero />
       <MarqueeStrip />

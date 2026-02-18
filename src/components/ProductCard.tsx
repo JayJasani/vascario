@@ -3,6 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useCurrency } from "@/context/CurrencyContext"
+import { getImageAlt } from "@/lib/seo-utils"
 
 interface Product {
   id: string
@@ -70,7 +71,7 @@ export function ProductCard({ product, variant = "default", aspectClass, href }:
           {product.images[0] && !product.images[0].includes("placeholder") && (
             <Image
               src={product.images[0]}
-              alt={product.name}
+              alt={getImageAlt("product", product.name)}
               fill
               className="object-cover object-center"
               sizes="(max-width: 768px) 80vw, 480px"

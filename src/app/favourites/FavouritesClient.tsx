@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useFavourites } from "@/context/FavouritesContext";
+import { getImageAlt } from "@/lib/seo-utils";
 
 export function FavouritesClient() {
   const { user } = useAuth();
@@ -108,7 +109,7 @@ export function FavouritesClient() {
                 {item.image && (
                   <Image
                     src={item.image}
-                    alt={item.name}
+                    alt={getImageAlt("product", item.name)}
                     fill
                     className="object-cover group-hover:scale-[1.03] transition-transform duration-300"
                   />

@@ -1,15 +1,34 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { getPageMetadata } from "@/lib/seo-config";
+import { FAQPageStructuredDataServer } from "@/components/StructuredDataServer";
 
-export const metadata = {
-  title: "Shipping — VASCARIO",
-  description:
-    "Details on Vascario shipping timelines, carriers, and how we handle orders from dispatch to delivery.",
-};
+export const metadata = getPageMetadata("shipping");
 
 export default function ShippingPage() {
+  // FAQ structured data for shipping page
+  const shippingFAQs = [
+    {
+      question: "How long does order processing take?",
+      answer: "Each order is packed in-house. Please allow 2–4 business days for processing before your package is handed off to the carrier.",
+    },
+    {
+      question: "How long does shipping take to India?",
+      answer: "India — typically 3–7 business days after dispatch. Tracking details are emailed as soon as your order is scanned by the carrier.",
+    },
+    {
+      question: "How long does international shipping take?",
+      answer: "International shipping timing varies by destination and carrier. Tracking details are emailed as soon as your order is scanned by the carrier.",
+    },
+    {
+      question: "Can shipping timelines be affected?",
+      answer: "Shipping timelines are estimates and can be affected by carrier delays, weather, or customs. We'll always do our best to keep you updated.",
+    },
+  ];
+
   return (
     <main className="min-h-screen bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)]">
+      <FAQPageStructuredDataServer faqs={shippingFAQs} />
       <Navbar />
 
       <section className="pt-32 pb-24 px-6 md:px-12 lg:px-40 max-w-5xl mx-auto">

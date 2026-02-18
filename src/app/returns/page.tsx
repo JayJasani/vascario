@@ -1,15 +1,30 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { getPageMetadata } from "@/lib/seo-config";
+import { FAQPageStructuredDataServer } from "@/components/StructuredDataServer";
 
-export const metadata = {
-  title: "Returns & Exchanges — VASCARIO",
-  description:
-    "Information on Vascario returns, exchanges, and how to reach us if something isn’t right with your order.",
-};
+export const metadata = getPageMetadata("returns");
 
 export default function ReturnsPage() {
+  // FAQ structured data for returns page
+  const returnsFAQs = [
+    {
+      question: "What is the return window?",
+      answer: "We accept returns on unworn, unwashed items within 7 days of delivery, with original tags and packaging intact.",
+    },
+    {
+      question: "How do I start a return?",
+      answer: "Email wear@vascario.com with your Order ID, item(s) you'd like to return or exchange, and a short note on the issue (fit, defect, etc.).",
+    },
+    {
+      question: "What items cannot be returned?",
+      answer: "Final-sale items and heavily worn or damaged garments can't be accepted back. If you're unsure, reach out first and we'll help you out.",
+    },
+  ];
+
   return (
     <main className="min-h-screen bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)]">
+      <FAQPageStructuredDataServer faqs={returnsFAQs} />
       <Navbar />
 
       <section className="pt-32 pb-24 px-6 md:px-12 lg:px-40 max-w-5xl mx-auto">
@@ -30,7 +45,7 @@ export default function ReturnsPage() {
             className="text-xs md:text-sm text-[var(--vsc-gray-400)] uppercase tracking-[0.2em]"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
-            What happens if the fit or piece isn’t right.
+            What happens if the fit or piece isn't right.
           </p>
         </header>
 
@@ -86,4 +101,3 @@ export default function ReturnsPage() {
     </main>
   );
 }
-

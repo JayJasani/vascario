@@ -1,12 +1,9 @@
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
 import { ContactForm } from "./ContactForm"
+import { getPageMetadata } from "@/lib/seo-config"
 
-export const metadata = {
-  title: "Contact — VASCARIO",
-  description:
-    "Get in touch with Vascario. Questions, orders, or collabs — we're here for it.",
-}
+export const metadata = getPageMetadata("contact")
 
 export default function ContactPage() {
   return (

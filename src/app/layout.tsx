@@ -7,6 +7,7 @@ import { CartProvider } from "@/context/CartContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { FavouritesProvider } from "@/context/FavouritesContext";
 import { UserProfileProvider } from "@/context/UserProfileContext";
+import { getHomeMetadata } from "@/lib/seo-config";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -23,28 +24,10 @@ const spaceMono = Space_Mono({
   display: "swap",
 });
 
+// Root layout metadata with metadataBase for proper OG image URLs
 export const metadata: Metadata = {
-  title: "VASCARIO — SEASON 1",
-  description:
-    "Premium embroidered streetwear. Limited drops. Wear the culture. VASCARIO — where raw craftsmanship meets digital-age fashion.",
-  keywords: [
-    "streetwear",
-    "embroidered tees",
-    "premium t-shirts",
-    "limited drop",
-    "Gen Z fashion",
-    "VASCARIO",
-  ],
-  openGraph: {
-    title: "VASCARIO — SEASON 1",
-    description: "Premium embroidered streetwear. Limited drops.",
-    type: "website",
-  },
-  icons: {
-    icon: "/v.png",
-    shortcut: "/v.png",
-    apple: "/v.png",
-  },
+  ...getHomeMetadata(),
+  metadataBase: new URL("https://www.vascario.com"),
 };
 
 export default function RootLayout({
