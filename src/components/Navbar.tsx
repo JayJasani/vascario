@@ -180,6 +180,7 @@ export function Navbar() {
               aria-label="Select currency"
               style={{ fontFamily: "var(--font-space-mono)" }}
             >
+              <span className="text-base">{CURRENCIES[currencyCode]?.flag || ""}</span>
               <span className="text-xs font-bold uppercase tracking-wider">{currencyCode}</span>
               <ChevronDownIcon className={`w-4 h-4 transition-transform ${currencyOpen ? "rotate-180" : ""}`} />
             </button>
@@ -202,10 +203,11 @@ export function Navbar() {
                       setCurrencyOpen(false);
                     }}
                     onMouseDown={(e) => e.preventDefault()}
-                    className={`w-full text-left px-4 py-2 text-xs uppercase tracking-wider transition-colors ${currencyCode === code ? "bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)]" : "text-[var(--vsc-gray-900)] hover:bg-[var(--vsc-cream)]"}`}
+                    className={`w-full text-left px-4 py-2 text-xs uppercase tracking-wider transition-colors flex items-center gap-2 ${currencyCode === code ? "bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)]" : "text-[var(--vsc-gray-900)] hover:bg-[var(--vsc-cream)]"}`}
                     style={{ fontFamily: "var(--font-space-mono)" }}
                   >
-                    {c.symbol} {code}
+                    <span className="text-base">{c.flag}</span>
+                    <span>{c.symbol} {code}</span>
                   </button>
                 ))}
               </div>
