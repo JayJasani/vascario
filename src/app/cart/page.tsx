@@ -1,6 +1,7 @@
 "use client"
 
 import { useCart } from "@/context/CartContext"
+import { useCurrency } from "@/context/CurrencyContext"
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
 import Link from "next/link"
@@ -10,6 +11,7 @@ import { useAuth } from "@/context/AuthContext"
 
 export default function CartPage() {
     const { user } = useAuth()
+    const { formatPrice } = useCurrency()
     const { items, updateQuantity, removeItem, cartTotal, cartCount } = useCart()
     const [mounted, setMounted] = useState(false)
 
@@ -165,7 +167,7 @@ export default function CartPage() {
                                                 className="text-lg md:text-xl font-bold text-[var(--vsc-gray-900)]"
                                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                                 >
-                                                    ₹{item.price.toLocaleString("en-IN")}
+                                                    {formatPrice(item.price)}
                                                 </span>
 
                                                 {/* Quantity Controls — Squishy */}
@@ -209,7 +211,7 @@ export default function CartPage() {
                                                     className="text-sm font-bold text-[var(--vsc-accent)]"
                                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                                 >
-                                                    ₹{(item.price * item.quantity).toLocaleString("en-IN")}
+                                                    {formatPrice(item.price * item.quantity)}
                                                 </span>
                                             </div>
                                         </div>
@@ -260,8 +262,7 @@ export default function CartPage() {
                                                         className="text-[10px] text-[var(--vsc-gray-400)] uppercase tracking-[0.2em]"
                                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                                     >
-                                                        SIZE: {item.size} · QTY: {item.quantity} × ₹
-                                                        {Number(item.price).toLocaleString("en-IN")}
+                                                        SIZE: {item.size} · QTY: {item.quantity} × {formatPrice(Number(item.price))}
                                                     </span>
                                                 </div>
                                             </div>
@@ -269,7 +270,7 @@ export default function CartPage() {
                                                 className="text-xs font-bold text-[var(--vsc-gray-900)] shrink-0"
                                                 style={{ fontFamily: "var(--font-space-mono)" }}
                                             >
-                                                ₹{Number(item.price * item.quantity).toLocaleString("en-IN")}
+                                                {formatPrice(Number(item.price * item.quantity))}
                                             </span>
                                         </div>
                                     ))}
@@ -286,7 +287,7 @@ export default function CartPage() {
                                             className="text-sm font-bold text-[var(--vsc-gray-900)]"
                                             style={{ fontFamily: "var(--font-space-mono)" }}
                                         >
-                                            ₹{cartTotal.toLocaleString("en-IN")}
+                                            {formatPrice(cartTotal)}
                                         </span>
                                     </div>
 
@@ -304,7 +305,7 @@ export default function CartPage() {
                                         >
                                             {shipping === 0
                                                 ? "FREE"
-                                                : `₹${Number(shipping).toLocaleString("en-IN")}`}
+                                                : formatPrice(Number(shipping))}
                                         </span>
                                     </div>
 
@@ -320,7 +321,7 @@ export default function CartPage() {
                                             className="text-xl md:text-2xl font-bold text-[var(--vsc-accent)]"
                                             style={{ fontFamily: "var(--font-space-mono)" }}
                                         >
-                                            ₹{total.toLocaleString("en-IN")}
+                                            {formatPrice(total)}
                                         </span>
                                     </div>
 

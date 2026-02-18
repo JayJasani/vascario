@@ -4,6 +4,7 @@ import { SmoothScroller } from "@/components/SmoothScroller";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
+import { CurrencyProvider } from "@/context/CurrencyContext";
 import { FavouritesProvider } from "@/context/FavouritesContext";
 import "./globals.css";
 
@@ -57,12 +58,14 @@ export default function RootLayout({
       >
         <SmoothScroller>
           <AuthProvider>
-            <CartProvider>
-              <FavouritesProvider>
-                <ScrollToTop />
-                {children}
-              </FavouritesProvider>
-            </CartProvider>
+            <CurrencyProvider>
+              <CartProvider>
+                <FavouritesProvider>
+                  <ScrollToTop />
+                  {children}
+                </FavouritesProvider>
+              </CartProvider>
+            </CurrencyProvider>
           </AuthProvider>
         </SmoothScroller>
       </body>

@@ -1,6 +1,7 @@
 "use client"
 
 import { useCart } from "@/context/CartContext"
+import { useCurrency } from "@/context/CurrencyContext"
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
 import Link from "next/link"
@@ -26,6 +27,7 @@ const stepVariants = {
 
 export default function CheckoutPage() {
     const { user } = useAuth()
+    const { formatPrice } = useCurrency()
     const { items, cartTotal, clearCart } = useCart()
     const [step, setStep] = useState(1)
     const [direction, setDirection] = useState(1)
@@ -273,7 +275,7 @@ export default function CheckoutPage() {
                                     className="text-xs font-bold text-[var(--vsc-gray-900)] shrink-0"
                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                 >
-                                    ₹{(item.price * item.quantity).toLocaleString("en-IN")}
+                                    {formatPrice(item.price * item.quantity)}
                                 </span>
                                     </div>
                                 ))}
@@ -288,7 +290,7 @@ export default function CheckoutPage() {
                                     className="text-lg font-bold text-[var(--vsc-accent)]"
                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                 >
-                                    ₹{cartTotal.toLocaleString("en-IN")}
+                                    {formatPrice(cartTotal)}
                                 </span>
                                 </div>
                             </div>

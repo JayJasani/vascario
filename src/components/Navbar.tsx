@@ -2,27 +2,33 @@
 
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import {
   MagnifyingGlassIcon,
   HeartIcon,
   ShoppingBagIcon,
   ArrowRightOnRectangleIcon,
+  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { type SearchItem } from "@/lib/search-data";
 import { searchItems } from "@/app/storefront-actions";
+import { CURRENCIES } from "@/lib/currency";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [currencyOpen, setCurrencyOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState<SearchItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const currencyRef = useRef<HTMLDivElement>(null);
   const { cartCount } = useCart();
   const { user, logout } = useAuth();
+  const { currencyCode, currency, setCurrency, formatPrice } = useCurrency();
 
   const displayName =
     user?.displayName || user?.email?.split("@")[0] || "";
@@ -53,6 +59,18 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
+    if (!currencyOpen) return;
+    function handleClickOutside(e: MouseEvent) {
+      const target = e.target as Node;
+      if (currencyRef.current && !currencyRef.current.contains(target)) {
+        setCurrencyOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [currencyOpen]);
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
@@ -69,14 +87,14 @@ export function Navbar() {
 
   useEffect(() => {
     let cancelled = false;
-    
+
     const performSearch = async () => {
       if (!searchQuery.trim()) {
         setResults([]);
         setIsSearching(false);
         return;
       }
-      
+
       setIsSearching(true);
       try {
         const items = await searchItems(searchQuery);
@@ -95,7 +113,7 @@ export function Navbar() {
 
     // Debounce search to avoid too many requests
     const timeoutId = setTimeout(performSearch, 300);
-    
+
     return () => {
       cancelled = true;
       clearTimeout(timeoutId);
@@ -120,8 +138,8 @@ export function Navbar() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
-          ? "bg-[var(--vsc-white)]/95 backdrop-blur-sm border-b border-[var(--vsc-gray-200)]"
-          : "bg-[var(--vsc-white)]/90 border-b border-transparent"
+        ? "bg-[var(--vsc-white)]/95 backdrop-blur-sm border-b border-[var(--vsc-gray-200)]"
+        : "bg-[var(--vsc-white)]/90 border-b border-transparent"
         }`}
     >
       <div className="flex items-center justify-between px-6 py-4 md:px-12 lg:px-20">
@@ -169,8 +187,49 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* Right side — Search, Favourites, Cart + User */}
+        {/* Right side — Currency, Search, Favourites, Cart + User */}
         <div className="flex items-center gap-2 md:gap-4">
+          {/* Currency selector */}
+          <div className="relative" ref={currencyRef}>
+            <button
+              type="button"
+              onClick={() => setCurrencyOpen((o) => !o)}
+              className="flex items-center gap-1 p-2 md:px-3 md:py-2 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent rounded"
+              aria-label="Select currency"
+              style={{ fontFamily: "var(--font-space-mono)" }}
+            >
+              <span className="text-xs font-bold uppercase tracking-wider">{currencyCode}</span>
+              <ChevronDownIcon className={`w-4 h-4 transition-transform ${currencyOpen ? "rotate-180" : ""}`} />
+            </button>
+            {currencyOpen && (
+              <div
+                className="absolute right-0 top-full mt-1 py-1 min-w-[140px] bg-[var(--vsc-white)] border-2 border-[var(--vsc-gray-200)] shadow-lg z-[200]"
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+                role="listbox"
+                aria-label="Select currency"
+              >
+                {Object.entries(CURRENCIES).map(([code, c]) => (
+                  <button
+                    key={code}
+                    type="button"
+                    role="option"
+                    aria-selected={currencyCode === code}
+                    onClick={() => {
+                      setCurrency(code);
+                      setCurrencyOpen(false);
+                    }}
+                    onMouseDown={(e) => e.preventDefault()}
+                    className={`w-full text-left px-4 py-2 text-xs uppercase tracking-wider transition-colors ${currencyCode === code ? "bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)]" : "text-[var(--vsc-gray-900)] hover:bg-[var(--vsc-cream)]"}`}
+                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  >
+                    {c.symbol} {code}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Search icon */}
           <button
             type="button"
@@ -318,7 +377,7 @@ export function Navbar() {
                               className="text-sm font-bold text-[var(--vsc-gray-900)]"
                               style={{ fontFamily: "var(--font-space-mono)" }}
                             >
-                              ₹{item.price.toLocaleString("en-IN")}
+                              {formatPrice(item.price)}
                             </span>
                           )}
                         </Link>

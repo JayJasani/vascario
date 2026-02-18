@@ -9,6 +9,7 @@ import { Footer } from "@/components/Footer"
 import { MarqueeStrip } from "@/components/MarqueeStrip"
 import { useCart } from "@/context/CartContext"
 import { useAuth } from "@/context/AuthContext"
+import { useCurrency } from "@/context/CurrencyContext"
 import { useFavourites } from "@/context/FavouritesContext"
 
 export interface StockBySize {
@@ -89,6 +90,7 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
     const [selectedImageIndex, setSelectedImageIndex] = useState(0)
     const { addItem } = useCart()
     const { user, loading } = useAuth()
+    const { formatPrice, currencyCode } = useCurrency()
     const { toggleFavourite, isFavourite } = useFavourites()
     const router = useRouter()
 
@@ -321,13 +323,13 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                     className="text-2xl text-[var(--vsc-accent)] font-bold"
                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                 >
-                                    ₹{product.price.toLocaleString("en-IN")}
+                                    {formatPrice(product.price)}
                                 </span>
                                 <span
                                     className="text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.2em]"
                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                 >
-                                    INR
+                                    {currencyCode}
                                 </span>
                             </div>
 
@@ -527,7 +529,7 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                 style={{ fontFamily: "var(--font-space-mono)", border: "2px solid #000" }}
                             >
                                 {canAddToCart
-                                    ? `Add to Cart — ₹${(product.price * quantity).toLocaleString("en-IN")}`
+                                    ? `Add to Cart — ${formatPrice(product.price * quantity)}`
                                     : !hasRequiredSelections
                                         ? "Select a size"
                                         : stockForSelectedSize === 0

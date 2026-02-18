@@ -3,10 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { useFavourites } from "@/context/FavouritesContext";
 
 export function FavouritesClient() {
   const { user } = useAuth();
+  const { formatPrice } = useCurrency();
   const { items } = useFavourites();
 
   const isEmpty = items.length === 0;
@@ -123,7 +125,7 @@ export function FavouritesClient() {
                   className="text-xs font-bold text-[var(--vsc-gray-900)]"
                   style={{ fontFamily: "var(--font-space-mono)" }}
                 >
-                  ₹{item.price.toLocaleString("en-IN")}
+                  {formatPrice(item.price)}
                 </span>
               </div>
             </Link>

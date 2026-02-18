@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import { useCurrency } from "@/context/CurrencyContext"
 
 interface Product {
   id: string
@@ -21,6 +22,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, variant = "default", aspectClass, href }: ProductCardProps) {
+  const { formatPrice } = useCurrency()
   const isFeatured = variant === "featured"
   const isGrid = variant === "grid"
   // Only show "Out of stock" when total stock is explicitly 0 (not when undefined). If any size has stock, don't show.
@@ -113,7 +115,7 @@ export function ProductCard({ product, variant = "default", aspectClass, href }:
             className="text-sm font-bold text-[var(--vsc-white)] transition-colors duration-200"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
-            ₹{product.price.toLocaleString("en-IN")}
+            {formatPrice(product.price)}
           </span>
           <span
             className={`text-xs font-bold tracking-[0.15em] transition-colors duration-200 ${outOfStock ? "text-[var(--vsc-gray-500)]" : "text-[var(--vsc-white)] group-hover:text-[var(--vsc-white)]"}`}
