@@ -11,6 +11,11 @@ import { useCart } from "@/context/CartContext"
 import { useAuth } from "@/context/AuthContext"
 import { useFavourites } from "@/context/FavouritesContext"
 
+export interface StockBySize {
+    size: string;
+    quantity: number;
+}
+
 export interface ProductDetailData {
     id: string;
     name: string;
@@ -20,6 +25,8 @@ export interface ProductDetailData {
     colors: string[];
     images: string[];
     sku: string | null;
+    totalStock: number;
+    stockBySize: StockBySize[];
 }
 
 const HEX_COLOR = /^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/
@@ -87,6 +94,21 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
 
     const currentImage = product.images[selectedImageIndex] || product.images[0]
     const hasMultipleImages = product.images.length > 1
+
+    const stockForSelectedSize =
+        product.sizes.length > 0 && selectedSize
+            ? (product.stockBySize.find((s) => s.size === selectedSize)?.quantity ?? 0)
+            : product.totalStock
+    const hasRequiredSelections = product.sizes.length === 0 || !!selectedSize
+    const canAddToCart =
+        hasRequiredSelections && stockForSelectedSize > 0 && quantity <= stockForSelectedSize
+
+    // Cap quantity to available stock when size or stock changes
+    useEffect(() => {
+        if (stockForSelectedSize > 0 && quantity > stockForSelectedSize) {
+            setQuantity(stockForSelectedSize)
+        }
+    }, [stockForSelectedSize, quantity])
 
     // Restore cart intent from sessionStorage after login
     useEffect(() => {
@@ -372,22 +394,54 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                         Size {selectedSize && `— ${selectedSize}`}
                                     </span>
                                     <div className="flex gap-2 flex-wrap">
-                                        {product.sizes.map((size) => (
-                                            <button
-                                                key={size}
-                                                onClick={() => setSelectedSize(size)}
-                                                className={`px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] border-2 transition-all duration-200 ${selectedSize === size
-                                                    ? "bg-[var(--vsc-accent)] text-[var(--vsc-black)] border-transparent"
-                                                    : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)]"
-                                                    }`}
-                                                style={{ fontFamily: "var(--font-space-mono)" }}
-                                            >
-                                                {size}
-                                            </button>
-                                        ))}
+                                        {product.sizes.map((size) => {
+                                            const sizeStock = product.stockBySize.find((s) => s.size === size)?.quantity ?? 0
+                                            const inStock = sizeStock > 0
+                                            return (
+                                                <button
+                                                    key={size}
+                                                    type="button"
+                                                    disabled={!inStock}
+                                                    onClick={() => inStock && setSelectedSize(size)}
+                                                    className={`px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] border-2 transition-all duration-200 ${!inStock
+                                                        ? "opacity-50 cursor-not-allowed border-[var(--vsc-gray-700)] text-[var(--vsc-gray-500)]"
+                                                        : selectedSize === size
+                                                            ? "bg-[var(--vsc-accent)] text-[var(--vsc-black)] border-transparent"
+                                                            : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)]"
+                                                        }`}
+                                                    style={{ fontFamily: "var(--font-space-mono)" }}
+                                                    title={inStock ? `${sizeStock} in stock` : "Out of stock"}
+                                                >
+                                                    {size}
+                                                    {!inStock && " (0)"}
+                                                </button>
+                                            )
+                                        })}
                                     </div>
                                 </div>
                             )}
+
+                            {/* Stock */}
+                            <div className="mb-6">
+                                <span
+                                    className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.3em] block mb-1"
+                                    style={{ fontFamily: "var(--font-space-mono)" }}
+                                >
+                                    Stock
+                                </span>
+                                <span
+                                    className={`text-sm font-bold ${stockForSelectedSize > 0 ? "text-[var(--vsc-accent)]" : "text-[var(--vsc-gray-500)]"}`}
+                                    style={{ fontFamily: "var(--font-space-mono)" }}
+                                >
+                                    {product.sizes.length > 0 && selectedSize
+                                        ? stockForSelectedSize > 0
+                                            ? `${stockForSelectedSize} in stock for ${selectedSize}`
+                                            : `Out of stock for ${selectedSize}`
+                                        : product.totalStock > 0
+                                            ? `${product.totalStock} in stock`
+                                            : "Out of stock"}
+                                </span>
+                            </div>
 
                             {/* Quantity */}
                             <div className="mb-8">
@@ -412,8 +466,10 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                         {String(quantity).padStart(2, "0")}
                                     </span>
                                     <button
-                                        onClick={() => setQuantity(quantity + 1)}
-                                        className="px-5 py-2 text-sm font-bold text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200"
+                                        type="button"
+                                        onClick={() => setQuantity(Math.min(quantity + 1, stockForSelectedSize))}
+                                        disabled={quantity >= stockForSelectedSize}
+                                        className="px-5 py-2 text-sm font-bold text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                     >
                                         +
@@ -423,6 +479,8 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
 
                             {/* Add to Cart */}
                             <button
+                                type="button"
+                                disabled={!canAddToCart}
                                 onClick={() => {
                                     if (!user) {
                                         // Store cart intent before redirecting
@@ -451,6 +509,7 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                         alert("Please select a color before adding to cart.")
                                         return
                                     }
+                                    if (!canAddToCart) return
 
                                     addItem({
                                         id: product.id,
@@ -461,10 +520,19 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                         quantity,
                                     })
                                 }}
-                                className="w-full py-3 bg-[var(--vsc-accent)] text-black text-sm font-bold uppercase tracking-[0.2em] hover:bg-black hover:text-[var(--vsc-accent)] transition-all duration-200 hover:shadow-[0_0_24px_var(--vsc-accent-dim)]"
+                                className={`w-full py-3 text-sm font-bold uppercase tracking-[0.2em] transition-all duration-200 ${canAddToCart
+                                    ? "bg-[var(--vsc-accent)] text-black hover:bg-black hover:text-[var(--vsc-accent)] hover:shadow-[0_0_24px_var(--vsc-accent-dim)] cursor-pointer"
+                                    : "bg-[var(--vsc-gray-700)] text-[var(--vsc-gray-500)] cursor-not-allowed"
+                                    }`}
                                 style={{ fontFamily: "var(--font-space-mono)", border: "2px solid #000" }}
                             >
-                                Add to Cart — ₹{(product.price * quantity).toLocaleString("en-IN")}
+                                {canAddToCart
+                                    ? `Add to Cart — ₹${(product.price * quantity).toLocaleString("en-IN")}`
+                                    : !hasRequiredSelections
+                                        ? "Select a size"
+                                        : stockForSelectedSize === 0
+                                            ? "Out of stock"
+                                            : `Max ${stockForSelectedSize} available`}
                             </button>
 
                             {/* Favourite toggle */}

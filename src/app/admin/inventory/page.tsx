@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AdminButton } from "@/components/admin/AdminButton";
+import { AdminLoadingBlock } from "@/components/admin/AdminLoadingBlock";
 import { updateStock } from "../actions";
 import useSWR from "swr";
 
@@ -27,7 +28,6 @@ async function fetchInventory(): Promise<ProductStock[]> {
 
 export default function InventoryPage() {
     const { data: products, mutate } = useSWR("admin-inventory", fetchInventory, {
-        fallbackData: [],
         refreshInterval: 10000,
     });
     const [editingCell, setEditingCell] = useState<string | null>(null);
@@ -91,6 +91,9 @@ export default function InventoryPage() {
             </div>
 
             {/* ── INVENTORY GRID ── */}
+            {products === undefined ? (
+                <AdminLoadingBlock />
+            ) : (
             <div className="border-2 border-[#2A2A2A] overflow-x-auto">
                 <table className="w-full">
                     <thead>
@@ -216,6 +219,7 @@ export default function InventoryPage() {
                     </tbody>
                 </table>
             </div>
+            )}
 
             {/* ── ALERT SUMMARY ── */}
             {products && products.length > 0 && (

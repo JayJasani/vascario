@@ -9,6 +9,8 @@ interface Product {
   price: number
   images: string[]
   tag?: string
+  /** Total stock across all sizes. If 0, card shows "Out of stock". */
+  totalStock?: number
 }
 
 interface ProductCardProps {
@@ -21,6 +23,8 @@ interface ProductCardProps {
 export function ProductCard({ product, variant = "default", aspectClass, href }: ProductCardProps) {
   const isFeatured = variant === "featured"
   const isGrid = variant === "grid"
+  // Only show "Out of stock" when total stock is explicitly 0 (not when undefined). If any size has stock, don't show.
+  const outOfStock = product.totalStock !== undefined && product.totalStock <= 0
 
   const linkClass = isGrid
     ? "group relative block w-full overflow-hidden border border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] transition-colors duration-200"
@@ -81,6 +85,17 @@ export function ProductCard({ product, variant = "default", aspectClass, href }:
             {product.tag}
           </div>
         )}
+        {/* Out of stock overlay */}
+        {outOfStock && (
+          <div
+            className="absolute inset-0 bg-[var(--vsc-gray-900)]/70 flex items-center justify-center z-10"
+            style={{ fontFamily: "var(--font-space-mono)" }}
+          >
+            <span className="text-[var(--vsc-white)] text-xs font-bold uppercase tracking-[0.2em]">
+              Out of stock
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Info bar — stays dark with white text on hover */}
@@ -101,10 +116,10 @@ export function ProductCard({ product, variant = "default", aspectClass, href }:
             ₹{product.price.toLocaleString("en-IN")}
           </span>
           <span
-            className="text-xs font-bold text-[var(--vsc-white)] group-hover:text-[var(--vsc-white)] tracking-[0.15em] transition-colors duration-200"
+            className={`text-xs font-bold tracking-[0.15em] transition-colors duration-200 ${outOfStock ? "text-[var(--vsc-gray-500)]" : "text-[var(--vsc-white)] group-hover:text-[var(--vsc-white)]"}`}
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
-            ADD →
+            {outOfStock ? "OUT OF STOCK" : "ADD →"}
           </span>
         </div>
       </div>

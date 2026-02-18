@@ -5,6 +5,7 @@ import { HexColorPicker } from "react-colorful";
 import { Palette } from "lucide-react";
 import { AdminButton } from "@/components/admin/AdminButton";
 import { AdminInput, AdminTextarea } from "@/components/admin/AdminInput";
+import { AdminLoadingBlock } from "@/components/admin/AdminLoadingBlock";
 import { createProduct, toggleProductActive, updateProductAction } from "../actions";
 import useSWR from "swr";
 import Image from "next/image";
@@ -80,7 +81,6 @@ async function fetchProducts(): Promise<Product[]> {
 
 export default function DropsPage() {
     const { data: products, mutate } = useSWR("admin-products", fetchProducts, {
-        fallbackData: [],
         refreshInterval: 10000,
     });
     const [showForm, setShowForm] = useState(false);
@@ -543,10 +543,13 @@ export default function DropsPage() {
             )}
 
             {/* ── PRODUCT LIST ── */}
+            {products === undefined ? (
+                <AdminLoadingBlock />
+            ) : (
             <div className="border-2 border-[#2A2A2A]">
                 <div className="px-6 py-4 border-b-2 border-[#2A2A2A] bg-[#0D0D0D]">
                     <span className="font-mono text-xs text-[#F5F5F0] tracking-[0.15em] uppercase font-bold">
-                        All Drops ({products?.length ?? 0})
+                        All Drops ({products.length})
                     </span>
                 </div>
                 <div className="overflow-x-auto">
@@ -574,7 +577,7 @@ export default function DropsPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {(!products || products.length === 0) ? (
+                            {products.length === 0 ? (
                                 <tr>
                                     <td
                                         colSpan={6}
@@ -634,6 +637,7 @@ export default function DropsPage() {
                     </table>
                 </div>
             </div>
+            )}
 
         </div>
     );

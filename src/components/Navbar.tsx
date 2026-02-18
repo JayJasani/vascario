@@ -154,7 +154,7 @@ export function Navbar() {
             Favourites
           </Link>
           <Link
-            href="/#editorial"
+            href="/lookbook"
             className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >

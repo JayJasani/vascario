@@ -237,6 +237,15 @@ export async function getAllStockLevels(): Promise<StockLevel[]> {
     });
 }
 
+/** Returns total stock per product (sum of all sizes). Used by storefront for cards. */
+export async function getStockTotalsByProduct(): Promise<Record<string, number>> {
+    const levels = await getAllStockLevels();
+    return levels.reduce<Record<string, number>>((acc, level) => {
+        acc[level.productId] = (acc[level.productId] ?? 0) + level.quantity;
+        return acc;
+    }, {});
+}
+
 export async function createStockLevel(data: Omit<StockLevel, "id">): Promise<StockLevel> {
     const stockRef = db.collection(COLLECTIONS.STOCK_LEVELS).doc();
     await stockRef.set({

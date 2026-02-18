@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AdminButton } from "@/components/admin/AdminButton";
 import { DataCard } from "@/components/admin/DataCard";
+import { AdminLoadingBlock } from "@/components/admin/AdminLoadingBlock";
 import { updateOrderStatus, addTrackingInfo } from "../actions";
 import useSWR from "swr";
 
@@ -44,16 +45,17 @@ async function fetchOrders(): Promise<Order[]> {
 
 export default function OrdersPage() {
     const { data: orders, mutate } = useSWR("admin-orders", fetchOrders, {
-        fallbackData: [],
         refreshInterval: 5000, // Poll every 5s for live updates
     });
     const [activeTab, setActiveTab] = useState<OrderStatus | "ALL">("ALL");
     const [trackingModal, setTrackingModal] = useState<string | null>(null);
 
     const filteredOrders =
-        activeTab === "ALL"
-            ? orders
-            : orders?.filter((o) => o.status === activeTab) ?? [];
+        orders === undefined
+            ? undefined
+            : activeTab === "ALL"
+                ? orders
+                : orders.filter((o) => o.status === activeTab);
 
     async function handleStatusUpdate(orderId: string, status: OrderStatus) {
         await updateOrderStatus(orderId, status);
@@ -110,7 +112,9 @@ export default function OrdersPage() {
             </div>
 
             {/* ── BENTO GRID ── */}
-            {filteredOrders && filteredOrders.length > 0 ? (
+            {orders === undefined ? (
+                <AdminLoadingBlock />
+            ) : filteredOrders && filteredOrders.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {filteredOrders.map((order) => (
                         <DataCard

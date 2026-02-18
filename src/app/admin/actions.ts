@@ -143,6 +143,17 @@ export async function getAdminContactSubmissions() {
     }));
 }
 
+// ─── NEWSLETTER SUBSCRIPTIONS ────────────────────────────────────────────────────
+
+export async function getAdminNewsletterSubscriptions() {
+    const list = await getNewsletterSubscriptions();
+    return list.map((s) => ({
+        id: s.id,
+        email: s.email,
+        createdAt: s.createdAt.toISOString(),
+    }));
+}
+
 // ─── PRODUCTS / DROPS ───────────────────────────────────────────────────────────
 
 export async function getProducts() {

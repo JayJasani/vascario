@@ -3,36 +3,35 @@
 import useSWR from "swr";
 import { AdminLoadingBlock } from "@/components/admin/AdminLoadingBlock";
 
-interface ContactSubmission {
+interface NewsletterSubscription {
     id: string;
-    firstName: string;
-    lastName: string;
     email: string;
-    query: string;
     createdAt: string;
 }
 
-async function fetchContactSubmissions(): Promise<ContactSubmission[]> {
-    const res = await fetch("/admin/contact/api");
+async function fetchNewsletterSubscriptions(): Promise<NewsletterSubscription[]> {
+    const res = await fetch("/admin/newsletter/api");
     return res.json();
 }
 
-export default function AdminContactPage() {
-    const { data: submissions, mutate, isValidating } = useSWR("admin-contact", fetchContactSubmissions);
+export default function AdminNewsletterPage() {
+    const { data: subscriptions, mutate, isValidating } = useSWR(
+        "admin-newsletter",
+        fetchNewsletterSubscriptions
+    );
 
     return (
         <div className="space-y-10">
-            {/* ── PAGE HEADER ── */}
             <div className="flex items-end justify-between">
                 <div>
                     <h2
                         className="text-2xl font-bold tracking-[-0.03em] uppercase"
                         style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
                     >
-                        Contact Queries
+                        Newsletter
                     </h2>
                     <p className="font-mono text-xs text-[#666] tracking-[0.15em] uppercase mt-1">
-                        // Inquiries from contact form
+                        // Emails subscribed to the website
                     </p>
                 </div>
                 <button
@@ -45,8 +44,7 @@ export default function AdminContactPage() {
                 </button>
             </div>
 
-            {/* ── TABLE ── */}
-            {submissions === undefined ? (
+            {subscriptions === undefined ? (
                 <AdminLoadingBlock />
             ) : (
             <div className="border-2 border-[#2A2A2A]">
@@ -55,35 +53,35 @@ export default function AdminContactPage() {
                         <thead>
                             <tr className="border-b border-[#2A2A2A] bg-[#0D0D0D]">
                                 <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
-                                    Date
+                                    #
                                 </th>
                                 <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
-                                    Name
+                                    Subscribed at
                                 </th>
                                 <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
                                     Email
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
-                                    Query
-                                </th>
                             </tr>
                         </thead>
                         <tbody>
-                            {!submissions?.length ? (
+                            {!subscriptions?.length ? (
                                 <tr>
                                     <td
-                                        colSpan={4}
+                                        colSpan={3}
                                         className="px-6 py-12 text-center font-mono text-xs text-[#666] tracking-[0.1em]"
                                     >
-                                        NO CONTACT SUBMISSIONS YET
+                                        NO SUBSCRIBERS YET
                                     </td>
                                 </tr>
                             ) : (
-                                submissions.map((sub) => (
+                                subscriptions.map((sub, index) => (
                                     <tr
                                         key={sub.id}
                                         className="border-b border-[#1A1A1A] hover:bg-[#0D0D0D] transition-colors"
                                     >
+                                        <td className="px-6 py-4 font-mono text-[10px] text-[#666] tracking-[0.1em] w-12">
+                                            {index + 1}
+                                        </td>
                                         <td className="px-6 py-4 font-mono text-[10px] text-[#666] tracking-[0.1em] whitespace-nowrap">
                                             {new Date(sub.createdAt).toLocaleDateString("en-IN", {
                                                 day: "2-digit",
@@ -93,9 +91,6 @@ export default function AdminContactPage() {
                                                 minute: "2-digit",
                                             })}
                                         </td>
-                                        <td className="px-6 py-4 font-mono text-xs text-[#F5F5F0] tracking-[0.05em]">
-                                            {sub.firstName} {sub.lastName}
-                                        </td>
                                         <td className="px-6 py-4">
                                             <a
                                                 href={`mailto:${sub.email}`}
@@ -104,9 +99,6 @@ export default function AdminContactPage() {
                                                 {sub.email}
                                             </a>
                                         </td>
-                                        <td className="px-6 py-4 font-mono text-[10px] text-[#999] tracking-[0.05em] max-w-md">
-                                            <span className="line-clamp-3">{sub.query}</span>
-                                        </td>
                                     </tr>
                                 ))
                             )}
@@ -114,6 +106,12 @@ export default function AdminContactPage() {
                     </table>
                 </div>
             </div>
+            )}
+
+            {subscriptions && subscriptions.length > 0 && (
+                <p className="font-mono text-[10px] text-[#666] tracking-[0.15em] uppercase">
+                    {subscriptions.length} subscriber{subscriptions.length === 1 ? "" : "s"} total
+                </p>
             )}
         </div>
     );
