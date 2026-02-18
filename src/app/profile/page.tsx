@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
+import { useUserProfile } from "@/context/UserProfileContext";
 import type { UserAddress } from "@/app/api/users/route";
 
 const inputClass =
@@ -27,8 +28,8 @@ function newAddress(): UserAddress {
 
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
+  const { profile, loading: profileLoading, refreshProfile } = useUserProfile();
   const router = useRouter();
-  const [profileLoading, setProfileLoading] = useState(true);
   const [savePending, setSavePending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -40,34 +41,22 @@ export default function ProfilePage() {
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const [newAddressForm, setNewAddressForm] = useState<UserAddress | null>(null);
 
-  const fetchProfile = useCallback(async () => {
-    if (!user) return;
-    try {
-      const token = await user.getIdToken();
-      const res = await fetch("/api/users", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error("Failed to load profile");
-      const data = await res.json();
-      setFirstName(data.firstName ?? "");
-      setLastName(data.lastName ?? "");
-      setDisplayName(data.displayName ?? "");
-      setAddresses(Array.isArray(data.addresses) ? data.addresses : []);
-    } catch (e) {
-      console.error(e);
-      setError("Could not load profile.");
-    } finally {
-      setProfileLoading(false);
+  // Initialize form fields from profile context
+  useEffect(() => {
+    if (profile) {
+      setFirstName(profile.firstName ?? "");
+      setLastName(profile.lastName ?? "");
+      setDisplayName(profile.displayName ?? "");
+      setAddresses(Array.isArray(profile.addresses) ? profile.addresses : []);
     }
-  }, [user]);
+  }, [profile]);
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.replace("/login?redirect=/profile");
       return;
     }
-    if (user) fetchProfile();
-  }, [authLoading, user, router, fetchProfile]);
+  }, [authLoading, user, router]);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,6 +96,8 @@ export default function ProfilePage() {
           })
         );
       }
+      // Refresh profile from context
+      await refreshProfile();
       setSuccess(true);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to save profile.");
@@ -141,6 +132,8 @@ export default function ProfilePage() {
       const savedAddress = await res.json();
       setAddresses((prev) => [...prev, savedAddress]);
       setNewAddressForm(null);
+      // Refresh profile to sync addresses
+      await refreshProfile();
       setSuccess(true);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to save address.");
@@ -168,6 +161,8 @@ export default function ProfilePage() {
       }
       setAddresses((prev) => prev.filter((a) => a.id !== id));
       if (editingAddressId === id) setEditingAddressId(null);
+      // Refresh profile to sync addresses
+      await refreshProfile();
       setSuccess(true);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to delete address.");
@@ -207,6 +202,8 @@ export default function ProfilePage() {
         throw new Error(data?.error ?? "Failed to update address");
       }
       setEditingAddressId(null);
+      // Refresh profile to sync addresses
+      await refreshProfile();
       setSuccess(true);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to update address.");

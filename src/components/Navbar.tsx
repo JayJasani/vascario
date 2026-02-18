@@ -2,6 +2,7 @@
 
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useUserProfile } from "@/context/UserProfileContext";
 import {
   MagnifyingGlassIcon,
   HeartIcon,
@@ -23,18 +24,14 @@ export function Navbar() {
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [profileDisplayName, setProfileDisplayName] = useState<string>("");
   const currencyRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const { cartCount } = useCart();
   const { user, logout } = useAuth();
   const { currencyCode, setCurrency } = useCurrency();
+  const { getDisplayName } = useUserProfile();
 
-  const displayName =
-    profileDisplayName ||
-    user?.displayName ||
-    user?.email?.split("@")[0] ||
-    "";
+  const displayName = getDisplayName();
   const userInitial = displayName
     ? displayName.charAt(0).toUpperCase()
     : "?";
@@ -92,57 +89,6 @@ export function Navbar() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
-
-  useEffect(() => {
-    const loadProfile = async () => {
-      if (!user) {
-        setProfileDisplayName("");
-        return;
-      }
-      try {
-        const token = await user.getIdToken();
-        const res = await fetch("/api/users", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        const fromDb =
-          (data.displayName as string | undefined) ||
-          [data.firstName, data.lastName].filter(Boolean).join(" ").trim();
-        if (fromDb) {
-          setProfileDisplayName(fromDb);
-        }
-      } catch {
-        // ignore, fall back to auth displayName/email
-      }
-    };
-
-    const handleProfileUpdated = (event: Event) => {
-      const detail = (event as CustomEvent<{
-        displayName?: string;
-        firstName?: string;
-        lastName?: string;
-      }>).detail;
-      const fromEvent =
-        detail.displayName?.trim() ||
-        [detail.firstName, detail.lastName].filter(Boolean).join(" ").trim();
-      if (fromEvent) {
-        setProfileDisplayName(fromEvent);
-      }
-    };
-
-    loadProfile();
-    window.addEventListener(
-      "vascario:profile-updated",
-      handleProfileUpdated as EventListener
-    );
-    return () => {
-      window.removeEventListener(
-        "vascario:profile-updated",
-        handleProfileUpdated as EventListener
-      );
-    };
-  }, [user]);
 
   return (
     <nav
