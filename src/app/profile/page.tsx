@@ -233,8 +233,8 @@ export default function ProfilePage() {
     <main className="min-h-screen bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)]">
       <Navbar />
 
-      <section className="pt-32 pb-24 px-6 md:px-12 lg:px-20">
-        <div className="max-w-2xl mx-auto space-y-12">
+      <section className="pt-24 sm:pt-32 pb-16 sm:pb-24 px-4 sm:px-6 md:px-12 lg:px-20">
+        <div className="max-w-2xl mx-auto space-y-8 sm:space-y-12">
           <header>
             <p
               className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.3em] mb-2"
@@ -268,15 +268,15 @@ export default function ProfilePage() {
           )}
 
           {/* Profile form */}
-          <div className="border-2 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] px-6 py-7 md:px-8 md:py-8 shadow-sm">
+          <div className="border-2 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] px-4 sm:px-6 py-5 sm:py-7 md:px-8 md:py-8 shadow-sm">
             <h2
-              className="text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-700)] mb-6"
+              className="text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-700)] mb-4 sm:mb-6"
               style={{ fontFamily: "var(--font-space-mono)" }}
             >
               Personal details
             </h2>
-            <form onSubmit={handleSaveProfile} className="space-y-5" style={{ fontFamily: "var(--font-space-mono)" }}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <form onSubmit={handleSaveProfile} className="space-y-4 sm:space-y-5" style={{ fontFamily: "var(--font-space-mono)" }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                 <div className="space-y-2">
                   <label className={labelClass}>First name</label>
                   <input
@@ -311,7 +311,7 @@ export default function ProfilePage() {
               <button
                 type="submit"
                 disabled={savePending}
-                className="px-6 py-3.5 bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 disabled:opacity-60"
+                className="w-full sm:w-auto px-6 py-3 sm:py-3.5 bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 disabled:opacity-60"
               >
                 {savePending ? "Saving..." : "Save profile"}
               </button>
@@ -319,8 +319,8 @@ export default function ProfilePage() {
           </div>
 
           {/* Addresses */}
-          <div className="border-2 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] px-6 py-7 md:px-8 md:py-8 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
+          <div className="border-2 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] px-4 sm:px-6 py-5 sm:py-7 md:px-8 md:py-8 shadow-sm">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
               <h2
                 className="text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-700)]"
                 style={{ fontFamily: "var(--font-space-mono)" }}
@@ -340,7 +340,7 @@ export default function ProfilePage() {
             </div>
 
             {newAddressForm && (
-              <div className="mb-8 p-5 border border-[var(--vsc-gray-200)] bg-[var(--vsc-cream)]/50 space-y-4">
+              <div className="mb-6 sm:mb-8 p-4 sm:p-5 border border-[var(--vsc-gray-200)] bg-[var(--vsc-cream)]/50 space-y-3 sm:space-y-4">
                 <div className="space-y-2">
                   <label className={labelClass}>Label (optional)</label>
                   <input
@@ -371,7 +371,7 @@ export default function ProfilePage() {
                     placeholder="Apt, suite..."
                   />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
                     <label className={labelClass}>City *</label>
                     <input
@@ -393,7 +393,7 @@ export default function ProfilePage() {
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
                     <label className={labelClass}>Postal code *</label>
                     <input
@@ -415,12 +415,12 @@ export default function ProfilePage() {
                     />
                   </div>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <button
                     type="button"
                     onClick={saveNewAddress}
                     disabled={savePending}
-                    className="px-4 py-2 bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] text-xs font-bold uppercase tracking-[0.2em] disabled:opacity-60"
+                    className="w-full sm:w-auto px-4 py-2 bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] text-xs font-bold uppercase tracking-[0.2em] disabled:opacity-60"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                   >
                     {savePending ? "Saving..." : "Save address"}
@@ -428,7 +428,7 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     onClick={() => setNewAddressForm(null)}
-                    className="px-4 py-2 border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-600)] text-xs uppercase tracking-[0.2em]"
+                    className="w-full sm:w-auto px-4 py-2 border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-600)] text-xs uppercase tracking-[0.2em]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                   >
                     Cancel
@@ -437,11 +437,11 @@ export default function ProfilePage() {
               </div>
             )}
 
-            <ul className="space-y-4">
+            <ul className="space-y-3 sm:space-y-4">
               {addresses.map((addr) => (
                 <li
                   key={addr.id}
-                  className="border border-[var(--vsc-gray-200)] p-4 flex flex-col gap-3"
+                  className="border border-[var(--vsc-gray-200)] p-3 sm:p-4 flex flex-col gap-2 sm:gap-3"
                 >
                   {editingAddressId === addr.id ? (
                     <>
@@ -466,7 +466,7 @@ export default function ProfilePage() {
                         className={inputClass}
                         placeholder="Address line 2"
                       />
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <input
                           type="text"
                           value={addr.city}
@@ -496,7 +496,7 @@ export default function ProfilePage() {
                           placeholder="Country"
                         />
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <button
                           type="button"
                           onClick={() => saveAddressUpdate(addr.id)}

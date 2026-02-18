@@ -31,8 +31,8 @@ export function ProductCard({ product, variant = "default", aspectClass, href }:
   const linkClass = isGrid
     ? "group relative block w-full overflow-hidden border border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] transition-colors duration-200"
     : isFeatured
-      ? "group relative block overflow-hidden border border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] transition-colors duration-200 min-w-[380px] md:min-w-[480px]"
-      : "group relative block overflow-hidden border border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] transition-colors duration-200 min-w-[300px] md:min-w-[360px]"
+      ? "group relative block overflow-hidden border border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] transition-colors duration-200 w-full sm:min-w-[380px] md:min-w-[480px]"
+      : "group relative block overflow-hidden border border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] transition-colors duration-200 w-full sm:min-w-[300px] md:min-w-[360px]"
 
   const aspect = aspectClass ?? "aspect-[3/4]"
   const targetHref = href ?? `/product/${product.id}`

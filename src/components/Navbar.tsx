@@ -7,6 +7,8 @@ import {
   HeartIcon,
   ShoppingBagIcon,
   ChevronDownIcon,
+  Bars3Icon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -20,8 +22,10 @@ export function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDisplayName, setProfileDisplayName] = useState<string>("");
   const currencyRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
   const { cartCount } = useCart();
   const { user, logout } = useAuth();
   const { currencyCode, setCurrency } = useCurrency();
@@ -54,6 +58,29 @@ export function Navbar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [currencyOpen]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    function handleClickOutside(e: MouseEvent) {
+      const target = e.target as Node;
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(target)) {
+        setMobileMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -124,11 +151,26 @@ export function Navbar() {
         : "bg-[var(--vsc-white)]/90 border-b border-transparent"
         }`}
     >
-      <div className="flex items-center justify-between px-6 py-4 md:px-12 lg:px-20">
+      <div className="flex items-center justify-between px-4 sm:px-6 py-3 md:py-4 md:px-12 lg:px-20">
+        {/* Mobile menu button */}
+        <button
+          type="button"
+          onClick={() => setMobileMenuOpen((o) => !o)}
+          className="md:hidden p-2 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors"
+          aria-label="Toggle menu"
+          aria-expanded={mobileMenuOpen}
+        >
+          {mobileMenuOpen ? (
+            <XMarkIcon className="w-6 h-6" strokeWidth={1.5} />
+          ) : (
+            <Bars3Icon className="w-6 h-6" strokeWidth={1.5} />
+          )}
+        </button>
+
         {/* Logo — brutalist, cropped feeling */}
-        <Link href="/" className="text-display">
+        <Link href="/" className="text-display flex-1 md:flex-none text-center md:text-left">
           <span
-            className="text-2xl md:text-3xl font-bold tracking-[-0.06em] uppercase text-[var(--vsc-gray-900)]"
+            className="text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.06em] uppercase text-[var(--vsc-gray-900)]"
             style={{ fontFamily: "var(--font-space-grotesk)" }}
           >
             VASC
@@ -170,19 +212,19 @@ export function Navbar() {
         </div>
 
         {/* Right side — Currency, Search, Favourites, Cart + User */}
-        <div className="flex items-center gap-2 md:gap-4">
-          {/* Currency selector */}
-          <div className="relative" ref={currencyRef}>
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-4">
+          {/* Currency selector — hide on very small screens */}
+          <div className="relative hidden sm:block" ref={currencyRef}>
             <button
               type="button"
               onClick={() => setCurrencyOpen((o) => !o)}
-              className="flex items-center gap-1 p-2 md:px-3 md:py-2 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent rounded"
+              className="flex items-center gap-1 p-1.5 sm:p-2 md:px-3 md:py-2 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent rounded"
               aria-label="Select currency"
               style={{ fontFamily: "var(--font-space-mono)" }}
             >
-              <span className="text-base">{CURRENCIES[currencyCode]?.flag || ""}</span>
-              <span className="text-xs font-bold uppercase tracking-wider">{currencyCode}</span>
-              <ChevronDownIcon className={`w-4 h-4 transition-transform ${currencyOpen ? "rotate-180" : ""}`} />
+              <span className="text-sm sm:text-base">{CURRENCIES[currencyCode]?.flag || ""}</span>
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">{currencyCode}</span>
+              <ChevronDownIcon className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform ${currencyOpen ? "rotate-180" : ""}`} />
             </button>
             {currencyOpen && (
               <div
@@ -218,30 +260,30 @@ export function Navbar() {
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
-            className="p-3 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent"
+            className="p-2 sm:p-3 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent"
             aria-label="Search (⌘K)"
           >
-            <MagnifyingGlassIcon className="w-5 h-5" strokeWidth={1.5} />
+            <MagnifyingGlassIcon className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.5} />
           </button>
 
           {/* Favourites icon */}
           <Link
             href="/favourites"
-            className="p-3 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent"
+            className="p-2 sm:p-3 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent"
             aria-label="View favourites"
           >
-            <HeartIcon className="w-5 h-5" strokeWidth={1.5} />
+            <HeartIcon className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.5} />
           </Link>
 
           {/* Cart icon */}
           <Link
             href="/cart"
-            className="relative p-3 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent"
+            className="relative p-2 sm:p-3 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent"
             aria-label="View bag"
           >
-            <ShoppingBagIcon className="w-5 h-5" strokeWidth={1.5} />
+            <ShoppingBagIcon className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.5} />
             {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center bg-[var(--vsc-gray-900)] text-[var(--vsc-white)] text-[10px] font-bold rounded-full">
+              <span className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center bg-[var(--vsc-gray-900)] text-[var(--vsc-white)] text-[9px] sm:text-[10px] font-bold rounded-full">
                 {cartCount}
               </span>
             )}
@@ -303,6 +345,65 @@ export function Navbar() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 top-[73px] z-40 bg-[var(--vsc-white)] border-t border-[var(--vsc-gray-200)]">
+          <div ref={mobileMenuRef} className="h-full overflow-y-auto">
+            <nav className="px-6 py-8" style={{ fontFamily: "var(--font-space-mono)" }}>
+              <ul className="space-y-6">
+                <li>
+                  <Link
+                    href="/collection"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block text-sm uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 py-2"
+                  >
+                    Collection
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/favourites"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block text-sm uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 py-2"
+                  >
+                    Favourites
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/lookbook"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block text-sm uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 py-2"
+                  >
+                    Lookbook
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/about"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block text-sm uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 py-2"
+                  >
+                    About
+                  </Link>
+                </li>
+                {!user && (
+                  <li className="pt-6 border-t border-[var(--vsc-gray-200)]">
+                    <Link
+                      href="/login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block text-sm uppercase tracking-[0.18em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-accent)] transition-colors py-2"
+                    >
+                      Sign in
+                    </Link>
+                  </li>
+                )}
+              </ul>
+            </nav>
+          </div>
+        </div>
+      )}
 
       <AccountDrawer
         open={menuOpen && !!user}

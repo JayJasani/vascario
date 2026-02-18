@@ -52,10 +52,10 @@ function LoginForm() {
     <main className="min-h-screen bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)]">
       <Navbar />
 
-      <section className="pt-32 pb-24 px-6 md:px-12 lg:px-20">
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-start">
+      <section className="pt-24 sm:pt-32 pb-16 sm:pb-24 px-4 sm:px-6 md:px-12 lg:px-20">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-16 items-start">
           {/* Left — copy */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <p
               className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.3em]"
               style={{ fontFamily: "var(--font-space-mono)" }}
@@ -63,13 +63,13 @@ function LoginForm() {
               Account
             </p>
             <h1
-              className="text-3xl md:text-4xl text-[var(--vsc-gray-900)] leading-tight"
+              className="text-2xl sm:text-3xl md:text-4xl text-[var(--vsc-gray-900)] leading-tight"
               style={{ fontFamily: "var(--font-space-grotesk)" }}
             >
               {mode === "login" ? "Sign in to continue" : "Create your account"}
             </h1>
             <p
-              className="text-xs md:text-sm text-[var(--vsc-gray-500)] uppercase tracking-[0.2em] max-w-sm"
+              className="text-xs sm:text-sm text-[var(--vsc-gray-500)] uppercase tracking-[0.2em] max-w-sm"
               style={{ fontFamily: "var(--font-space-mono)" }}
             >
               Log in to sync your bag, favourites, and checkout across devices.
@@ -77,15 +77,15 @@ function LoginForm() {
           </div>
 
           {/* Right — form card */}
-          <div className="border-2 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] px-6 py-7 md:px-8 md:py-8 shadow-sm">
+          <div className="border-2 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] px-4 sm:px-6 py-5 sm:py-7 md:px-8 md:py-8 shadow-sm">
             <form
               onSubmit={handleSubmit}
-              className="space-y-6"
+              className="space-y-5 sm:space-y-6"
               style={{ fontFamily: "var(--font-space-mono)" }}
             >
               {mode === "register" && (
                 <>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div className="space-y-2">
                       <label className="text-[10px] uppercase tracking-[0.25em] text-[var(--vsc-gray-600)]">
                         First name
@@ -164,7 +164,7 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={pending}
-                className="w-full px-6 py-3.5 bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 disabled:opacity-60"
+                className="w-full px-6 py-3 sm:py-3.5 bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 disabled:opacity-60"
               >
                 {pending
                   ? mode === "login"
@@ -201,7 +201,7 @@ export default function LoginPage() {
     <Suspense fallback={
       <main className="min-h-screen bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)]">
         <Navbar />
-        <section className="pt-32 pb-24 px-6 md:px-12 lg:px-20">
+        <section className="pt-24 sm:pt-32 pb-16 sm:pb-24 px-4 sm:px-6 md:px-12 lg:px-20">
           <div className="max-w-4xl mx-auto flex items-center justify-center">
             <p className="text-sm text-[var(--vsc-gray-500)]">Loading...</p>
           </div>

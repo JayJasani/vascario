@@ -31,10 +31,10 @@ export function Footer() {
       </div> */}
 
       {/* Accent divider */}
-      <div className="h-px bg-[var(--vsc-gray-200)] mx-6 md:mx-12 lg:mx-20" />
+      <div className="h-px bg-[var(--vsc-gray-200)] mx-4 sm:mx-6 md:mx-12 lg:mx-20" />
 
       {/* Footer content grid */}
-      <div className="px-6 md:px-12 lg:px-20 py-16 grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-8">
+      <div className="px-4 sm:px-6 md:px-12 lg:px-20 py-12 sm:py-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 md:gap-8">
         {/* Column 1 — Info */}
         <div>
           <span
@@ -136,7 +136,7 @@ export function Footer() {
       </div>
 
       {/* Copyright bar */}
-      <div className="px-6 md:px-12 lg:px-20 py-8 border-t border-[var(--vsc-gray-200)] flex flex-col md:flex-row items-center justify-between gap-2">
+      <div className="px-4 sm:px-6 md:px-12 lg:px-20 py-6 sm:py-8 border-t border-[var(--vsc-gray-200)] flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
         <span
           className="text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.2em]"
           style={{ fontFamily: "var(--font-space-mono)" }}

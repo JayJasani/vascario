@@ -183,11 +183,11 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                 </div>
 
                 {/* Main content — layout */}
-                <div className="px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-8">
+                <div className="px-4 sm:px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 md:gap-8">
                     {/* Left — Image Gallery (slightly wider) */}
                     <div className="md:col-span-4 lg:col-span-4">
                         {/* Main image – slightly smaller so details panel can grow */}
-                        <div className="relative aspect-[4/5] max-h-[70vh] bg-[var(--vsc-gray-900)] overflow-hidden border border-[var(--vsc-gray-700)] group">
+                        <div className="relative aspect-[4/5] max-h-[60vh] sm:max-h-[70vh] bg-[var(--vsc-gray-900)] overflow-hidden border border-[var(--vsc-gray-700)] group">
                             {currentImage ? (
                                 <>
                                     <Image
@@ -204,7 +204,7 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                             <button
                                                 type="button"
                                                 onClick={showPrevImage}
-                                                className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 md:h-10 md:w-10 rounded-full bg-[var(--vsc-black)]/60 border border-[var(--vsc-gray-600)] text-[var(--vsc-white)] flex items-center justify-center hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors"
+                                                className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-full bg-[var(--vsc-black)]/60 border border-[var(--vsc-gray-600)] text-[var(--vsc-white)] flex items-center justify-center hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors text-lg sm:text-xl md:text-2xl"
                                                 aria-label="Previous image"
                                             >
                                                 ‹
@@ -212,7 +212,7 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                             <button
                                                 type="button"
                                                 onClick={showNextImage}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 md:h-10 md:w-10 rounded-full bg-[var(--vsc-black)]/60 border border-[var(--vsc-gray-600)] text-[var(--vsc-white)] flex items-center justify-center hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors"
+                                                className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-full bg-[var(--vsc-black)]/60 border border-[var(--vsc-gray-600)] text-[var(--vsc-white)] flex items-center justify-center hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors text-lg sm:text-xl md:text-2xl"
                                                 aria-label="Next image"
                                             >
                                                 ›
@@ -220,10 +220,10 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                         </>
                                     )}
                                     {/* Image number indicator */}
-                                    <div className="absolute bottom-4 left-4 flex items-center gap-2 z-10 bg-[var(--vsc-black)]/50 px-3 py-1.5 backdrop-blur-sm">
-                                        <div className="w-8 h-px bg-[var(--vsc-accent)]" />
+                                    <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 flex items-center gap-2 z-10 bg-[var(--vsc-black)]/50 px-2 sm:px-3 py-1 sm:py-1.5 backdrop-blur-sm">
+                                        <div className="w-6 sm:w-8 h-px bg-[var(--vsc-accent)]" />
                                         <span
-                                            className="text-[10px] text-[var(--vsc-white)] uppercase tracking-[0.2em]"
+                                            className="text-[9px] sm:text-[10px] text-[var(--vsc-white)] uppercase tracking-[0.2em]"
                                             style={{ fontFamily: "var(--font-space-mono)" }}
                                         >
                                             {String(selectedImageIndex + 1).padStart(2, "0")} / {String(Math.max(product.images.length, 1)).padStart(2, "0")}
@@ -276,12 +276,12 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
 
                         {/* Thumbnail strip — smaller images to click through */}
                         {product.images.length > 0 && (
-                            <div className="flex gap-2 mt-3">
+                            <div className="flex gap-2 mt-2 sm:mt-3 overflow-x-auto pb-2">
                                 {product.images.map((image, i) => (
                                     <button
                                         key={i}
                                         onClick={() => setSelectedImageIndex(i)}
-                                        className={`relative w-16 h-16 md:w-20 md:h-20 overflow-hidden border-2 transition-colors ${selectedImageIndex === i
+                                        className={`relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 shrink-0 overflow-hidden border-2 transition-colors ${selectedImageIndex === i
                                             ? "border-[var(--vsc-accent)]"
                                             : "border-[var(--vsc-gray-700)] hover:border-[var(--vsc-gray-600)]"
                                             }`}
@@ -300,14 +300,14 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                     </div>
 
                     {/* Right — Product Info (still wide) — Sticky */}
-                    <div className="md:col-span-7 lg:col-span-7">
+                    <div className="md:col-span-7 lg:col-span-7 mt-4 sm:mt-0">
                         <div className="md:sticky md:top-24">
                             {/* Product name */}
                             <h1
-                                className="text-black mb-2"
+                                className="text-black mb-2 sm:mb-3"
                                 style={{
                                     fontFamily: "var(--font-space-grotesk)",
-                                    fontSize: "clamp(1.5rem, 3vw, 2.5rem)",
+                                    fontSize: "clamp(1.25rem, 4vw, 2.5rem)",
                                     fontWeight: 700,
                                     letterSpacing: "-0.02em",
                                     lineHeight: 1,
@@ -318,15 +318,15 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                             </h1>
 
                             {/* Price */}
-                            <div className="flex items-baseline gap-3 mb-6">
+                            <div className="flex items-baseline gap-2 sm:gap-3 mb-4 sm:mb-6">
                                 <span
-                                    className="text-2xl text-[var(--vsc-accent)] font-bold"
+                                    className="text-xl sm:text-2xl text-[var(--vsc-accent)] font-bold"
                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                 >
                                     {formatPrice(product.price)}
                                 </span>
                                 <span
-                                    className="text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.2em]"
+                                    className="text-[9px] sm:text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.2em]"
                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                 >
                                     {currencyCode}
@@ -334,11 +334,11 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                             </div>
 
                             {/* Divider */}
-                            <div className="h-px bg-[var(--vsc-gray-700)] mb-6" />
+                            <div className="h-px bg-[var(--vsc-gray-700)] mb-4 sm:mb-6" />
 
                             {/* Description */}
                             <div
-                                className="text-sm text-[var(--vsc-gray-400)] leading-relaxed mb-8 space-y-2"
+                                className="text-xs sm:text-sm text-[var(--vsc-gray-400)] leading-relaxed mb-6 sm:mb-8 space-y-2"
                                 style={{ fontFamily: "var(--font-space-mono)" }}
                             >
                                 {renderDescription(product.description)}
@@ -446,9 +446,9 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                             </div>
 
                             {/* Quantity */}
-                            <div className="mb-8">
+                            <div className="mb-6 sm:mb-8">
                                 <span
-                                    className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.3em] block mb-3"
+                                    className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.3em] block mb-2 sm:mb-3"
                                     style={{ fontFamily: "var(--font-space-mono)" }}
                                 >
                                     Quantity
@@ -456,13 +456,13 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                 <div className="flex items-center border border-[var(--vsc-gray-700)] inline-flex">
                                     <button
                                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                        className="px-5 py-2 text-sm font-bold text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200"
+                                        className="px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                     >
                                         −
                                     </button>
                                     <span
-                                        className="px-8 py-2 text-sm font-bold text-black border-x border-[var(--vsc-gray-700)]"
+                                        className="px-6 sm:px-8 py-2 text-xs sm:text-sm font-bold text-black border-x border-[var(--vsc-gray-700)]"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                     >
                                         {String(quantity).padStart(2, "0")}
@@ -471,7 +471,7 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                         type="button"
                                         onClick={() => setQuantity(Math.min(quantity + 1, stockForSelectedSize))}
                                         disabled={quantity >= stockForSelectedSize}
-                                        className="px-5 py-2 text-sm font-bold text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                     >
                                         +
@@ -522,7 +522,7 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                         quantity,
                                     })
                                 }}
-                                className={`w-full py-3 text-sm font-bold uppercase tracking-[0.2em] transition-all duration-200 ${canAddToCart
+                                className={`w-full py-2.5 sm:py-3 text-xs sm:text-sm font-bold uppercase tracking-[0.2em] transition-all duration-200 ${canAddToCart
                                     ? "bg-[var(--vsc-accent)] text-black hover:bg-black hover:text-[var(--vsc-accent)] hover:shadow-[0_0_24px_var(--vsc-accent-dim)] cursor-pointer"
                                     : "bg-[var(--vsc-gray-700)] text-[var(--vsc-gray-500)] cursor-not-allowed"
                                     }`}
