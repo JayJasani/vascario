@@ -197,6 +197,17 @@ export async function deleteProduct(id: string): Promise<void> {
     await db.collection(COLLECTIONS.PRODUCTS).doc(id).delete();
 }
 
+/** Delete all stock level documents for a product. Call before or after deleteProduct. */
+export async function deleteStockLevelsByProductId(productId: string): Promise<void> {
+    const snapshot = await db
+        .collection(COLLECTIONS.STOCK_LEVELS)
+        .where("productId", "==", productId)
+        .get();
+    const batch = db.batch();
+    snapshot.docs.forEach((doc) => batch.delete(doc.ref));
+    if (!snapshot.empty) await batch.commit();
+}
+
 // ─── STOCK LEVEL HELPERS ────────────────────────────────────────────────────────
 
 export async function getStockLevelsByProductId(productId: string): Promise<StockLevel[]> {

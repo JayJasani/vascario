@@ -6,7 +6,7 @@ import { Palette } from "lucide-react";
 import { AdminButton } from "@/components/admin/AdminButton";
 import { AdminInput, AdminTextarea } from "@/components/admin/AdminInput";
 import { AdminLoadingBlock } from "@/components/admin/AdminLoadingBlock";
-import { createProduct, toggleProductActive, updateProductAction } from "../actions";
+import { createProduct, toggleProductActive, updateProductAction, deleteDropAction } from "../actions";
 import useSWR from "swr";
 import Image from "next/image";
 
@@ -92,6 +92,7 @@ export default function DropsPage() {
     const [pickerPlacement, setPickerPlacement] = useState<"top" | "bottom">("bottom");
     const [uploading, setUploading] = useState(false);
     const [extractingPalette, setExtractingPalette] = useState(false);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const colorPickerRef = useRef<HTMLDivElement>(null);
 
@@ -199,6 +200,21 @@ export default function DropsPage() {
     async function handleToggle(id: string) {
         await toggleProductActive(id);
         mutate();
+    }
+
+    async function handleDelete(product: Product) {
+        if (!confirm(`Delete drop "${product.name}"? This will remove the product and all its stock levels. This cannot be undone.`)) return;
+        setDeletingId(product.id);
+        try {
+            await deleteDropAction(product.id);
+            if (editingProduct?.id === product.id) {
+                setEditingProduct(null);
+                closeForm();
+            }
+            mutate();
+        } finally {
+            setDeletingId(null);
+        }
     }
 
     function openEdit(product: Product) {
@@ -613,7 +629,7 @@ export default function DropsPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2">
+                                            <div className="flex items-center justify-end gap-2 flex-wrap">
                                                 <AdminButton
                                                     variant="ghost"
                                                     size="sm"
@@ -627,6 +643,15 @@ export default function DropsPage() {
                                                     onClick={() => handleToggle(product.id)}
                                                 >
                                                     {product.isActive ? "Archive" : "Reactivate"}
+                                                </AdminButton>
+                                                <AdminButton
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleDelete(product)}
+                                                    disabled={deletingId === product.id}
+                                                    className="text-[#FF3333] hover:bg-[#FF3333]/10 hover:text-[#FF3333]"
+                                                >
+                                                    {deletingId === product.id ? "…" : "Delete"}
                                                 </AdminButton>
                                             </div>
                                         </td>

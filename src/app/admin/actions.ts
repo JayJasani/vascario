@@ -12,6 +12,8 @@ import {
     getActiveProducts,
     createProduct as createProductHelper,
     updateProduct,
+    deleteProduct,
+    deleteStockLevelsByProductId,
     getProductById,
     getStockLevelsByProductId,
     updateStockLevel,
@@ -262,6 +264,27 @@ export async function toggleProductActive(productId: string) {
     await updateProduct(productId, { isActive: !product.isActive });
 
     revalidatePath("/admin/drops");
+    revalidatePath("/admin");
+    revalidateTag(CACHE_TAGS.activeProducts, "max");
+    revalidateTag(CACHE_TAGS.product(productId), "max");
+}
+
+export async function deleteDropAction(productId: string) {
+    const product = await getProductById(productId);
+    if (!product) return;
+
+    await deleteStockLevelsByProductId(productId);
+    await deleteProduct(productId);
+
+    await createAuditLog({
+        action: "PRODUCT_DELETED",
+        entity: "Product",
+        entityId: productId,
+        details: { name: product.name },
+    });
+
+    revalidatePath("/admin/drops");
+    revalidatePath("/admin/inventory");
     revalidatePath("/admin");
     revalidateTag(CACHE_TAGS.activeProducts, "max");
     revalidateTag(CACHE_TAGS.product(productId), "max");
