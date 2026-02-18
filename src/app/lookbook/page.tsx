@@ -3,12 +3,10 @@ import { Footer } from "@/components/Footer";
 import { getActiveProducts } from "../storefront-actions";
 import Link from "next/link";
 import Image from "next/image";
+import { getPageMetadata } from "@/lib/seo-config";
+import { getImageAlt } from "@/lib/seo-utils";
 
-export const metadata = {
-  title: "Lookbook — VASCARIO",
-  description:
-    "Editorial lookbook. How the culture wears Vascario — embroidery-first streetwear.",
-};
+export const metadata = getPageMetadata("lookbook");
 
 export default async function LookbookPage() {
   const products = await getActiveProducts();
@@ -67,7 +65,7 @@ export default async function LookbookPage() {
                   {product.images[0] ? (
                     <Image
                       src={product.images[0]}
-                      alt={product.name}
+                      alt={getImageAlt("lookbook", product.name)}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                       sizes={isLarge ? "(max-width: 768px) 100vw, 60vw" : "(max-width: 768px) 100vw, 40vw"}

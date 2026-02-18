@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
 import { MarqueeStrip } from "@/components/MarqueeStrip"
+import { ProductStructuredData, BreadcrumbStructuredData } from "@/components/StructuredData"
+import { getImageAlt } from "@/lib/seo-utils"
 import { useCart } from "@/context/CartContext"
 import { useAuth } from "@/context/AuthContext"
 import { useCurrency } from "@/context/CurrencyContext"
@@ -150,6 +152,14 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
 
     return (
         <main className="min-h-screen">
+            <ProductStructuredData product={product} />
+            <BreadcrumbStructuredData 
+                items={[
+                    { name: "Home", url: "/" },
+                    { name: "Collection", url: "/collection" },
+                    { name: product.name, url: `/product/${product.id}` }
+                ]}
+            />
             <Navbar />
 
             {/* Product section */}
@@ -192,7 +202,7 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                 <>
                                     <Image
                                         src={currentImage}
-                                        alt={product.name}
+                                        alt={getImageAlt("product", product.name, selectedImageIndex, product.images.length)}
                                         fill
                                         className="object-cover"
                                         priority
@@ -288,7 +298,7 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                     >
                                         <Image
                                             src={image}
-                                            alt={`${product.name} - Image ${i + 1}`}
+                                            alt={getImageAlt("productThumbnail", product.name, i)}
                                             fill
                                             className="object-cover"
                                             sizes="(max-width: 768px) 20vw, 10vw"

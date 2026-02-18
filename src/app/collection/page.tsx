@@ -2,11 +2,10 @@ import { Navbar } from "@/components/Navbar"
 import { CollectionGrid } from "@/components/CollectionGrid"
 import { Footer } from "@/components/Footer"
 import { getActiveProducts } from "../storefront-actions"
+import { getCollectionMetadata } from "@/lib/seo-config"
+import { getCollectionIntroText } from "@/lib/seo-utils"
 
-export const metadata = {
-  title: "Collection — VASCARIO",
-  description: "Premium embroidered streetwear. Limited drops. The Drop — Season 1.",
-}
+export const metadata = getCollectionMetadata()
 
 export default async function CollectionPage() {
   const products = await getActiveProducts()
@@ -14,6 +13,15 @@ export default async function CollectionPage() {
   return (
     <main className="min-h-screen">
       <Navbar />
+      {/* SEO-friendly intro text */}
+      <section className="pt-28 md:pt-36 pb-8 px-6 md:px-12 lg:px-20 max-w-4xl">
+        <div className="prose prose-sm max-w-none">
+          <h1 className="sr-only">Vascario Embroidered Streetwear Collection</h1>
+          <p className="text-sm md:text-base text-[var(--vsc-gray-600)] leading-relaxed mb-6" style={{ fontFamily: "var(--font-space-mono)" }}>
+            {getCollectionIntroText()}
+          </p>
+        </div>
+      </section>
       <CollectionGrid products={products} />
       <Footer />
     </main>

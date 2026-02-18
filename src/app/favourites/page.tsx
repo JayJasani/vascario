@@ -1,11 +1,9 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FavouritesClient } from "./FavouritesClient";
+import { getPageMetadata } from "@/lib/seo-config";
 
-export const metadata = {
-  title: "Favourites — VASCARIO",
-  description: "View the pieces you've marked as favourites.",
-};
+export const metadata = getPageMetadata("favourites");
 
 export default function FavouritesPage() {
   return (

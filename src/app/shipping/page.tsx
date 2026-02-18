@@ -1,11 +1,8 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { getPageMetadata } from "@/lib/seo-config";
 
-export const metadata = {
-  title: "Shipping — VASCARIO",
-  description:
-    "Details on Vascario shipping timelines, carriers, and how we handle orders from dispatch to delivery.",
-};
+export const metadata = getPageMetadata("shipping");
 
 export default function ShippingPage() {
   return (

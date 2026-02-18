@@ -1,11 +1,8 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { getPageMetadata } from "@/lib/seo-config";
 
-export const metadata = {
-  title: "About — VASCARIO",
-  description:
-    "Learn more about Vascario — the story, craft, and vision behind the embroidered streetwear label.",
-};
+export const metadata = getPageMetadata("about");
 
 export default function AboutPage() {
   return (

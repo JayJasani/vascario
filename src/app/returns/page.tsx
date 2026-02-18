@@ -1,11 +1,8 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { getPageMetadata } from "@/lib/seo-config";
 
-export const metadata = {
-  title: "Returns & Exchanges — VASCARIO",
-  description:
-    "Information on Vascario returns, exchanges, and how to reach us if something isn’t right with your order.",
-};
+export const metadata = getPageMetadata("returns");
 
 export default function ReturnsPage() {
   return (
@@ -30,7 +27,7 @@ export default function ReturnsPage() {
             className="text-xs md:text-sm text-[var(--vsc-gray-400)] uppercase tracking-[0.2em]"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
-            What happens if the fit or piece isn’t right.
+            What happens if the fit or piece isn't right.
           </p>
         </header>
 
@@ -86,4 +83,3 @@ export default function ReturnsPage() {
     </main>
   );
 }
-
