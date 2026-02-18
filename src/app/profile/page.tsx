@@ -65,23 +65,26 @@ export default function ProfilePage() {
     setSuccess(false);
     setSavePending(true);
     try {
+      // Sync token to cookie
       const token = await user.getIdToken();
-      const res = await fetch("/api/users", {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          displayName,
-        }),
+      await fetch("/api/auth/set-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error ?? "Failed to save");
+
+      // Use server action instead of API route
+      const { updateUserProfile } = await import("@/app/user-actions");
+      const result = await updateUserProfile({
+        firstName,
+        lastName,
+        displayName,
+      });
+
+      if (!result.success) {
+        throw new Error(result.error ?? "Failed to save");
       }
+
       const effectiveDisplayName =
         displayName.trim() ||
         [firstName, lastName].filter(Boolean).join(" ").trim();

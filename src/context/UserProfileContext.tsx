@@ -55,33 +55,37 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
+      // Sync token to cookie first
       const token = await user.getIdToken();
-      const res = await fetch("/api/users", {
-        headers: { Authorization: `Bearer ${token}` },
-        signal,
+      await fetch("/api/auth/set-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
       });
 
       if (signal?.aborted) return;
 
-      if (!res.ok) {
-        if (res.status === 401) {
-          // User not authenticated, clear profile
-          setProfile(null);
-          setLoading(false);
-          fetchingRef.current = false;
-          return;
-        }
-        throw new Error("Failed to load profile");
+      // Use server action instead of API route
+      const { getUserProfile } = await import("@/app/user-actions");
+      const profileData = await getUserProfile();
+
+      if (signal?.aborted) return;
+
+      if (!profileData) {
+        // User not authenticated, clear profile
+        setProfile(null);
+        setLoading(false);
+        fetchingRef.current = false;
+        return;
       }
 
-      const data = await res.json();
       setProfile({
-        uid: data.uid || user.uid,
-        email: data.email || user.email || "",
-        displayName: data.displayName || "",
-        firstName: data.firstName || "",
-        lastName: data.lastName || "",
-        addresses: Array.isArray(data.addresses) ? data.addresses : [],
+        uid: profileData.uid || user.uid,
+        email: profileData.email || user.email || "",
+        displayName: profileData.displayName || "",
+        firstName: profileData.firstName || "",
+        lastName: profileData.lastName || "",
+        addresses: Array.isArray(profileData.addresses) ? profileData.addresses : [],
       });
       setError(null);
     } catch (err) {
