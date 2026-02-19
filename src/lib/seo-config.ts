@@ -498,8 +498,8 @@ export function generateMetadata(config: {
       site: SEO_BASE.twitterHandle,
     },
     icons: {
-      icon: SEO_BASE.logo,
-      shortcut: SEO_BASE.logo,
+      icon: "/favicon.ico",
+      shortcut: "/favicon.ico",
       apple: SEO_BASE.logo,
     },
     verification: {
