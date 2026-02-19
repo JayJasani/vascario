@@ -80,7 +80,13 @@ export default async function ProductDetailPage({
     return (
         <>
             {/* Server-side structured data for better SEO */}
-            <ProductStructuredDataServer product={product} />
+            <ProductStructuredDataServer 
+                product={{
+                    ...product,
+                    colors: product.colors,
+                    sizes: product.sizes,
+                }} 
+            />
             <BreadcrumbStructuredDataServer items={breadcrumbItems} />
             <ProductDetailClient product={product} />
         </>

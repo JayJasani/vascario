@@ -193,7 +193,22 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                     </div>
                 </div>
 
-                {/* Main content — layout */}
+                {/* Visible breadcrumb navigation for SEO */}
+            <nav className="px-4 sm:px-6 md:px-12 lg:px-20 pt-4 pb-6" aria-label="Breadcrumb">
+                <ol className="flex items-center gap-2 text-xs text-[var(--vsc-gray-500)]" style={{ fontFamily: "var(--font-space-mono)" }}>
+                    <li>
+                        <Link href="/" className="hover:text-[var(--vsc-accent)] transition-colors">Home</Link>
+                    </li>
+                    <li className="text-[var(--vsc-gray-700)]">/</li>
+                    <li>
+                        <Link href="/collection" className="hover:text-[var(--vsc-accent)] transition-colors">Collection</Link>
+                    </li>
+                    <li className="text-[var(--vsc-gray-700)]">/</li>
+                    <li className="text-[var(--vsc-white)]" aria-current="page">{product.name}</li>
+                </ol>
+            </nav>
+
+            {/* Main content — layout */}
                 <div className="px-4 sm:px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 md:gap-8">
                     {/* Left — Image Gallery (slightly wider) */}
                     <div className="md:col-span-4 lg:col-span-4">
@@ -348,11 +363,20 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                             <div className="h-px bg-[var(--vsc-gray-700)] mb-4 sm:mb-6" />
 
                             {/* Description */}
-                            <div
-                                className="text-xs sm:text-sm text-[var(--vsc-gray-400)] leading-relaxed mb-6 sm:mb-8 space-y-2"
-                                style={{ fontFamily: "var(--font-space-mono)" }}
-                            >
-                                {renderDescription(product.description)}
+                            <div className="mb-6 sm:mb-8">
+                                <h2 className="text-lg sm:text-xl font-bold text-[var(--vsc-white)] mb-3 sm:mb-4 uppercase tracking-[0.1em]" style={{ fontFamily: "var(--font-space-grotesk)" }}>
+                                    Product Details
+                                </h2>
+                                <div
+                                    className="text-xs sm:text-sm text-[var(--vsc-gray-400)] leading-relaxed space-y-2"
+                                    style={{ fontFamily: "var(--font-space-mono)" }}
+                                >
+                                    {renderDescription(product.description)}
+                                </div>
+                                {/* Internal link to collection */}
+                                <p className="mt-4 text-xs text-[var(--vsc-gray-500)]" style={{ fontFamily: "var(--font-space-mono)" }}>
+                                    Explore our complete <Link href="/collection" className="text-[var(--vsc-accent)] hover:text-[var(--vsc-white)] underline">embroidered streetwear collection</Link> or view our <Link href="/lookbook" className="text-[var(--vsc-accent)] hover:text-[var(--vsc-white)] underline">editorial lookbook</Link>.
+                                </p>
                             </div>
 
                             {/* Color selector */}
@@ -570,16 +594,13 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                 {isFavourite(product.id) ? "Remove from favourites" : "Add to favourites"}
                             </button>
 
-                            {/* SKU */}
-                            {product.sku && (
-                                <div className="mt-8 pt-6 border-t border-[var(--vsc-gray-700)]">
-                                    <span
-                                        className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.3em] block mb-4"
-                                        style={{ fontFamily: "var(--font-space-mono)" }}
-                                    >
-                                        Details
-                                    </span>
-                                    <div className="flex items-start gap-3">
+                            {/* SKU & Additional Info */}
+                            <div className="mt-8 pt-6 border-t border-[var(--vsc-gray-700)]">
+                                <h2 className="text-lg sm:text-xl font-bold text-[var(--vsc-white)] mb-4 uppercase tracking-[0.1em]" style={{ fontFamily: "var(--font-space-grotesk)" }}>
+                                    Additional Information
+                                </h2>
+                                {product.sku && (
+                                    <div className="flex items-start gap-3 mb-3">
                                         <span className="text-[var(--vsc-accent)] text-xs mt-0.5">—</span>
                                         <span
                                             className="text-xs text-[var(--vsc-gray-400)] uppercase tracking-[0.1em]"
@@ -588,8 +609,14 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                             SKU: {product.sku}
                                         </span>
                                     </div>
+                                )}
+                                {/* Internal links to shipping and returns */}
+                                <div className="mt-4 space-y-2">
+                                    <p className="text-xs text-[var(--vsc-gray-500)]" style={{ fontFamily: "var(--font-space-mono)" }}>
+                                        <Link href="/shipping" className="text-[var(--vsc-accent)] hover:text-[var(--vsc-white)] underline">Free shipping</Link> across India. View our <Link href="/returns" className="text-[var(--vsc-accent)] hover:text-[var(--vsc-white)] underline">returns policy</Link> or check the <Link href="/size-chart" className="text-[var(--vsc-accent)] hover:text-[var(--vsc-white)] underline">size chart</Link>.
+                                    </p>
                                 </div>
-                            )}
+                            </div>
                         </div>
                     </div>
                 </div>

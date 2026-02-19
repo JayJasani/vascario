@@ -503,9 +503,14 @@ export function generateMetadata(config: {
       apple: SEO_BASE.logo,
     },
     verification: {
-      // Add Google Search Console verification when available
-      // google: "your-google-verification-code",
-      // Add other verification codes as needed
+      // Google Search Console verification
+      // ✅ VERIFIED VIA DNS METHOD (Domain Name Provider)
+      // No HTML meta tag needed - verification is done at DNS level via TXT record
+      // This method verifies the entire domain and all subdomains automatically
+      //
+      // For other search engines (Bing, Yandex, etc.), add verification codes here if needed:
+      // bing: "your-bing-verification-code",
+      // yandex: "your-yandex-verification-code",
     },
   }
 }
@@ -620,6 +625,10 @@ export const SEO_STRUCTURED_DATA = {
     ],
     address: {
       "@type": "PostalAddress",
+      streetAddress: "Yogi Chowk",
+      addressLocality: "Surat",
+      postalCode: "395006",
+      addressRegion: "Gujarat",
       addressCountry: "IN",
     },
   },
@@ -633,6 +642,8 @@ export const SEO_STRUCTURED_DATA = {
     images: string[]
     sku?: string | null
     totalStock: number
+    colors?: string[]
+    sizes?: string[]
     aggregateRating?: {
       ratingValue: number
       reviewCount: number
@@ -651,6 +662,27 @@ export const SEO_STRUCTURED_DATA = {
     sku: product.sku || product.id,
     mpn: product.sku || product.id,
     category: "Apparel & Accessories > Clothing > Shirts & Tops",
+    // Enhanced product attributes for better SEO
+    material: "Premium Cotton", // VASCARIO uses premium cotton
+    pattern: "Embroidered", // All products feature embroidery
+    countryOfOrigin: {
+      "@type": "Country",
+      name: "India",
+    },
+    // Add colors if available
+    ...(product.colors && product.colors.length > 0 && {
+      color: product.colors.map(color => {
+        // Handle hex colors and named colors
+        if (color.startsWith("#")) {
+          return color.toUpperCase()
+        }
+        return color
+      }),
+    }),
+    // Add sizes if available
+    ...(product.sizes && product.sizes.length > 0 && {
+      size: product.sizes,
+    }),
     offers: {
       "@type": "Offer",
       url: `${SEO_BASE.siteUrl}/product/${product.slug || product.id}`,
@@ -665,6 +697,13 @@ export const SEO_STRUCTURED_DATA = {
         "@type": "Organization",
         name: SEO_BASE.brandName,
       },
+      // Add available sizes and colors to offer
+      ...(product.sizes && product.sizes.length > 0 && {
+        eligibleQuantity: {
+          "@type": "QuantitativeValue",
+          value: product.sizes.length,
+        },
+      }),
     },
     ...(product.aggregateRating && {
       aggregateRating: {
