@@ -6,6 +6,7 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { type SearchItem } from "@/lib/search-data";
 import { searchItems } from "@/app/storefront-actions";
 import { useCurrency } from "@/context/CurrencyContext";
+import { trackSearch, trackSelectSearchResult } from "@/lib/analytics";
 
 interface SearchPanelProps {
   open: boolean;
@@ -53,6 +54,7 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
         if (!cancelled) {
           setResults(items);
           setIsSearching(false);
+          trackSearch({ search_term: searchQuery, results_count: items.length });
         }
       } catch (error) {
         console.error("Search error:", error);
@@ -135,7 +137,15 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
                   <li key={`${item.type}-${item.id}`}>
                     <Link
                       href={item.url}
-                      onClick={onClose}
+                      onClick={() => {
+                        trackSelectSearchResult({
+                          search_term: searchQuery,
+                          item_id: item.id,
+                          item_name: item.name,
+                          index: results.indexOf(item),
+                        });
+                        onClose();
+                      }}
                       className="flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-2.5 sm:py-3 text-[var(--vsc-gray-700)] hover:bg-[var(--vsc-gray-100)] hover:text-[var(--vsc-gray-900)] transition-colors duration-150 group"
                     >
                       <div className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] flex items-center justify-center overflow-hidden">

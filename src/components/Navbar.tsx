@@ -17,6 +17,13 @@ import { CURRENCIES } from "@/lib/currency";
 import { useCurrency } from "@/context/CurrencyContext";
 import { SearchPanel } from "@/components/SearchPanel";
 import { AccountDrawer } from "@/components/AccountDrawer";
+import {
+  trackCurrencyChange,
+  trackOpenSearch,
+  trackOpenAccountDrawer,
+  trackOpenMobileMenu,
+  trackClickNavLink,
+} from "@/lib/analytics";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -83,7 +90,10 @@ export function Navbar() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setSearchOpen((open) => !open);
+        setSearchOpen((open) => {
+          if (!open) trackOpenSearch();
+          return !open;
+        });
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -101,7 +111,12 @@ export function Navbar() {
         {/* Mobile menu button */}
         <button
           type="button"
-          onClick={() => setMobileMenuOpen((o) => !o)}
+          onClick={() => {
+            setMobileMenuOpen((o) => {
+              if (!o) trackOpenMobileMenu();
+              return !o;
+            });
+          }}
           className="md:hidden p-2 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors"
           aria-label="Toggle menu"
           aria-expanded={mobileMenuOpen}
@@ -127,34 +142,22 @@ export function Navbar() {
 
         {/* Nav Links — monospace, minimal */}
         <div className="hidden md:flex items-center gap-8">
-          <Link
-            href="/collection"
-            className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200"
-            style={{ fontFamily: "var(--font-space-mono)" }}
-          >
-            Collection
-          </Link>
-          <Link
-            href="/favourites"
-            className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200"
-            style={{ fontFamily: "var(--font-space-mono)" }}
-          >
-            Favourites
-          </Link>
-          <Link
-            href="/lookbook"
-            className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200"
-            style={{ fontFamily: "var(--font-space-mono)" }}
-          >
-            Lookbook
-          </Link>
-          <Link
-            href="/about"
-            className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200"
-            style={{ fontFamily: "var(--font-space-mono)" }}
-          >
-            About
-          </Link>
+          {([
+            { href: "/collection", label: "Collection" },
+            { href: "/favourites", label: "Favourites" },
+            { href: "/lookbook", label: "Lookbook" },
+            { href: "/about", label: "About" },
+          ] as const).map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => trackClickNavLink({ link_text: link.label, link_url: link.href, location: "header" })}
+              className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200"
+              style={{ fontFamily: "var(--font-space-mono)" }}
+            >
+              {link.label}
+            </Link>
+          ))}
         </div>
 
         {/* Right side — Currency, Search, Favourites, Cart + User */}
@@ -187,6 +190,7 @@ export function Navbar() {
                     role="option"
                     aria-selected={currencyCode === code}
                     onClick={() => {
+                      trackCurrencyChange({ from_currency: currencyCode, to_currency: code });
                       setCurrency(code);
                       setCurrencyOpen(false);
                     }}
@@ -205,7 +209,10 @@ export function Navbar() {
           {/* Search icon */}
           <button
             type="button"
-            onClick={() => setSearchOpen(true)}
+            onClick={() => {
+              trackOpenSearch();
+              setSearchOpen(true);
+            }}
             className="p-2 sm:p-3 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent"
             aria-label="Search (⌘K)"
           >
@@ -239,7 +246,10 @@ export function Navbar() {
           {user && (
             <button
               type="button"
-              onClick={() => setMenuOpen(true)}
+              onClick={() => {
+                trackOpenAccountDrawer();
+                setMenuOpen(true);
+              }}
               className="md:hidden p-2 text-[var(--vsc-gray-600)] hover:text-[var(--vsc-gray-900)] transition-colors rounded-full"
               aria-label="Account menu"
               aria-expanded={menuOpen}
@@ -262,7 +272,10 @@ export function Navbar() {
             {user ? (
               <button
                 type="button"
-                onClick={() => setMenuOpen(true)}
+                onClick={() => {
+                  trackOpenAccountDrawer();
+                  setMenuOpen(true);
+                }}
                 className="flex items-center gap-2 p-1 -m-1 rounded text-[var(--vsc-gray-600)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent"
                 aria-label="Account menu"
                 aria-expanded={menuOpen}
@@ -298,42 +311,25 @@ export function Navbar() {
           <div ref={mobileMenuRef} className="h-full overflow-y-auto">
             <nav className="px-6 py-8" style={{ fontFamily: "var(--font-space-mono)" }}>
               <ul className="space-y-6">
-                <li>
-                  <Link
-                    href="/collection"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block text-sm uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 py-2"
-                  >
-                    Collection
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/favourites"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block text-sm uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 py-2"
-                  >
-                    Favourites
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/lookbook"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block text-sm uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 py-2"
-                  >
-                    Lookbook
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/about"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block text-sm uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 py-2"
-                  >
-                    About
-                  </Link>
-                </li>
+                {([
+                  { href: "/collection", label: "Collection" },
+                  { href: "/favourites", label: "Favourites" },
+                  { href: "/lookbook", label: "Lookbook" },
+                  { href: "/about", label: "About" },
+                ] as const).map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      onClick={() => {
+                        trackClickNavLink({ link_text: link.label, link_url: link.href, location: "mobile_menu" });
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block text-sm uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 py-2"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
                 {!user && (
                   <li className="pt-6 border-t border-[var(--vsc-gray-200)]">
                     <Link

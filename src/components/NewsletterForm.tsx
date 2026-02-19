@@ -6,6 +6,7 @@ import {
   subscribeToNewsletter,
   type NewsletterFormState,
 } from "@/app/newsletter-actions";
+import { trackNewsletterSignup } from "@/lib/analytics";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -33,6 +34,7 @@ export function NewsletterForm() {
   useEffect(() => {
     if (state?.success) {
       setShowSuccess(true);
+      trackNewsletterSignup({ method: "form", location: "footer" });
       const timer = setTimeout(() => setShowSuccess(false), 4000);
       return () => clearTimeout(timer);
     }

@@ -13,6 +13,16 @@ import { useCart } from "@/context/CartContext"
 import { useAuth } from "@/context/AuthContext"
 import { useCurrency } from "@/context/CurrencyContext"
 import { useFavourites } from "@/context/FavouritesContext"
+import {
+    trackViewItem,
+    trackAddToCart,
+    trackAddToWishlist,
+    trackRemoveFromWishlist,
+    trackSelectSize,
+    trackSelectColor,
+    trackChangeQuantity,
+    trackImageGalleryNavigate,
+} from "@/lib/analytics"
 
 export interface StockBySize {
     size: string;
@@ -108,6 +118,22 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
     const canAddToCart =
         hasRequiredSelections && stockForSelectedSize > 0 && quantity <= stockForSelectedSize
 
+    useEffect(() => {
+        trackViewItem({
+            currency: "INR",
+            value: product.price,
+            items: [{
+                item_id: product.id,
+                item_name: product.name,
+                price: product.price,
+                item_variant: selectedSize || undefined,
+                item_category: selectedColor || undefined,
+            }],
+        })
+    // Fire once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [product.id])
+
     // Cap quantity to available stock when size or stock changes
     useEffect(() => {
         if (stockForSelectedSize > 0 && quantity > stockForSelectedSize) {
@@ -139,16 +165,20 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
 
     const showPrevImage = () => {
         if (!hasMultipleImages) return
-        setSelectedImageIndex((prev) =>
-            prev === 0 ? product.images.length - 1 : prev - 1
-        )
+        setSelectedImageIndex((prev) => {
+            const next = prev === 0 ? product.images.length - 1 : prev - 1
+            trackImageGalleryNavigate({ item_id: product.id, item_name: product.name, image_index: next, method: "prev" })
+            return next
+        })
     }
 
     const showNextImage = () => {
         if (!hasMultipleImages) return
-        setSelectedImageIndex((prev) =>
-            prev === product.images.length - 1 ? 0 : prev + 1
-        )
+        setSelectedImageIndex((prev) => {
+            const next = prev === product.images.length - 1 ? 0 : prev + 1
+            trackImageGalleryNavigate({ item_id: product.id, item_name: product.name, image_index: next, method: "next" })
+            return next
+        })
     }
 
     return (
@@ -291,7 +321,10 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                 {product.images.map((image, i) => (
                                     <button
                                         key={i}
-                                        onClick={() => setSelectedImageIndex(i)}
+                                        onClick={() => {
+                                            setSelectedImageIndex(i)
+                                            trackImageGalleryNavigate({ item_id: product.id, item_name: product.name, image_index: i, method: "thumbnail" })
+                                        }}
                                         className={`relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 shrink-0 overflow-hidden border-2 transition-colors ${selectedImageIndex === i
                                             ? "border-[var(--vsc-accent)]"
                                             : "border-[var(--vsc-gray-700)] hover:border-[var(--vsc-gray-600)]"
@@ -370,7 +403,10 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                                 <button
                                                     key={color}
                                                     type="button"
-                                                    onClick={() => setSelectedColor(color)}
+                                                    onClick={() => {
+                                                        setSelectedColor(color)
+                                                        trackSelectColor({ item_id: product.id, item_name: product.name, color })
+                                                    }}
                                                     className={`w-8 h-8 shrink-0 border-2 transition-all duration-200 ${selectedColor === color
                                                         ? "border-[var(--vsc-accent)] ring-2 ring-[var(--vsc-accent)] ring-offset-2 ring-offset-[var(--vsc-black)]"
                                                         : "border-[var(--vsc-gray-700)] hover:border-[var(--vsc-gray-500)]"
@@ -382,7 +418,10 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                             ) : (
                                                 <button
                                                     key={color}
-                                                    onClick={() => setSelectedColor(color)}
+                                                    onClick={() => {
+                                                        setSelectedColor(color)
+                                                        trackSelectColor({ item_id: product.id, item_name: product.name, color })
+                                                    }}
                                                     className={`px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] border transition-all duration-200 ${selectedColor === color
                                                         ? "bg-[var(--vsc-accent)] text-[var(--vsc-black)] border-[var(--vsc-accent)]"
                                                         : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)]"
@@ -415,7 +454,11 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                                     key={size}
                                                     type="button"
                                                     disabled={!inStock}
-                                                    onClick={() => inStock && setSelectedSize(size)}
+                                                    onClick={() => {
+                                                        if (!inStock) return
+                                                        setSelectedSize(size)
+                                                        trackSelectSize({ item_id: product.id, item_name: product.name, size })
+                                                    }}
                                                     className={`px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] border-2 transition-all duration-200 ${!inStock
                                                         ? "opacity-50 cursor-not-allowed border-[var(--vsc-gray-700)] text-[var(--vsc-gray-500)]"
                                                         : selectedSize === size
@@ -466,7 +509,11 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                 </span>
                                 <div className="flex items-center border border-[var(--vsc-gray-700)] inline-flex">
                                     <button
-                                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                        onClick={() => {
+                                            const next = Math.max(1, quantity - 1)
+                                            trackChangeQuantity({ item_id: product.id, item_name: product.name, quantity: next, previous_quantity: quantity })
+                                            setQuantity(next)
+                                        }}
                                         className="px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                     >
@@ -480,7 +527,11 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                     </span>
                                     <button
                                         type="button"
-                                        onClick={() => setQuantity(Math.min(quantity + 1, stockForSelectedSize))}
+                                        onClick={() => {
+                                            const next = Math.min(quantity + 1, stockForSelectedSize)
+                                            trackChangeQuantity({ item_id: product.id, item_name: product.name, quantity: next, previous_quantity: quantity })
+                                            setQuantity(next)
+                                        }}
                                         disabled={quantity >= stockForSelectedSize}
                                         className="px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold text-[var(--vsc-white)] hover:text-[var(--vsc-accent)] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
@@ -529,8 +580,20 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                         name: product.name,
                                         price: product.price,
                                         image: product.images[0] ?? "",
-                                        size: selectedSize || "OS", // Only "OS" if no sizes available
+                                        size: selectedSize || "OS",
                                         quantity,
+                                    })
+                                    trackAddToCart({
+                                        currency: "INR",
+                                        value: product.price * quantity,
+                                        items: [{
+                                            item_id: product.id,
+                                            item_name: product.name,
+                                            price: product.price,
+                                            quantity,
+                                            item_variant: selectedSize || "OS",
+                                            item_category: selectedColor || undefined,
+                                        }],
                                     })
                                 }}
                                 className={`w-full py-2.5 sm:py-3 text-xs sm:text-sm font-bold uppercase tracking-[0.2em] transition-all duration-200 ${canAddToCart
@@ -556,6 +619,7 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                         router.push(`/login?redirect=/product/${product.slug}`)
                                         return
                                     }
+                                    const wasAlreadyFavourite = isFavourite(product.id)
                                     toggleFavourite({
                                         id: product.id,
                                         name: product.name,
@@ -563,6 +627,12 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                         price: product.price,
                                         image: product.images[0] ?? "",
                                     })
+                                    const wishlistItem = { item_id: product.id, item_name: product.name, price: product.price }
+                                    if (wasAlreadyFavourite) {
+                                        trackRemoveFromWishlist({ currency: "INR", value: product.price, items: [wishlistItem] })
+                                    } else {
+                                        trackAddToWishlist({ currency: "INR", value: product.price, items: [wishlistItem] })
+                                    }
                                 }}
                                 className="mt-3 w-full py-2 border border-[var(--vsc-gray-700)] text-xs font-bold uppercase tracking-[0.18em] text-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors duration-200"
                                 style={{ fontFamily: "var(--font-space-mono)" }}
