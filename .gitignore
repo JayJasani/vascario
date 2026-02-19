@@ -45,3 +45,4 @@ next-env.d.ts
 # Firebase
 firebase-service-account.json
 *-firebase-adminsdk-*.json
+.unlighthouse/

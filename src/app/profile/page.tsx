@@ -8,10 +8,13 @@ import { Footer } from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { useUserProfile } from "@/context/UserProfileContext";
 import type { UserAddress } from "@/app/api/users/route";
+import { getPageMetadata } from "@/lib/seo-config";
 
 const inputClass =
   "w-full px-5 py-3.5 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-sm tracking-[0.1em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]";
 const labelClass = "text-[10px] uppercase tracking-[0.25em] text-[var(--vsc-gray-600)]";
+
+export const metadata = getPageMetadata("profile");
 
 function newAddress(): UserAddress {
   return {

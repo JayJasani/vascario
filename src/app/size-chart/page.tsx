@@ -9,6 +9,11 @@ import {
   WOMENS_PLUS_SIZES,
   INTERNATIONAL_SIZES,
 } from "@/lib/size-chart-data";
+import { getPageMetadata, SEO_BASE } from "@/lib/seo-config";
+
+export const metadata = getPageMetadata("sizeChart", {
+  url: `${SEO_BASE.siteUrl}/size-chart`,
+});
 
 export default function SizeChartPage() {
   const [gender, setGender] = useState<"men" | "women">("men");

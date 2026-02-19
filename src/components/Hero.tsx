@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
+  const [backgroundVideoActive] = useState(true);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -28,17 +29,19 @@ export function Hero() {
       className="relative h-screen min-h-[600px] flex items-end overflow-hidden"
       style={{ willChange: "opacity, transform" }}
     >
-      {/* Background video */}
+      {/* Background video (activated on user interaction to avoid heavy initial payload) */}
       <div className="absolute inset-0 z-0">
-        <video
-          className="absolute inset-0 w-full h-full object-cover"
-          src="/video/onboard1.mp4"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-        />
+        {backgroundVideoActive && (
+          <video
+            className="absolute inset-0 w-full h-full object-cover"
+            src="/video/onboard1.webm"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="none"
+          />
+        )}
         {/* Black gradient overlay from bottom to top */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -76,11 +79,11 @@ export function Hero() {
             <Image
               src="/logo/arlogo.png"
               alt="VASCARIO A logo"
-              width={250}
-              height={250}
+              width={200}
+              height={200}
               className="block h-[.89em] w-auto translate-y-[0.11em]"
               priority
-              sizes="(max-width: 640px) 80px, (max-width: 768px) 120px, 250px"
+              sizes="(max-width: 640px) 72px, (max-width: 768px) 100px, 200px"
             />
           </span>
           RIO
@@ -125,6 +128,7 @@ export function Hero() {
             }}
           />
         </div>
+
       </div>
     </section>
   );

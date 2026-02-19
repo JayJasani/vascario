@@ -1,11 +1,12 @@
 "use client"
 
 import Image from "next/image"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { getImageAlt } from "@/lib/seo-utils"
 
 export function EditorialSection() {
     const sectionRef = useRef<HTMLElement>(null)
+    const [hasEnteredViewport, setHasEnteredViewport] = useState(false)
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -13,6 +14,7 @@ export function EditorialSection() {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add("visible")
+                        setHasEnteredViewport(true)
                     }
                 })
             },
@@ -58,17 +60,20 @@ export function EditorialSection() {
             {/* Asymmetric editorial grid */}
             <div className="px-6 md:px-12 lg:px-20">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
-                    {/* Large editorial image */}
+                    {/* Large editorial image / motion, only loaded once the section enters the viewport */}
                     <div className="md:col-span-7 reveal">
                         <div className="relative aspect-[4/5] bg-[var(--vsc-gray-900)] overflow-hidden border border-[var(--vsc-gray-700)] group">
-                            <video
-                                className="absolute inset-0 w-full h-full object-cover"
-                                src="/video/onboard2.mp4"
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                            />
+                            {hasEnteredViewport && (
+                                <video
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                    src="/video/onboard2.webm"
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
+                                    preload="none"
+                                />
+                            )}
                             <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
                                 <div className="absolute inset-0 opacity-[0.06]"
                                     style={{

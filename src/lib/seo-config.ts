@@ -396,6 +396,34 @@ export const SEO_PAGES = {
     description: "Manage your Vascario account settings, orders, and preferences.",
     keywords: [],
   },
+
+  login: {
+    title: "Login or Create Account | Vascario Premium Streetwear",
+    description:
+      "Sign in or create your Vascario account to sync your shopping bag, favourites, and checkout across devices.",
+    keywords: [
+      "Vascario login",
+      "Vascario account",
+      "sign in Vascario",
+      "create account Vascario",
+      "streetwear account login",
+      ...SEO_KEYWORDS.brand,
+    ],
+  },
+
+  orderSuccess: {
+    title: "Order Confirmed | Thank You for Shopping Vascario",
+    description:
+      "Your Vascario order is confirmed. View your digital receipt, print your order details, and continue shopping premium embroidered streetwear.",
+    keywords: [
+      "order confirmation",
+      "Vascario order confirmed",
+      "Vascario receipt",
+      "Vascario order success",
+      "streetwear order confirmation",
+      ...SEO_KEYWORDS.brand,
+    ],
+  },
 }
 
 // ─── METADATA GENERATOR FUNCTIONS ────────────────────────────────────────────

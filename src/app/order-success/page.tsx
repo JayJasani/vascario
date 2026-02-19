@@ -7,6 +7,11 @@ import { Printer } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { getPageMetadata, SEO_BASE } from "@/lib/seo-config";
+
+export const metadata = getPageMetadata("orderSuccess", {
+  url: `${SEO_BASE.siteUrl}/order-success`,
+});
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams();

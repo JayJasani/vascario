@@ -7,6 +7,9 @@ import { EyeIcon, ViewOffIcon } from "@hugeicons/core-free-icons";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
+import { getPageMetadata } from "@/lib/seo-config";
+
+export const metadata = getPageMetadata("login");
 
 function LoginForm() {
   const { user, loading, login, register } = useAuth();

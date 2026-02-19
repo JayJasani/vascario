@@ -1,11 +1,10 @@
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
+import { getPageMetadata, SEO_BASE } from "@/lib/seo-config"
 
-export const metadata = {
-  title: "Privacy Policy — VASCARIO",
-  description:
-    "Read Vascario's privacy policy to understand how we collect, use, and protect your information.",
-}
+export const metadata = getPageMetadata("privacy", {
+  url: `${SEO_BASE.siteUrl}/privacy-policy`,
+})
 
 export default function PrivacyPolicyPage() {
   return (

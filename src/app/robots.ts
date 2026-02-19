@@ -21,21 +21,12 @@ import { SEO_BASE } from "@/lib/seo-config"
 export default function robots(): MetadataRoute.Robots {
   const baseUrl = SEO_BASE.siteUrl
 
-  // Common disallow paths for all bots (private/user-specific pages)
+  // Common disallow paths for all bots (strictly private / system paths)
   const commonDisallow = [
     "/admin",
     "/admin/*",
     "/api",
     "/api/*",
-    "/checkout",
-    "/checkout/*",
-    "/cart",
-    "/profile",
-    "/profile/*",
-    "/favourites",
-    "/order-success",
-    "/login",
-    "/login/*",
     // Block search parameters and filters that create duplicate content
     "/*?search=*",
     "/*?filter=*",

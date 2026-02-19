@@ -9,6 +9,9 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/context/AuthContext"
+import { getPageMetadata } from "@/lib/seo-config"
+
+export const metadata = getPageMetadata("checkout")
 
 const stepVariants = {
     enter: (direction: number) => ({

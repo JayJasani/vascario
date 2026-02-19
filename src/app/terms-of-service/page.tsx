@@ -1,11 +1,10 @@
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
+import { getPageMetadata, SEO_BASE } from "@/lib/seo-config"
 
-export const metadata = {
-  title: "Terms of Service — VASCARIO",
-  description:
-    "Read Vascario's terms of service to understand the conditions that govern use of this site and our services.",
-}
+export const metadata = getPageMetadata("terms", {
+  url: `${SEO_BASE.siteUrl}/terms-of-service`,
+})
 
 export default function TermsOfServicePage() {
   return (

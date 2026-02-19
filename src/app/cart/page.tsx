@@ -8,6 +8,9 @@ import Link from "next/link"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { useAuth } from "@/context/AuthContext"
+import { getPageMetadata } from "@/lib/seo-config"
+
+export const metadata = getPageMetadata("cart")
 
 export default function CartPage() {
     const { user } = useAuth()
