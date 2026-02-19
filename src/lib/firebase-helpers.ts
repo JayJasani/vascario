@@ -869,3 +869,133 @@ export async function getNewsletterSubscriptions(): Promise<NewsletterSubscripti
         } as NewsletterSubscription;
     });
 }
+
+// ─── STATIC CONTENT HELPERS ────────────────────────────────────────────────────────
+
+export interface StaticContent {
+    id: string;
+    key: string; // "onboard1", "onboard2", "tshirtCloseup"
+    url: string; // Firebase Storage URL or public URL
+    type: "video" | "image"; // Content type
+    redirectUrl?: string | null; // Optional redirect URL when content is clicked
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+/**
+ * Get static content by key (e.g., "onboard1", "onboard2", "tshirtCloseup")
+ */
+export async function getStaticContentByKey(key: string): Promise<StaticContent | null> {
+    const snapshot = await db
+        .collection(COLLECTIONS.STATIC_CONTENT)
+        .where("key", "==", key)
+        .limit(1)
+        .get();
+
+    if (snapshot.empty) return null;
+
+    const doc = snapshot.docs[0];
+    const data = doc.data();
+    return {
+        id: doc.id,
+        key: data.key as string,
+        url: data.url as string,
+        type: data.type as "video" | "image",
+        redirectUrl: (data.redirectUrl as string | null) || null,
+        createdAt: toDate(data.createdAt),
+        updatedAt: toDate(data.updatedAt),
+    };
+}
+
+/**
+ * Get all static content items
+ */
+export async function getAllStaticContent(): Promise<StaticContent[]> {
+    const snapshot = await db
+        .collection(COLLECTIONS.STATIC_CONTENT)
+        .orderBy("key", "asc")
+        .get();
+
+    return snapshot.docs.map((doc: DocumentSnapshot) => {
+        const data = doc.data();
+        if (!data) throw new Error(`StaticContent document ${doc.id} has no data`);
+        return {
+            id: doc.id,
+            key: data.key as string,
+            url: data.url as string,
+            type: data.type as "video" | "image",
+            redirectUrl: (data.redirectUrl as string | null) || null,
+            createdAt: toDate(data.createdAt),
+            updatedAt: toDate(data.updatedAt),
+        } as StaticContent;
+    });
+}
+
+/**
+ * Create or update static content
+ */
+export async function upsertStaticContent(
+    key: string,
+    url: string,
+    type: "video" | "image",
+    redirectUrl?: string | null
+): Promise<StaticContent> {
+    const now = new Date();
+    
+    // Check if content with this key already exists
+    const existing = await getStaticContentByKey(key);
+    
+    if (existing) {
+        // Update existing
+        const updateData: Record<string, unknown> = {
+            url,
+            type,
+            updatedAt: toTimestamp(now),
+        };
+        
+        if (redirectUrl !== undefined) {
+            updateData.redirectUrl = redirectUrl || null;
+        }
+        
+        await db.collection(COLLECTIONS.STATIC_CONTENT).doc(existing.id).update(updateData);
+        
+        return {
+            ...existing,
+            url,
+            type,
+            redirectUrl: redirectUrl !== undefined ? (redirectUrl || null) : existing.redirectUrl,
+            updatedAt: now,
+        };
+    } else {
+        // Create new
+        const ref = db.collection(COLLECTIONS.STATIC_CONTENT).doc();
+        await ref.set({
+            key,
+            url,
+            type,
+            redirectUrl: redirectUrl || null,
+            createdAt: toTimestamp(now),
+            updatedAt: toTimestamp(now),
+        });
+        
+        return {
+            id: ref.id,
+            key,
+            url,
+            type,
+            redirectUrl: redirectUrl || null,
+            createdAt: now,
+            updatedAt: now,
+        };
+    }
+}
+
+/**
+ * Delete static content by key
+ */
+export async function deleteStaticContent(key: string): Promise<void> {
+    const content = await getStaticContentByKey(key);
+    if (content) {
+        await db.collection(COLLECTIONS.STATIC_CONTENT).doc(content.id).delete();
+    }
+}

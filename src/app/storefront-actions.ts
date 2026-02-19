@@ -7,6 +7,7 @@ import {
     getProductBySlug as getProductBySlugHelper,
     getStockLevelsByProductId,
     getStockTotalsByProduct,
+    getStaticContentByKey,
 } from "@/lib/firebase-helpers";
 import { CACHE_TAGS } from "@/lib/storefront-cache";
 import type { SearchItem } from "@/lib/search-data";
@@ -180,4 +181,71 @@ export async function searchItems(query: string): Promise<SearchItem[]> {
         console.error("Error searching items:", error);
         return [];
     }
+}
+
+// ─── STATIC CONTENT ───────────────────────────────────────────────────────────────
+
+// Cache static content for 1 hour (3600 seconds) - fetched once per hour maximum
+const STATIC_CONTENT_CACHE_TIME = 3600;
+
+type StaticContentUrls = {
+    onboard1: string;
+    onboard2: string;
+    tshirtCloseup: string;
+    onboard1Redirect?: string | null;
+    onboard2Redirect?: string | null;
+    tshirtCloseupRedirect?: string | null;
+};
+
+/**
+ * Get all static content URLs at once (fetched once and cached for 1 hour).
+ * This ensures we only call Firebase once per hour instead of on every page load.
+ */
+async function getCachedStaticContent(): Promise<StaticContentUrls> {
+    const cachedFn = unstable_cache(
+        async (): Promise<StaticContentUrls> => {
+            try {
+                const [onboard1, onboard2, tshirtCloseup] = await Promise.all([
+                    getStaticContentByKey("onboard1"),
+                    getStaticContentByKey("onboard2"),
+                    getStaticContentByKey("tshirtCloseup"),
+                ]);
+
+                return {
+                    onboard1: onboard1?.url || "/video/onboard1.webm",
+                    onboard2: onboard2?.url || "/video/onboard2.webm",
+                    tshirtCloseup: tshirtCloseup?.url || "/tshirt/closeup.png",
+                    onboard1Redirect: onboard1?.redirectUrl || null,
+                    onboard2Redirect: onboard2?.redirectUrl || null,
+                    tshirtCloseupRedirect: tshirtCloseup?.redirectUrl || null,
+                };
+            } catch (error) {
+                console.error("Error fetching static content:", error);
+                // Return fallbacks on error
+                return {
+                    onboard1: "/video/onboard1.webm",
+                    onboard2: "/video/onboard2.webm",
+                    tshirtCloseup: "/tshirt/closeup.png",
+                    onboard1Redirect: null,
+                    onboard2Redirect: null,
+                    tshirtCloseupRedirect: null,
+                };
+            }
+        },
+        ["storefront", "static-content", "all"],
+        { 
+            revalidate: STATIC_CONTENT_CACHE_TIME, 
+            tags: [CACHE_TAGS.STATIC_CONTENT] 
+        }
+    );
+    
+    return await cachedFn();
+}
+
+/**
+ * Get all static content URLs. Fetched once per hour maximum.
+ * Returns an object with onboard1, onboard2, and tshirtCloseup URLs.
+ */
+export async function getStaticContentUrls(): Promise<StaticContentUrls> {
+    return await getCachedStaticContent();
 }
