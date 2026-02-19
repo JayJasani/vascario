@@ -7,6 +7,7 @@ import { EyeIcon, ViewOffIcon } from "@hugeicons/core-free-icons";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
+import { trackLogin, trackSignUp } from "@/lib/analytics";
 
 function LoginForm() {
   const { user, loading, login, register } = useAuth();
@@ -36,8 +37,10 @@ function LoginForm() {
     try {
       if (mode === "login") {
         await login(email, password);
+        trackLogin({ method: "email" });
       } else {
         await register(email, password, { firstName, lastName });
+        trackSignUp({ method: "email" });
       }
       router.replace(redirectTo);
     } catch (err: any) {

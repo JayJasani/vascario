@@ -1,15 +1,21 @@
 "use client";
 
 import { useEffect } from "react";
-import { trackGTMEvent } from "@/lib/gtmEvents";
+import { usePathname, useSearchParams } from "next/navigation";
+import { trackPageView } from "@/lib/analytics";
 
 export function GtmPageView() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   useEffect(() => {
-    trackGTMEvent("page_view", {
-      page_path: window.location.pathname,
+    const search = searchParams.toString();
+    trackPageView({
+      page_path: pathname + (search ? `?${search}` : ""),
+      page_title: document.title,
+      page_search: search || undefined,
     });
-  }, []);
+  }, [pathname, searchParams]);
 
   return null;
 }
-

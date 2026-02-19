@@ -5,10 +5,17 @@ import { useCurrency } from "@/context/CurrencyContext"
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
 import Link from "next/link"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/context/AuthContext"
+import {
+    trackBeginCheckout,
+    trackAddShippingInfo,
+    trackAddPaymentInfo,
+    trackPurchase,
+    type AnalyticsItem,
+} from "@/lib/analytics"
 
 const stepVariants = {
     enter: (direction: number) => ({
@@ -34,9 +41,33 @@ export default function CheckoutPageClient() {
     const [mounted, setMounted] = useState(false)
     const router = useRouter()
 
+    const beginCheckoutFired = useRef(false)
+
     useEffect(() => {
         setMounted(true)
     }, [])
+
+    const buildAnalyticsItems = (): AnalyticsItem[] =>
+        items.map((item, i) => ({
+            item_id: item.id,
+            item_name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            item_variant: item.size,
+            index: i,
+        }))
+
+    useEffect(() => {
+        if (mounted && items.length > 0 && !beginCheckoutFired.current) {
+            beginCheckoutFired.current = true
+            trackBeginCheckout({
+                currency: "INR",
+                value: cartTotal,
+                items: buildAnalyticsItems(),
+            })
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [mounted, items.length])
 
     // Form state
     const [shipping, setShipping] = useState({
@@ -56,6 +87,21 @@ export default function CheckoutPageClient() {
     })
 
     const goNext = () => {
+        if (step === 1) {
+            trackAddShippingInfo({
+                currency: "INR",
+                value: cartTotal,
+                items: buildAnalyticsItems(),
+                shipping_tier: "standard",
+            })
+        } else if (step === 2) {
+            trackAddPaymentInfo({
+                currency: "INR",
+                value: cartTotal,
+                items: buildAnalyticsItems(),
+                payment_type: "card",
+            })
+        }
         setDirection(1)
         setStep((s) => Math.min(s + 1, 3))
     }
@@ -65,7 +111,14 @@ export default function CheckoutPageClient() {
     }
 
     const handlePlaceOrder = () => {
-        const orderId = Math.floor(1000 + Math.random() * 9000)
+        const orderId = String(Math.floor(1000 + Math.random() * 9000))
+        trackPurchase({
+            transaction_id: orderId,
+            currency: "INR",
+            value: cartTotal,
+            items: buildAnalyticsItems(),
+            shipping: 0,
+        })
         clearCart()
         router.push(`/order-success?order=${orderId}`)
     }

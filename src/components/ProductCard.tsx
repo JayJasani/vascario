@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useCurrency } from "@/context/CurrencyContext"
 import { getImageAlt } from "@/lib/seo-utils"
+import { trackSelectItem } from "@/lib/analytics"
 
 interface Product {
   id: string
@@ -39,8 +40,20 @@ export function ProductCard({ product, variant = "default", aspectClass, href }:
   const aspect = aspectClass ?? "aspect-[3/4]"
   const targetHref = href ?? `/product/${product.slug}`
 
+  const handleClick = () => {
+    trackSelectItem({
+      item_list_id: "collection",
+      item_list_name: "Collection",
+      items: [{
+        item_id: product.id,
+        item_name: product.name,
+        price: product.price,
+      }],
+    })
+  }
+
   return (
-    <Link href={targetHref} className={linkClass}>
+    <Link href={targetHref} className={linkClass} onClick={handleClick}>
       {/* Image container with chromatic aberration */}
       <div
         className={`relative overflow-hidden bg-[var(--vsc-gray-800)] chromatic-hover ${aspect}`}

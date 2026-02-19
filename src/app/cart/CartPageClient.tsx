@@ -6,8 +6,13 @@ import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
 import Link from "next/link"
 import Image from "next/image"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useAuth } from "@/context/AuthContext"
+import {
+    trackViewCart,
+    trackRemoveFromCart,
+    trackChangeQuantity,
+} from "@/lib/analytics"
 
 export default function CartPageClient() {
     const { user } = useAuth()
@@ -15,9 +20,29 @@ export default function CartPageClient() {
     const { items, updateQuantity, removeItem, cartTotal, cartCount } = useCart()
     const [mounted, setMounted] = useState(false)
 
+    const viewCartFired = useRef(false)
+
     useEffect(() => {
         setMounted(true)
     }, [])
+
+    useEffect(() => {
+        if (mounted && items.length > 0 && !viewCartFired.current) {
+            viewCartFired.current = true
+            trackViewCart({
+                currency: "INR",
+                value: cartTotal,
+                items: items.map((item, i) => ({
+                    item_id: item.id,
+                    item_name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    item_variant: item.size,
+                    index: i,
+                })),
+            })
+        }
+    }, [mounted, items, cartTotal])
 
     const shipping = cartTotal > 0 ? 0 : 0
     const total = cartTotal + shipping
@@ -101,7 +126,14 @@ export default function CartPageClient() {
                                     >
                                         {/* Remove button */}
                                         <button
-                                            onClick={() => removeItem(item.id, item.size)}
+                                            onClick={() => {
+                                                trackRemoveFromCart({
+                                                    currency: "INR",
+                                                    value: item.price * item.quantity,
+                                                    items: [{ item_id: item.id, item_name: item.name, price: item.price, quantity: item.quantity, item_variant: item.size }],
+                                                })
+                                                removeItem(item.id, item.size)
+                                            }}
                                             className="absolute top-2 right-2 sm:top-3 sm:right-3 z-20 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-[var(--vsc-white)] border-2 border-[var(--vsc-gray-300)] text-[var(--vsc-gray-500)] hover:border-[#ef4444] hover:text-[#ef4444] hover:bg-[var(--vsc-cream)] transition-all duration-200 active:scale-90 text-sm sm:text-base"
                                             style={{ fontFamily: "var(--font-space-mono)" }}
                                         >
@@ -173,11 +205,19 @@ export default function CartPageClient() {
                                                 {/* Quantity Controls — Squishy */}
                                                 <div className="flex items-center gap-0 border-2 border-[var(--vsc-white)]">
                                                     <button
-                                                        onClick={() =>
-                                                            item.quantity > 1
-                                                                ? updateQuantity(item.id, item.size, item.quantity - 1)
-                                                                : removeItem(item.id, item.size)
-                                                        }
+                                                        onClick={() => {
+                                                            if (item.quantity > 1) {
+                                                                trackChangeQuantity({ item_id: item.id, item_name: item.name, quantity: item.quantity - 1, previous_quantity: item.quantity })
+                                                                updateQuantity(item.id, item.size, item.quantity - 1)
+                                                            } else {
+                                                                trackRemoveFromCart({
+                                                                    currency: "INR",
+                                                                    value: item.price,
+                                                                    items: [{ item_id: item.id, item_name: item.name, price: item.price, quantity: 1, item_variant: item.size }],
+                                                                })
+                                                                removeItem(item.id, item.size)
+                                                            }
+                                                        }}
                                                         className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-[var(--vsc-gray-100)] text-[var(--vsc-gray-900)] text-base sm:text-lg font-bold hover:bg-[var(--vsc-gray-200)] hover:text-[var(--vsc-gray-900)] transition-all duration-150 active:scale-[0.85] select-none"
                                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                                     >
@@ -190,7 +230,10 @@ export default function CartPageClient() {
                                                         {item.quantity}
                                                     </span>
                                                     <button
-                                                        onClick={() => updateQuantity(item.id, item.size, item.quantity + 1)}
+                                                        onClick={() => {
+                                                            trackChangeQuantity({ item_id: item.id, item_name: item.name, quantity: item.quantity + 1, previous_quantity: item.quantity })
+                                                            updateQuantity(item.id, item.size, item.quantity + 1)
+                                                        }}
                                                         className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-[var(--vsc-gray-100)] text-[var(--vsc-gray-900)] text-base sm:text-lg font-bold hover:bg-[var(--vsc-gray-200)] hover:text-[var(--vsc-gray-900)] transition-all duration-150 active:scale-[0.85] select-none"
                                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                                     >

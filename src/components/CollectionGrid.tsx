@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from "react"
 import { ProductCard } from "@/components/ProductCard"
+import { trackViewItemList } from "@/lib/analytics"
 
 // Varying aspect ratios for staggered masonry effect
 const ASPECTS = ["aspect-[3/4]", "aspect-[4/5]", "aspect-square", "aspect-[5/6]", "aspect-[2/3]"]
@@ -21,6 +22,23 @@ interface CollectionGridProps {
 
 export function CollectionGrid({ products }: CollectionGridProps) {
   const sectionRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (products.length > 0) {
+      trackViewItemList({
+        item_list_id: "collection",
+        item_list_name: "Collection",
+        items: products.map((p, i) => ({
+          item_id: p.id,
+          item_name: p.name,
+          price: p.price,
+          index: i,
+          item_list_id: "collection",
+          item_list_name: "Collection",
+        })),
+      })
+    }
+  }, [products])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
