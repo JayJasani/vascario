@@ -25,7 +25,7 @@ import { getImageAlt } from "@/lib/seo-utils";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, useRef, type ReactNode } from "react";
 
 export interface StockBySize {
   size: string;
@@ -101,10 +101,16 @@ export function ProductDetailClient({
 }: {
   product: ProductDetailData;
 }) {
-  const [selectedSize, setSelectedSize] = useState<string>("");
+  // Set "M" as default size if available, otherwise empty string
+  const defaultSize = product.sizes.includes("M") ? "M" : "";
+  const [selectedSize, setSelectedSize] = useState<string>(defaultSize);
   const [selectedColor, setSelectedColor] = useState(product.colors[0] || "");
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isZoomActive, setIsZoomActive] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const imageContainerRef = useRef<HTMLDivElement>(null);
   const { addItem } = useCart();
   const { user, loading } = useAuth();
   const { formatPrice, currencyCode } = useCurrency();
@@ -200,6 +206,37 @@ export function ProductDetailClient({
     });
   };
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!imageContainerRef.current || !currentImage) return;
+
+    const rect = imageContainerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // Calculate percentage position (0-100)
+    const percentX = (x / rect.width) * 100;
+    const percentY = (y / rect.height) * 100;
+
+    // Clamp values to stay within bounds
+    const clampedX = Math.max(0, Math.min(100, percentX));
+    const clampedY = Math.max(0, Math.min(100, percentY));
+
+    setMousePosition({ x: clampedX, y: clampedY });
+    // For zoom preview, we want to show the area under the lens
+    // The background position should match the lens position
+    setZoomPosition({ x: clampedX, y: clampedY });
+  };
+
+  const handleMouseEnter = () => {
+    if (currentImage) {
+      setIsZoomActive(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsZoomActive(false);
+  };
+
   return (
     <main className="min-h-screen">
       <ProductStructuredData product={product} />
@@ -245,24 +282,44 @@ export function ProductDetailClient({
         {/* Main content — layout */}
         <div className="px-4 sm:px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 md:gap-8">
           {/* Left — Image Gallery (slightly wider) */}
-          <div className="md:col-span-4 lg:col-span-4">
+          <div className="md:col-span-5 lg:col-span-5">
             {/* Main image – slightly smaller so details panel can grow */}
-            <div className="relative aspect-[4/5] max-h-[60vh] sm:max-h-[70vh] bg-[var(--vsc-gray-900)] overflow-hidden border border-[var(--vsc-gray-700)] group">
-              {currentImage ? (
-                <>
-                  <Image
-                    src={currentImage}
-                    alt={getImageAlt(
-                      "product",
-                      product.name,
-                      selectedImageIndex,
-                      product.images.length,
+            <div className="relative">
+              <div
+                ref={imageContainerRef}
+                className="relative aspect-[4/5] max-h-[70vh] sm:max-h-[80vh] md:max-h-[85vh] bg-[var(--vsc-gray-900)] overflow-hidden border border-[var(--vsc-gray-700)] group cursor-zoom-in"
+                onMouseMove={handleMouseMove}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
+                {currentImage ? (
+                  <>
+                    <Image
+                      src={currentImage}
+                      alt={getImageAlt(
+                        "product",
+                        product.name,
+                        selectedImageIndex,
+                        product.images.length,
+                      )}
+                      fill
+                      className="object-cover"
+                      priority
+                      sizes="(max-width: 768px) 100vw, 45vw"
+                    />
+                    {/* Zoom lens overlay */}
+                    {isZoomActive && (
+                      <div
+                        className="absolute pointer-events-none z-20 border-2 border-[var(--vsc-accent)] bg-[var(--vsc-accent)]/10 rounded-sm backdrop-blur-[1px]"
+                        style={{
+                          width: "clamp(120px, 25vw, 180px)",
+                          height: "clamp(120px, 25vw, 180px)",
+                          left: `clamp(0px, calc(${mousePosition.x}% - clamp(60px, 12.5vw, 90px)), calc(100% - clamp(120px, 25vw, 180px)))`,
+                          top: `clamp(0px, calc(${mousePosition.y}% - clamp(60px, 12.5vw, 90px)), calc(100% - clamp(120px, 25vw, 180px)))`,
+                          boxShadow: "0 0 0 1px rgba(0,0,0,0.3) inset",
+                        }}
+                      />
                     )}
-                    fill
-                    className="object-cover"
-                    priority
-                    sizes="(max-width: 768px) 100vw, 60vw"
-                  />
                   {/* Prev/Next controls */}
                   {hasMultipleImages && (
                     <>
@@ -284,22 +341,22 @@ export function ProductDetailClient({
                       </button>
                     </>
                   )}
-                  {/* Image number indicator */}
-                  <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 flex items-center gap-2 z-10 bg-[var(--vsc-black)]/50 px-2 sm:px-3 py-1 sm:py-1.5 backdrop-blur-sm">
-                    <div className="w-6 sm:w-8 h-px bg-[var(--vsc-accent)]" />
-                    <span
-                      className="text-[9px] sm:text-[10px] text-[var(--vsc-white)] uppercase tracking-[0.2em]"
-                      style={{ fontFamily: "var(--font-space-mono)" }}
-                    >
-                      {String(selectedImageIndex + 1).padStart(2, "0")} /{" "}
-                      {String(Math.max(product.images.length, 1)).padStart(
-                        2,
-                        "0",
-                      )}
-                    </span>
-                  </div>
-                </>
-              ) : (
+                    {/* Image number indicator */}
+                    <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 flex items-center gap-2 z-10 bg-[var(--vsc-black)]/50 px-2 sm:px-3 py-1 sm:py-1.5 backdrop-blur-sm">
+                      <div className="w-6 sm:w-8 h-px bg-white" />
+                      <span
+                        className="text-[9px] sm:text-[10px] text-[var(--vsc-white)] uppercase tracking-[0.2em]"
+                        style={{ fontFamily: "var(--font-space-mono)" }}
+                      >
+                        {String(selectedImageIndex + 1).padStart(2, "0")} /{" "}
+                        {String(Math.max(product.images.length, 1)).padStart(
+                          2,
+                          "0",
+                        )}
+                      </span>
+                    </div>
+                  </>
+                ) : (
                 <>
                   {/* Placeholder visual */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -341,6 +398,22 @@ export function ProductDetailClient({
                     </span>
                   </div>
                 </>
+              )}
+              </div>
+              
+              {/* Zoom preview panel - appears on hover (desktop only) */}
+              {isZoomActive && currentImage && (
+                <div className="hidden xl:block absolute left-full top-0 ml-6 w-[500px] aspect-[4/5] max-h-[70vh] sm:max-h-[80vh] md:max-h-[85vh] border border-[var(--vsc-gray-700)] bg-[var(--vsc-gray-900)] overflow-hidden z-30 pointer-events-none shadow-2xl">
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      backgroundImage: `url(${currentImage})`,
+                      backgroundSize: "300%",
+                      backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                      backgroundRepeat: "no-repeat",
+                    }}
+                  />
+                </div>
               )}
             </div>
 
@@ -419,7 +492,7 @@ export function ProductDetailClient({
               <div className="mb-6 sm:mb-8">
                 <h2
                   className="text-lg sm:text-xl font-bold text-[var(--vsc-white)] mb-3 sm:mb-4 uppercase tracking-[0.1em]"
-                  style={{ fontFamily: "var(--font-space-grotesk)" }}
+                  style={{ fontFamily: "var(--font-space-grotesk)", color: "black" }}
                 >
                   Product Details
                 </h2>
@@ -760,7 +833,7 @@ export function ProductDetailClient({
               <div className="mt-8 pt-6 border-t border-[var(--vsc-gray-700)]">
                 <h2
                   className="text-lg sm:text-xl font-bold text-[var(--vsc-white)] mb-4 uppercase tracking-[0.1em]"
-                  style={{ fontFamily: "var(--font-space-grotesk)" }}
+                  style={{ fontFamily: "var(--font-space-grotesk)", color: "black" }}
                 >
                   Additional Information
                 </h2>
@@ -832,11 +905,12 @@ export function ProductDetailClient({
                   letterSpacing: "-0.03em",
                   lineHeight: 0.95,
                   textTransform: "uppercase",
+                  color: "black",
                 }}
               >
                 Every stitch
                 <br />
-                <span className="text-[var(--vsc-accent)]">tells a story</span>
+                <span className="text-black">tells a story</span>
               </h2>
               <p
                 className="text-sm text-[var(--vsc-gray-400)] leading-relaxed max-w-md"
