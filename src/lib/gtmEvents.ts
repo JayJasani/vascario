@@ -1,22 +1,12 @@
-declare global {
-  interface Window {
-    dataLayer: Record<string, any>[];
-  }
-}
-
-function pushToDataLayer(event: Record<string, any>) {
-  if (typeof window === "undefined") return;
-  window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push(event);
-}
+/**
+ * @deprecated Use `@/lib/analytics` instead.
+ * This file re-exports a backward-compatible `trackGTMEvent` for any remaining callers.
+ */
+import { getAnalytics } from "./analytics";
 
 export function trackGTMEvent(
   event: string,
-  params: Record<string, any> = {},
+  params: Record<string, unknown> = {},
 ): void {
-  pushToDataLayer({
-    event,
-    ...params,
-  });
+  getAnalytics().track(event as never, params as never);
 }
-

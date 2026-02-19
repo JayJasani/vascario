@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { submitContactAction } from "./contact-actions";
+import { trackContactFormSubmit } from "@/lib/analytics";
 
 const inputClass =
   "w-full px-5 py-4 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-sm placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)] transition-colors";
@@ -13,6 +14,14 @@ export function ContactForm() {
     submitContactAction,
     null
   );
+
+  const contactTracked = useRef(false);
+  useEffect(() => {
+    if (state?.success && !contactTracked.current) {
+      contactTracked.current = true;
+      trackContactFormSubmit({ form_id: "contact" });
+    }
+  }, [state?.success]);
 
   if (state?.success) {
     return (

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
+import { Suspense } from "react";
 import { SmoothScroller } from "@/components/SmoothScroller";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { GoogleTagManagerHead, GoogleTagManagerNoScript } from "@/components/GoogleTagManager";
@@ -50,7 +51,9 @@ export default function RootLayout({
               <CurrencyProvider>
                 <CartProvider>
                   <FavouritesProvider>
-                    <GtmPageView />
+                    <Suspense fallback={null}>
+                      <GtmPageView />
+                    </Suspense>
                     <ScrollToTop />
                     {children}
                   </FavouritesProvider>
