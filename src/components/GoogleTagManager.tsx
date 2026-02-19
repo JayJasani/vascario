@@ -3,10 +3,12 @@
 import Script from "next/script";
 
 export const GTM_ID = "GTM-PN35346F";
+const GA4_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID;
 
 export function GoogleTagManagerHead() {
   return (
     <>
+      {/* Google Tag Manager */}
       <Script
         id="gtm-base"
         strategy="afterInteractive"
@@ -18,6 +20,29 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','${GTM_ID}');`,
         }}
       />
+      {/* Google Analytics 4 */}
+      {GA4_MEASUREMENT_ID && (
+        <>
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}`}
+            strategy="afterInteractive"
+          />
+          <Script
+            id="ga4-config"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA4_MEASUREMENT_ID}', {
+                  page_path: window.location.pathname,
+                });
+              `,
+            }}
+          />
+        </>
+      )}
     </>
   );
 }
