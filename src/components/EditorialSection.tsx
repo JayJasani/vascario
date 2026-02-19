@@ -4,7 +4,19 @@ import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 import { getImageAlt } from "@/lib/seo-utils"
 
-export function EditorialSection() {
+interface EditorialSectionProps {
+  onboard2VideoUrl?: string;
+  tshirtCloseupUrl?: string;
+  onboard2RedirectUrl?: string;
+  tshirtCloseupRedirectUrl?: string;
+}
+
+export function EditorialSection({ 
+  onboard2VideoUrl = "/video/onboard2.webm",
+  tshirtCloseupUrl = "/tshirt/closeup.png",
+  onboard2RedirectUrl,
+  tshirtCloseupRedirectUrl,
+}: EditorialSectionProps) {
     const sectionRef = useRef<HTMLElement>(null)
     const [hasEnteredViewport, setHasEnteredViewport] = useState(false)
 
@@ -62,11 +74,28 @@ export function EditorialSection() {
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
                     {/* Large editorial image / motion, only loaded once the section enters the viewport */}
                     <div className="md:col-span-7 reveal">
-                        <div className="relative aspect-[4/5] bg-[var(--vsc-gray-900)] overflow-hidden border border-[var(--vsc-gray-700)] group">
+                        <div 
+                            className={`relative aspect-[4/5] bg-[var(--vsc-gray-900)] overflow-hidden border border-[var(--vsc-gray-700)] group ${onboard2RedirectUrl ? 'cursor-pointer' : ''}`}
+                            onClick={(e) => {
+                                if (onboard2RedirectUrl) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    window.open(onboard2RedirectUrl, '_blank', 'noopener,noreferrer');
+                                }
+                            }}
+                            role={onboard2RedirectUrl ? "button" : undefined}
+                            tabIndex={onboard2RedirectUrl ? 0 : undefined}
+                            onKeyDown={(e) => {
+                                if (onboard2RedirectUrl && (e.key === 'Enter' || e.key === ' ')) {
+                                    e.preventDefault();
+                                    window.open(onboard2RedirectUrl, '_blank', 'noopener,noreferrer');
+                                }
+                            }}
+                        >
                             {hasEnteredViewport && (
                                 <video
                                     className="absolute inset-0 w-full h-full object-cover"
-                                    src="/video/onboard2.webm"
+                                    src={onboard2VideoUrl}
                                     autoPlay
                                     loop
                                     muted
@@ -102,9 +131,26 @@ export function EditorialSection() {
                     <div className="md:col-span-5 flex flex-col gap-6 md:gap-10">
                         {/* Smaller image */}
                         <div className="reveal" style={{ transitionDelay: "100ms" }}>
-                            <div className="relative aspect-square bg-[var(--vsc-gray-900)] overflow-hidden border border-[var(--vsc-gray-700)] group">
+                            <div 
+                                className={`relative aspect-square bg-[var(--vsc-gray-900)] overflow-hidden border border-[var(--vsc-gray-700)] group ${tshirtCloseupRedirectUrl ? 'cursor-pointer' : ''}`}
+                                onClick={(e) => {
+                                    if (tshirtCloseupRedirectUrl) {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        window.open(tshirtCloseupRedirectUrl, '_blank', 'noopener,noreferrer');
+                                    }
+                                }}
+                                role={tshirtCloseupRedirectUrl ? "button" : undefined}
+                                tabIndex={tshirtCloseupRedirectUrl ? 0 : undefined}
+                                onKeyDown={(e) => {
+                                    if (tshirtCloseupRedirectUrl && (e.key === 'Enter' || e.key === ' ')) {
+                                        e.preventDefault();
+                                        window.open(tshirtCloseupRedirectUrl, '_blank', 'noopener,noreferrer');
+                                    }
+                                }}
+                            >
                                 <Image
-                                    src="/tshirt/closeup.png"
+                                    src={tshirtCloseupUrl}
                                     alt={getImageAlt("editorial")}
                                     fill
                                     className="object-cover"

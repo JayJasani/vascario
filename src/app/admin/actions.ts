@@ -20,7 +20,12 @@ import {
     getLowStockAlerts,
     createStockLevel,
     getNewsletterSubscriptions,
+    getAllStaticContent,
+    getStaticContentByKey,
+    upsertStaticContent,
+    deleteStaticContent,
     type OrderStatus,
+    type StaticContent,
 } from "@/lib/firebase-helpers";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/storefront-cache";
@@ -395,4 +400,58 @@ export async function updateStock(
 
     revalidatePath("/admin/inventory");
     revalidatePath("/admin");
+}
+
+// ─── STATIC CONTENT ───────────────────────────────────────────────────────────────
+
+export async function getStaticContent() {
+    return await getAllStaticContent();
+}
+
+export async function updateStaticContent(
+    key: string, 
+    url: string, 
+    type: "video" | "image",
+    redirectUrl?: string | null
+) {
+    const content = await upsertStaticContent(key, url, type, redirectUrl);
+
+    await createAuditLog({
+        action: "STATIC_CONTENT_UPDATED",
+        entity: "StaticContent",
+        entityId: content.id,
+        details: {
+            key,
+            url,
+            type,
+            redirectUrl: redirectUrl || null,
+        },
+    });
+
+    revalidatePath("/admin/static-content");
+    revalidatePath("/");
+    revalidateTag(CACHE_TAGS.STATIC_CONTENT);
+    
+    return content;
+}
+
+export async function deleteStaticContentAction(key: string) {
+    const content = await getStaticContentByKey(key);
+    
+    if (content) {
+        await deleteStaticContent(key);
+        
+        await createAuditLog({
+            action: "STATIC_CONTENT_DELETED",
+            entity: "StaticContent",
+            entityId: content.id,
+            details: {
+                key,
+            },
+        });
+    }
+
+    revalidatePath("/admin/static-content");
+    revalidatePath("/");
+    revalidateTag(CACHE_TAGS.STATIC_CONTENT);
 }

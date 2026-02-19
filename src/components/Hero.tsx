@@ -3,7 +3,12 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
-export function Hero() {
+interface HeroProps {
+  onboard1VideoUrl?: string;
+  redirectUrl?: string;
+}
+
+export function Hero({ onboard1VideoUrl = "/video/onboard1.webm", redirectUrl }: HeroProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const [backgroundVideoActive] = useState(true);
 
@@ -30,11 +35,28 @@ export function Hero() {
       style={{ willChange: "opacity, transform" }}
     >
       {/* Background video (activated on user interaction to avoid heavy initial payload) */}
-      <div className="absolute inset-0 z-0">
+      <div 
+        className={`absolute inset-0 z-0 ${redirectUrl ? 'cursor-pointer' : ''}`}
+        onClick={(e) => {
+          if (redirectUrl) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.open(redirectUrl, '_blank', 'noopener,noreferrer');
+          }
+        }}
+        role={redirectUrl ? "button" : undefined}
+        tabIndex={redirectUrl ? 0 : undefined}
+        onKeyDown={(e) => {
+          if (redirectUrl && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            window.open(redirectUrl, '_blank', 'noopener,noreferrer');
+          }
+        }}
+      >
         {backgroundVideoActive && (
           <video
             className="absolute inset-0 w-full h-full object-cover"
-            src="/video/onboard1.webm"
+            src={onboard1VideoUrl}
             autoPlay
             loop
             muted
