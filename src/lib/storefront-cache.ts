@@ -3,4 +3,5 @@ export const CACHE_TAGS = {
     activeProducts: "storefront-active-products",
     product: (id: string) => `storefront-product-${id}`,
     STATIC_CONTENT: "static-content",
+    reviews: "storefront-reviews",
 } as const;

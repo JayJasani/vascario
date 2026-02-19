@@ -42,6 +42,15 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <GoogleTagManagerHead />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (typeof window !== 'undefined' && 'scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+              }
+            `,
+          }}
+        />
       </head>
       <body className={`${spaceGrotesk.variable} ${spaceMono.variable}`}>
         <GoogleTagManagerNoScript />

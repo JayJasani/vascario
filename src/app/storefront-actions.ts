@@ -8,6 +8,7 @@ import {
     getStockLevelsByProductId,
     getStockTotalsByProduct,
     getStaticContentByKey,
+    getActiveReviews as getActiveReviewsHelper,
 } from "@/lib/firebase-helpers";
 import { CACHE_TAGS } from "@/lib/storefront-cache";
 import type { SearchItem } from "@/lib/search-data";
@@ -248,4 +249,31 @@ async function getCachedStaticContent(): Promise<StaticContentUrls> {
  */
 export async function getStaticContentUrls(): Promise<StaticContentUrls> {
     return await getCachedStaticContent();
+}
+
+// ─── USER REVIEWS (ADMIN-MANAGED) ─────────────────────────────────────────────────
+
+export interface StorefrontReview {
+    id: string;
+    authorName: string;
+    text: string;
+    rating: number | null;
+}
+
+/**
+ * Get active reviews for the storefront (cached).
+ */
+export async function getReviews(): Promise<StorefrontReview[]> {
+    const cachedFn = unstable_cache(
+        async () => getActiveReviewsHelper(),
+        ["storefront", "reviews"],
+        { revalidate: CACHE_REVALIDATE, tags: [CACHE_TAGS.reviews] }
+    );
+    const reviews = await cachedFn();
+    return reviews.map((r) => ({
+        id: r.id,
+        authorName: r.authorName,
+        text: r.text,
+        rating: r.rating ?? null,
+    }));
 }

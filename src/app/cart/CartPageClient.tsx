@@ -151,6 +151,8 @@ export default function CartPageClient() {
                                                     alt={item.name}
                                                     fill
                                                     className="object-cover object-center"
+                                                    sizes="(max-width: 768px) 25vw, 15vw"
+                                                    loading="lazy"
                                                 />
                                             )}
                                             <div
@@ -290,6 +292,8 @@ export default function CartPageClient() {
                                                             src={item.image}
                                                             alt={item.name}
                                                             fill
+                                                            sizes="40px"
+                                                            loading="lazy"
                                                             className="object-cover"
                                                         />
                                                     </div>
