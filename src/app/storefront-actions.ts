@@ -4,6 +4,7 @@ import { unstable_cache } from "next/cache";
 import {
     getActiveProducts as getActiveProductsHelper,
     getProductById as getProductByIdHelper,
+    getProductBySlug as getProductBySlugHelper,
     getStockLevelsByProductId,
     getStockTotalsByProduct,
 } from "@/lib/firebase-helpers";
@@ -18,6 +19,7 @@ const CACHE_REVALIDATE = 60;
 export interface StorefrontProduct {
     id: string;
     name: string;
+    slug: string;
     description: string;
     price: number;
     images: string[];
@@ -64,6 +66,7 @@ export async function getActiveProducts(): Promise<StorefrontProduct[]> {
     return products.map((p) => ({
         id: p.id,
         name: p.name,
+        slug: p.slug,
         description: p.description,
         price: p.price,
         images: p.images,
@@ -96,6 +99,43 @@ export async function getProductById(id: string): Promise<(StorefrontProduct & {
     return {
         id: product.id,
         name: product.name,
+        slug: product.slug,
+        description: product.description,
+        price: product.price,
+        images: product.images,
+        colors: product.colors,
+        sizes: product.sizes,
+        sku: product.sku ?? null,
+        totalStock,
+        stockBySize,
+    };
+}
+
+/**
+ * Fetch a single product by slug (must be active).
+ * Returns null if not found or inactive. Includes stockBySize for per-size availability.
+ */
+export async function getProductBySlug(slug: string): Promise<(StorefrontProduct & { stockBySize: StockBySize[] }) | null> {
+    // Note: if a product previously had no `slug` stored, older deployments may have
+    // cached `null` for this slug. If the cached result is null, do a direct (uncached)
+    // fetch which also allows the helper to "self-heal" by persisting the slug.
+    const cached = await unstable_cache(
+        async () => getProductBySlugHelper(slug),
+        ["storefront", "product", "slug", slug],
+        { revalidate: CACHE_REVALIDATE, tags: [CACHE_TAGS.activeProducts] }
+    )();
+    const product = cached ?? (await getProductBySlugHelper(slug));
+
+    if (!product || !product.isActive) return null;
+
+    const stockLevels = await getStockLevelsByProductId(product.id);
+    const totalStock = stockLevels.reduce((sum, s) => sum + s.quantity, 0);
+    const stockBySize: StockBySize[] = stockLevels.map((s) => ({ size: s.size, quantity: s.quantity }));
+
+    return {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
         description: product.description,
         price: product.price,
         images: product.images,
@@ -123,7 +163,7 @@ export async function searchItems(query: string): Promise<SearchItem[]> {
             id: product.id,
             name: product.name,
             type: "product" as const,
-            url: `/product/${product.id}`,
+            url: `/product/${product.slug}`,
             image: product.images[0],
             price: product.price,
         }));

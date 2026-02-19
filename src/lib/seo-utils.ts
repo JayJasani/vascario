@@ -52,6 +52,16 @@ export function truncateMetaDescription(text: string, maxLength: number = 155): 
 export function generateProductSlug(productName: string): string {
   return productName
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
+    .trim()
+    .replace(/[^\w\s-]/g, '') // Remove special characters except hyphens
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+    .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
+}
+
+/**
+ * Generate SEO-friendly slug from product name (alias for generateProductSlug)
+ */
+export function generateSlug(name: string): string {
+  return generateProductSlug(name)
 }

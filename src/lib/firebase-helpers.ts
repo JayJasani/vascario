@@ -1,6 +1,7 @@
 import { db, COLLECTIONS } from "./firebase";
 import type { Timestamp, Query, DocumentSnapshot } from "firebase-admin/firestore";
 import { Timestamp as FirestoreTimestamp } from "firebase-admin/firestore";
+import { generateProductSlug } from "./seo-utils";
 
 // Type definitions matching Prisma schema
 export type OrderStatus = "PENDING" | "PAID" | "IN_PRODUCTION" | "SHIPPED" | "DELIVERED" | "CANCELLED";
@@ -8,6 +9,7 @@ export type OrderStatus = "PENDING" | "PAID" | "IN_PRODUCTION" | "SHIPPED" | "DE
 export interface Product {
     id: string;
     name: string;
+    slug: string;
     description: string;
     price: number;
     images: string[];
@@ -90,6 +92,79 @@ export async function getProductById(id: string): Promise<Product | null> {
     return {
         id: doc.id,
         name: data.name,
+        slug: data.slug || (data.name ? data.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') : ''),
+        description: data.description,
+        price: Number(data.price),
+        images: data.images || [],
+        colors: data.colors || [],
+        sizes: data.sizes || [],
+        sku: data.sku || null,
+        isActive: data.isActive ?? true,
+        createdAt: toDate(data.createdAt),
+        updatedAt: toDate(data.updatedAt),
+    } as Product;
+}
+
+/**
+ * Fetch a product by slug. Returns null if not found.
+ */
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+    const snapshot = await db
+        .collection(COLLECTIONS.PRODUCTS)
+        .where("slug", "==", slug)
+        .limit(1)
+        .get();
+    
+    if (snapshot.empty) {
+        // Backward-compatibility fallback:
+        // older products may not yet have `slug` stored in Firestore.
+        // Scan active products and match by generated slug.
+        const activeSnapshot = await db
+            .collection(COLLECTIONS.PRODUCTS)
+            .where("isActive", "==", true)
+            .get();
+
+        for (const doc of activeSnapshot.docs) {
+            const data = doc.data();
+            const name = data.name as string | undefined;
+            if (!name) continue;
+
+            const candidate = (data.slug as string | undefined) || generateProductSlug(name);
+            if (candidate !== slug) continue;
+
+            // Self-heal: persist slug so future lookups are fast.
+            if (!data.slug) {
+                await doc.ref.update({
+                    slug: candidate,
+                    updatedAt: toTimestamp(new Date()),
+                });
+            }
+
+            return {
+                id: doc.id,
+                name: name,
+                slug: candidate,
+                description: data.description,
+                price: Number(data.price),
+                images: data.images || [],
+                colors: data.colors || [],
+                sizes: data.sizes || [],
+                sku: data.sku || null,
+                isActive: data.isActive ?? true,
+                createdAt: toDate(data.createdAt),
+                updatedAt: toDate(data.updatedAt),
+            } as Product;
+        }
+
+        return null;
+    }
+    
+    const doc = snapshot.docs[0];
+    const data = doc.data();
+    return {
+        id: doc.id,
+        name: data.name,
+        slug: data.slug || slug,
         description: data.description,
         price: Number(data.price),
         images: data.images || [],
@@ -112,6 +187,7 @@ export async function getAllProducts(): Promise<Product[]> {
         return {
             id: doc.id,
             name: data.name as string,
+            slug: (data.slug as string) || (data.name ? (data.name as string).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') : ''),
             description: data.description as string,
             price: Number(data.price),
             images: (data.images as string[]) || [],
@@ -140,6 +216,7 @@ export async function getActiveProducts(): Promise<Product[]> {
         return {
             id: doc.id,
             name: data.name as string,
+            slug: (data.slug as string) || (data.name ? (data.name as string).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') : ''),
             description: data.description as string,
             price: Number(data.price),
             images: (data.images as string[]) || [],
@@ -156,9 +233,13 @@ export async function getActiveProducts(): Promise<Product[]> {
 export async function createProduct(data: Omit<Product, "id" | "createdAt" | "updatedAt">): Promise<Product> {
     const now = new Date();
     const productRef = db.collection(COLLECTIONS.PRODUCTS).doc();
+    
+    // Generate slug if not provided
+    const slug = data.slug || generateProductSlug(data.name);
 
     const productData = {
         name: data.name,
+        slug: slug,
         description: data.description,
         price: data.price,
         images: data.images,
@@ -175,6 +256,7 @@ export async function createProduct(data: Omit<Product, "id" | "createdAt" | "up
     return {
         id: productRef.id,
         ...data,
+        slug: slug,
         createdAt: now,
         updatedAt: now,
     };
@@ -185,6 +267,11 @@ export async function updateProduct(id: string, data: Partial<Product>): Promise
         ...data,
         updatedAt: toTimestamp(new Date()),
     };
+
+    // Generate slug if name is being updated and slug is not provided
+    if (data.name && !data.slug) {
+        updateData.slug = generateProductSlug(data.name);
+    }
 
     // Remove id, createdAt from update data
     delete updateData.id;

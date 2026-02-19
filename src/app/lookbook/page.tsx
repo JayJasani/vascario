@@ -56,7 +56,7 @@ export default async function LookbookPage() {
             return (
               <Link
                 key={product.id}
-                href={`/product/${product.id}`}
+                href={`/product/${product.slug}`}
                 className={`${colSpan} group block`}
               >
                 <div
