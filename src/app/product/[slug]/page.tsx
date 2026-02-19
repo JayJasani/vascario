@@ -4,6 +4,7 @@ import { getProductBySlug, getProductById } from "@/app/storefront-actions"
 import { ProductDetailClient } from "./ProductDetailClient"
 import { getProductMetadata } from "@/lib/seo-config"
 import { ProductStructuredDataServer, BreadcrumbStructuredDataServer } from "@/components/StructuredDataServer"
+import { ResourcePreloader } from "@/components/ResourcePreloader"
 import { SEO_BASE } from "@/lib/seo-config"
 
 export async function generateMetadata({
@@ -77,6 +78,11 @@ export default async function ProductDetailPage({
         { name: product.name, url: `${SEO_BASE.siteUrl}/product/${product.slug}` },
     ]
 
+    // Preload first product image if from Firebase Storage (API)
+    const isFirebaseUrl = (url: string) => url.startsWith('https://storage.googleapis.com')
+    const firstImage = product.images?.[0]
+    const criticalImages = firstImage && isFirebaseUrl(firstImage) ? [firstImage] : []
+
     return (
         <>
             {/* Server-side structured data for better SEO */}
@@ -88,6 +94,7 @@ export default async function ProductDetailPage({
                 }} 
             />
             <BreadcrumbStructuredDataServer items={breadcrumbItems} />
+            <ResourcePreloader images={criticalImages} />
             <ProductDetailClient product={product} />
         </>
     )

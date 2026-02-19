@@ -61,7 +61,7 @@ export function Hero({ onboard1VideoUrl = "/video/onboard1.webm", redirectUrl }:
             loop
             muted
             playsInline
-            preload="none"
+            preload="metadata"
           />
         )}
         {/* Black gradient overlay from bottom to top */}

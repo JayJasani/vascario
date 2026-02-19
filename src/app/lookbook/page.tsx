@@ -69,6 +69,7 @@ export default async function LookbookPage() {
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                       sizes={isLarge ? "(max-width: 768px) 100vw, 60vw" : "(max-width: 768px) 100vw, 40vw"}
+                      loading={index < 2 ? "eager" : "lazy"}
                     />
                   ) : (
                     <div

@@ -6,6 +6,7 @@ import { EditorialSection } from "@/components/EditorialSection"
 import { ReviewsSection } from "@/components/ReviewsSection"
 import { Footer } from "@/components/Footer"
 import { OrganizationStructuredDataServer, WebsiteStructuredDataServer } from "@/components/StructuredDataServer"
+import { ResourcePreloader } from "@/components/ResourcePreloader"
 import { getActiveProducts, getStaticContentUrls, getReviews } from "./storefront-actions"
 
 export default async function Home() {
@@ -24,10 +25,21 @@ export default async function Home() {
     tshirtCloseupRedirect,
   } = staticContent
 
+  // Determine which images are from Firebase Storage (API) vs local
+  const isFirebaseUrl = (url: string) => url.startsWith('https://storage.googleapis.com')
+  
+  // Preload critical Firebase Storage images only
+  const criticalImages: string[] = []
+  
+  if (tshirtCloseupUrl && isFirebaseUrl(tshirtCloseupUrl)) {
+    criticalImages.push(tshirtCloseupUrl)
+  }
+
   return (
     <main className="min-h-screen">
       <OrganizationStructuredDataServer />
       <WebsiteStructuredDataServer searchUrl="https://www.vascario.com/collection?search={search_term_string}" />
+      <ResourcePreloader images={criticalImages} />
       <Navbar />
       <Hero onboard1VideoUrl={onboard1Url} redirectUrl={onboard1Redirect || undefined} />
       <MarqueeStrip />

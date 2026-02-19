@@ -100,7 +100,7 @@ export function EditorialSection({
                                     loop
                                     muted
                                     playsInline
-                                    preload="none"
+                                    preload="metadata"
                                 />
                             )}
                             <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
@@ -154,6 +154,8 @@ export function EditorialSection({
                                     alt={getImageAlt("editorial")}
                                     fill
                                     className="object-cover"
+                                    sizes="(max-width: 768px) 100vw, 41.67vw"
+                                    loading="lazy"
                                 />
                                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
                                     <div className="absolute inset-0 opacity-[0.06]"

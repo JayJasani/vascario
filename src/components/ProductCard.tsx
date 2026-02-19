@@ -89,6 +89,7 @@ export function ProductCard({ product, variant = "default", aspectClass, href }:
               fill
               className="object-cover object-center"
               sizes="(max-width: 768px) 80vw, 480px"
+              loading="lazy"
             />
           )}
         </div>

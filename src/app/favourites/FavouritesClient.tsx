@@ -112,6 +112,8 @@ export function FavouritesClient() {
                     alt={getImageAlt("product", item.name)}
                     fill
                     className="object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    loading="lazy"
                   />
                 )}
               </div>

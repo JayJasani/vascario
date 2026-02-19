@@ -444,6 +444,7 @@ export function ProductDetailClient({
                       fill
                       className="object-cover"
                       sizes="(max-width: 768px) 20vw, 10vw"
+                      loading={i === 0 ? "eager" : "lazy"}
                     />
                   </button>
                 ))}
