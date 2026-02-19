@@ -3,6 +3,7 @@ import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { SmoothScroller } from "@/components/SmoothScroller";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { GoogleTagManagerHead, GoogleTagManagerNoScript } from "@/components/GoogleTagManager";
+import { GtmPageView } from "@/components/GtmPageView";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
@@ -49,6 +50,7 @@ export default function RootLayout({
               <CurrencyProvider>
                 <CartProvider>
                   <FavouritesProvider>
+                    <GtmPageView />
                     <ScrollToTop />
                     {children}
                   </FavouritesProvider>
