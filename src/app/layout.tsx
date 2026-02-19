@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { SmoothScroller } from "@/components/SmoothScroller";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { GoogleTagManagerHead, GoogleTagManagerNoScript } from "@/components/GoogleTagManager";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
@@ -37,9 +38,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${spaceGrotesk.variable} ${spaceMono.variable}`}
-      >
+      <head>
+        <GoogleTagManagerHead />
+      </head>
+      <body className={`${spaceGrotesk.variable} ${spaceMono.variable}`}>
+        <GoogleTagManagerNoScript />
         <SmoothScroller>
           <AuthProvider>
             <UserProfileProvider>
