@@ -16,6 +16,11 @@ export function SmoothScroller({ children }: { children: React.ReactNode }) {
         })
 
         lenisRef.current = lenis
+        
+        // Expose Lenis instance globally for ScrollToTop component
+        if (typeof window !== "undefined") {
+            (window as any).lenis = lenis
+        }
 
         function raf(time: number) {
             lenis.raf(time)
@@ -25,6 +30,9 @@ export function SmoothScroller({ children }: { children: React.ReactNode }) {
         requestAnimationFrame(raf)
 
         return () => {
+            if (typeof window !== "undefined") {
+                delete (window as any).lenis
+            }
             lenis.destroy()
         }
     }, [])
