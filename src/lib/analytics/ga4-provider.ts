@@ -4,6 +4,7 @@ import type { AnalyticsEventMap, AnalyticsEventName } from "./types";
 declare global {
   interface Window {
     dataLayer: Record<string, unknown>[];
+    gtag?: (...args: unknown[]) => void;
   }
 }
 
@@ -15,7 +16,10 @@ function pushToDataLayer(payload: Record<string, unknown>) {
 
 /**
  * GA4 provider that pushes events to `window.dataLayer`.
- * GTM picks these up and forwards them to the GA4 property.
+ * 
+ * Events are sent to both:
+ * 1. GTM (via dataLayer) - GTM forwards to GA4 if configured
+ * 2. Direct GA4 (via gtag) - Direct integration via GoogleTagManager component
  *
  * GA4 e-commerce events automatically clear the previous ecommerce object
  * before pushing new data (per Google's recommendation).
