@@ -430,7 +430,7 @@ export async function updateStaticContent(
 
     revalidatePath("/admin/static-content");
     revalidatePath("/");
-    revalidateTag(CACHE_TAGS.STATIC_CONTENT);
+    revalidateTag(CACHE_TAGS.STATIC_CONTENT, "max");
     
     return content;
 }
@@ -453,5 +453,5 @@ export async function deleteStaticContentAction(key: string) {
 
     revalidatePath("/admin/static-content");
     revalidatePath("/");
-    revalidateTag(CACHE_TAGS.STATIC_CONTENT);
+    revalidateTag(CACHE_TAGS.STATIC_CONTENT, "max");
 }
