@@ -20,6 +20,8 @@ interface ProductStructuredDataProps {
     images: string[]
     sku?: string | null
     totalStock: number
+    colors?: string[]
+    sizes?: string[]
     aggregateRating?: {
       ratingValue: number
       reviewCount: number

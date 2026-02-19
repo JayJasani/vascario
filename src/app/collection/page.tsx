@@ -28,7 +28,9 @@ export default async function CollectionPage() {
       {/* SEO-friendly intro text */}
       <section className="pt-28 md:pt-36 pb-8 px-6 md:px-12 lg:px-20 max-w-4xl">
         <div className="prose prose-sm max-w-none">
-          <h1 className="sr-only">Vascario Embroidered Streetwear Collection</h1>
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[var(--vsc-gray-900)] mb-4 md:mb-6" style={{ fontFamily: "var(--font-space-grotesk)" }}>
+            Vascario Embroidered Streetwear Collection
+          </h1>
           <p className="text-sm md:text-base text-[var(--vsc-gray-600)] leading-relaxed mb-6" style={{ fontFamily: "var(--font-space-mono)" }}>
             {getCollectionIntroText()}
           </p>
