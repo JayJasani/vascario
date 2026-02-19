@@ -13,6 +13,8 @@ export function SmoothScroller({ children }: { children: React.ReactNode }) {
             orientation: "vertical",
             gestureOrientation: "vertical",
             smoothWheel: true,
+            // Prevent scroll position restoration
+            syncTouch: false,
         })
 
         lenisRef.current = lenis
