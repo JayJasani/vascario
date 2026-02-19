@@ -102,7 +102,7 @@ export function FavouritesClient() {
           {items.map((item) => (
             <Link
               key={item.id}
-              href={`/product/${item.id}`}
+              href={`/product/${item.slug || item.id}`}
               className="group border border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] hover:border-[var(--vsc-gray-900)] transition-colors duration-200"
             >
               <div className="relative aspect-[3/4] bg-[var(--vsc-gray-100)] overflow-hidden">

@@ -12,6 +12,7 @@ import { useAuth } from "@/context/AuthContext";
 export interface FavouriteItem {
   id: string;
   name: string;
+  slug: string;
   price: number;
   image: string;
 }

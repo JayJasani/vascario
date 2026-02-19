@@ -17,7 +17,7 @@ export default async function CollectionPage() {
     name: product.name,
     description: product.description,
     image: product.images[0],
-    url: `/product/${product.id}`,
+    url: `/product/${product.slug}`,
     price: product.price,
   }))
 

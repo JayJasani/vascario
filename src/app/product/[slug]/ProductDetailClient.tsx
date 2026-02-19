@@ -22,6 +22,7 @@ export interface StockBySize {
 export interface ProductDetailData {
     id: string;
     name: string;
+    slug: string;
     price: number;
     description: string;
     sizes: string[];
@@ -157,7 +158,7 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                 items={[
                     { name: "Home", url: "/" },
                     { name: "Collection", url: "/collection" },
-                    { name: product.name, url: `/product/${product.id}` }
+                    { name: product.name, url: `/product/${product.slug}` }
                 ]}
             />
             <Navbar />
@@ -508,7 +509,7 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                                 console.error("Failed to store cart intent", err)
                                             }
                                         }
-                                        router.push(`/login?redirect=/product/${product.id}`)
+                                        router.push(`/login?redirect=/product/${product.slug}`)
                                         return
                                     }
                                     // Require size selection if sizes are available
@@ -552,12 +553,13 @@ export function ProductDetailClient({ product }: { product: ProductDetailData })
                                 type="button"
                                 onClick={() => {
                                     if (!user) {
-                                        router.push(`/login?redirect=/product/${product.id}`)
+                                        router.push(`/login?redirect=/product/${product.slug}`)
                                         return
                                     }
                                     toggleFavourite({
                                         id: product.id,
                                         name: product.name,
+                                        slug: product.slug,
                                         price: product.price,
                                         image: product.images[0] ?? "",
                                     })

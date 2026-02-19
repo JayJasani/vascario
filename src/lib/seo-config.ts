@@ -537,10 +537,11 @@ export function getProductMetadata(product: {
   name: string
   description?: string
   images?: string[]
+  slug?: string
   id?: string
 }): Metadata {
-  // Use product ID if available, otherwise generate slug from name
-  const productSlug = product.id || product.name.toLowerCase().replace(/\s+/g, "-")
+  // Use slug if available, otherwise fallback to ID or generate from name
+  const productSlug = product.slug || product.id || product.name.toLowerCase().replace(/\s+/g, "-")
   return generateMetadata({
     title: SEO_PAGES.product.titleTemplate(product.name),
     description: SEO_PAGES.product.descriptionTemplate(product.name, product.description),
@@ -626,6 +627,7 @@ export const SEO_STRUCTURED_DATA = {
   product: (product: {
     id: string
     name: string
+    slug?: string
     description: string
     price: number
     images: string[]
@@ -651,7 +653,7 @@ export const SEO_STRUCTURED_DATA = {
     category: "Apparel & Accessories > Clothing > Shirts & Tops",
     offers: {
       "@type": "Offer",
-      url: `${SEO_BASE.siteUrl}/product/${product.id}`,
+      url: `${SEO_BASE.siteUrl}/product/${product.slug || product.id}`,
       priceCurrency: "INR",
       price: product.price.toString(),
       availability: product.totalStock > 0 

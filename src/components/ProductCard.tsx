@@ -8,6 +8,7 @@ import { getImageAlt } from "@/lib/seo-utils"
 interface Product {
   id: string
   name: string
+  slug: string
   price: number
   images: string[]
   tag?: string
@@ -36,7 +37,7 @@ export function ProductCard({ product, variant = "default", aspectClass, href }:
       : "group relative block overflow-hidden border border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] transition-colors duration-200 w-full sm:min-w-[300px] md:min-w-[360px]"
 
   const aspect = aspectClass ?? "aspect-[3/4]"
-  const targetHref = href ?? `/product/${product.id}`
+  const targetHref = href ?? `/product/${product.slug}`
 
   return (
     <Link href={targetHref} className={linkClass}>
