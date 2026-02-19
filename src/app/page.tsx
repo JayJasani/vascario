@@ -3,14 +3,16 @@ import { Hero } from "@/components/Hero"
 import { MarqueeStrip } from "@/components/MarqueeStrip"
 import { ProductShowcase } from "@/components/ProductShowcase"
 import { EditorialSection } from "@/components/EditorialSection"
+import { ReviewsSection } from "@/components/ReviewsSection"
 import { Footer } from "@/components/Footer"
 import { OrganizationStructuredDataServer, WebsiteStructuredDataServer } from "@/components/StructuredDataServer"
-import { getActiveProducts, getStaticContentUrls } from "./storefront-actions"
+import { getActiveProducts, getStaticContentUrls, getReviews } from "./storefront-actions"
 
 export default async function Home() {
-  const [products, staticContent] = await Promise.all([
+  const [products, staticContent, reviews] = await Promise.all([
     getActiveProducts(),
     getStaticContentUrls(), // Fetch all static content once
+    getReviews(),
   ])
   
   const { 
@@ -36,6 +38,7 @@ export default async function Home() {
         onboard2RedirectUrl={onboard2Redirect || undefined}
         tshirtCloseupRedirectUrl={tshirtCloseupRedirect || undefined}
       />
+      <ReviewsSection reviews={reviews} />
       <Footer />
     </main>
   )

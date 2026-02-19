@@ -39,4 +39,5 @@ export const COLLECTIONS = {
     NEWSLETTER_SUBSCRIPTIONS: "newsletterSubscriptions",
     USERS: "users",
     STATIC_CONTENT: "staticContent",
+    REVIEWS: "reviews",
 } as const;

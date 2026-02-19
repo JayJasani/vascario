@@ -24,8 +24,14 @@ import {
     getStaticContentByKey,
     upsertStaticContent,
     deleteStaticContent,
+    getAllReviews,
+    getActiveReviews,
+    createReview as createReviewHelper,
+    updateReview as updateReviewHelper,
+    deleteReview as deleteReviewHelper,
     type OrderStatus,
     type StaticContent,
+    type Review,
 } from "@/lib/firebase-helpers";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/storefront-cache";
@@ -454,4 +460,59 @@ export async function deleteStaticContentAction(key: string) {
     revalidatePath("/admin/static-content");
     revalidatePath("/");
     revalidateTag(CACHE_TAGS.STATIC_CONTENT, "max");
+}
+
+// ─── USER REVIEWS ─────────────────────────────────────────────────────────────────
+
+export async function getReviewsAction() {
+    return await getAllReviews();
+}
+
+export async function createReviewAction(
+    authorName: string,
+    text: string,
+    rating?: number | null,
+    sortOrder?: number
+) {
+    const review = await createReviewHelper(authorName, text, rating, sortOrder);
+    await createAuditLog({
+        action: "REVIEW_CREATED",
+        entity: "Review",
+        entityId: review.id,
+        details: { authorName, text: text.slice(0, 80) },
+    });
+    revalidatePath("/admin/reviews");
+    revalidatePath("/");
+    revalidateTag(CACHE_TAGS.reviews, "max");
+    return review;
+}
+
+export async function updateReviewAction(
+    id: string,
+    updates: { authorName?: string; text?: string; rating?: number | null; sortOrder?: number; isActive?: boolean }
+) {
+    const review = await updateReviewHelper(id, updates);
+    await createAuditLog({
+        action: "REVIEW_UPDATED",
+        entity: "Review",
+        entityId: id,
+        details: updates,
+    });
+    revalidatePath("/admin/reviews");
+    revalidatePath("/");
+    revalidateTag(CACHE_TAGS.reviews, "max");
+    return review;
+}
+
+export async function deleteReviewAction(id: string) {
+    await deleteReviewHelper(id);
+    await createAuditLog({
+        action: "REVIEW_DELETED",
+        entity: "Review",
+        entityId: id,
+        details: {},
+    });
+    revalidatePath("/admin/reviews");
+    revalidatePath("/");
+    revalidateTag(CACHE_TAGS.reviews, "max");
 }
