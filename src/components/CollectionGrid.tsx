@@ -9,6 +9,7 @@ const ASPECTS = ["aspect-[3/4]", "aspect-[4/5]", "aspect-square", "aspect-[5/6]"
 interface Product {
   id: string
   name: string
+  slug: string
   price: number
   images: string[]
   tag?: string

@@ -230,7 +230,7 @@ export async function getActiveProducts(): Promise<Product[]> {
     });
 }
 
-export async function createProduct(data: Omit<Product, "id" | "createdAt" | "updatedAt">): Promise<Product> {
+export async function createProduct(data: Omit<Product, "id" | "createdAt" | "updatedAt" | "slug"> & { slug?: string }): Promise<Product> {
     const now = new Date();
     const productRef = db.collection(COLLECTIONS.PRODUCTS).doc();
     

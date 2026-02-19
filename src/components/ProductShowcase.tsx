@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/ProductCard"
 interface ShowcaseProduct {
     id: string;
     name: string;
+    slug: string;
     price: number;
     images: string[];
     tag?: string;
