@@ -33,6 +33,7 @@ export interface UserProfile {
   displayName: string;
   firstName: string;
   lastName: string;
+  photoURL?: string;
   addresses: UserAddress[];
 }
 
@@ -82,6 +83,7 @@ export async function getUserProfile(): Promise<UserProfile | null> {
         displayName: user.email.split("@")[0] ?? "",
         firstName: "",
         lastName: "",
+        photoURL: undefined,
         addresses,
       };
     }
@@ -97,6 +99,7 @@ export async function getUserProfile(): Promise<UserProfile | null> {
       displayName: userData.displayName ?? "",
       firstName: userData.firstName ?? "",
       lastName: userData.lastName ?? "",
+      photoURL: userData.photoURL ?? undefined,
       addresses,
     };
   } catch (error) {
@@ -141,6 +144,7 @@ export async function updateUserProfile(updates: {
   firstName?: string;
   lastName?: string;
   displayName?: string;
+  photoURL?: string;
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const user = await verifyUserToken();
@@ -154,8 +158,17 @@ export async function updateUserProfile(updates: {
     if (updates.firstName !== undefined) updateData.firstName = updates.firstName.trim();
     if (updates.lastName !== undefined) updateData.lastName = updates.lastName.trim();
     if (updates.displayName !== undefined) updateData.displayName = updates.displayName.trim();
+    if (updates.photoURL !== undefined) updateData.photoURL = updates.photoURL;
 
-    await ref.update(updateData);
+    const doc = await ref.get();
+    if (doc.exists) {
+      await ref.update(updateData);
+    } else {
+      await ref.set(
+        { uid: user.uid, email: user.email, ...updateData },
+        { merge: true }
+      );
+    }
     return { success: true };
   } catch (error) {
     console.error("Failed to update user profile:", error);

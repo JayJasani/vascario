@@ -28,13 +28,10 @@ interface CurrencyContextValue {
 const CurrencyContext = createContext<CurrencyContextValue | undefined>(undefined);
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
-  const [currencyCode, setCurrencyCodeState] = useState<string>(() => {
-    if (typeof window === "undefined") return "INR";
-    return window.localStorage.getItem(STORAGE_KEY) || "INR";
-  });
+  // Use "INR" for initial render to avoid hydration mismatch (server has no localStorage)
+  const [currencyCode, setCurrencyCodeState] = useState<string>("INR");
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
     const stored = window.localStorage.getItem(STORAGE_KEY);
     if (stored && CURRENCIES[stored]) setCurrencyCodeState(stored);
   }, []);

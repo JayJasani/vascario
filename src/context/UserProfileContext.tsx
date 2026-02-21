@@ -17,6 +17,7 @@ export interface UserProfile {
   displayName: string;
   firstName: string;
   lastName: string;
+  photoURL?: string;
   addresses?: Array<{
     id: string;
     label?: string;
@@ -85,6 +86,7 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
         displayName: profileData.displayName || "",
         firstName: profileData.firstName || "",
         lastName: profileData.lastName || "",
+        photoURL: profileData.photoURL,
         addresses: Array.isArray(profileData.addresses) ? profileData.addresses : [],
       });
       setError(null);
@@ -145,6 +147,7 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
         displayName?: string;
         firstName?: string;
         lastName?: string;
+        photoURL?: string;
       }>).detail;
 
       // Update local state optimistically
@@ -158,6 +161,7 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
           displayName: effectiveDisplayName || profile.displayName,
           firstName: detail.firstName !== undefined ? detail.firstName : profile.firstName,
           lastName: detail.lastName !== undefined ? detail.lastName : profile.lastName,
+          photoURL: detail.photoURL !== undefined ? detail.photoURL : profile.photoURL,
         });
       }
 

@@ -13,6 +13,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { CURRENCIES } from "@/lib/currency";
 import { useCurrency } from "@/context/CurrencyContext";
 import { SearchPanel } from "@/components/SearchPanel";
@@ -31,12 +32,15 @@ export function Navbar() {
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const currencyRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => setMounted(true), []);
   const { cartCount } = useCart();
   const { user, logout } = useAuth();
   const { currencyCode, setCurrency } = useCurrency();
-  const { getDisplayName } = useUserProfile();
+  const { getDisplayName, profile } = useUserProfile();
 
   const displayName = getDisplayName();
   const userInitial = displayName
@@ -254,8 +258,12 @@ export function Navbar() {
               aria-label="Account menu"
               aria-expanded={menuOpen}
             >
-              <div className="w-8 h-8 rounded-full bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] flex items-center justify-center text-xs font-bold">
-                {userInitial}
+              <div className="w-8 h-8 rounded-full bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] flex items-center justify-center text-xs font-bold overflow-hidden shrink-0">
+                {profile?.photoURL ? (
+                  <img src={profile.photoURL} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  userInitial
+                )}
               </div>
             </button>
           )}
@@ -280,8 +288,12 @@ export function Navbar() {
                 aria-label="Account menu"
                 aria-expanded={menuOpen}
               >
-                <div className="w-7 h-7 rounded-full bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] flex items-center justify-center text-xs font-bold">
-                  {userInitial}
+                <div className="w-7 h-7 rounded-full bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] flex items-center justify-center text-xs font-bold overflow-hidden shrink-0">
+                  {profile?.photoURL ? (
+                    <img src={profile.photoURL} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    userInitial
+                  )}
                 </div>
                 <span
                   className="text-[10px] uppercase tracking-[0.18em] max-w-[12ch] truncate"
@@ -305,47 +317,76 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-[73px] z-40 bg-[var(--vsc-white)] border-t border-[var(--vsc-gray-200)]">
-          <div ref={mobileMenuRef} className="h-full overflow-y-auto">
-            <nav className="px-6 py-8" style={{ fontFamily: "var(--font-space-mono)" }}>
-              <ul className="space-y-6">
-                {([
-                  { href: "/collection", label: "Collection" },
-                  { href: "/favourites", label: "Favourites" },
-                  { href: "/lookbook", label: "Lookbook" },
-                  { href: "/about", label: "About" },
-                ] as const).map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      onClick={() => {
-                        trackClickNavLink({ link_text: link.label, link_url: link.href, location: "mobile_menu" });
-                        setMobileMenuOpen(false);
-                      }}
-                      className="block text-sm uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 py-2"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-                {!user && (
+      {/* Mobile Menu — portaled to body so it isn't affected by Lenis transform on scroll */}
+      {mounted &&
+        mobileMenuOpen &&
+        createPortal(
+          <div className="md:hidden fixed inset-0 top-[73px] z-[60] bg-[var(--vsc-white)] border-t border-[var(--vsc-gray-200)]">
+            <div ref={mobileMenuRef} className="h-full overflow-y-auto">
+              <nav className="px-6 py-8" style={{ fontFamily: "var(--font-space-mono)" }}>
+                <ul className="space-y-6">
+                  {([
+                    { href: "/collection", label: "Collection" },
+                    { href: "/favourites", label: "Favourites" },
+                    { href: "/lookbook", label: "Lookbook" },
+                    { href: "/about", label: "About" },
+                  ] as const).map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        onClick={() => {
+                          trackClickNavLink({ link_text: link.label, link_url: link.href, location: "mobile_menu" });
+                          setMobileMenuOpen(false);
+                        }}
+                        className="block text-sm uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 py-2"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
                   <li className="pt-6 border-t border-[var(--vsc-gray-200)]">
-                    <Link
-                      href="/login"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block text-sm uppercase tracking-[0.18em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-accent)] transition-colors py-2"
-                    >
-                      Sign in
-                    </Link>
+                    <p className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.3em] mb-3">
+                      Currency — {CURRENCIES[currencyCode]?.flag} {currencyCode}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.entries(CURRENCIES).map(([code, c]) => (
+                        <button
+                          key={code}
+                          type="button"
+                          onClick={() => {
+                            trackCurrencyChange({ from_currency: currencyCode, to_currency: code });
+                            setCurrency(code);
+                            setMobileMenuOpen(false);
+                          }}
+                          className={`flex items-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-wider transition-colors border-2 ${
+                            currencyCode === code
+                              ? "bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] border-[var(--vsc-gray-900)]"
+                              : "bg-transparent text-[var(--vsc-gray-600)] border-[var(--vsc-gray-200)] hover:border-[var(--vsc-gray-300)]"
+                          }`}
+                        >
+                          <span className="text-base">{c.flag}</span>
+                          <span>{code}</span>
+                        </button>
+                      ))}
+                    </div>
                   </li>
-                )}
-              </ul>
-            </nav>
-          </div>
-        </div>
-      )}
+                  {!user && (
+                    <li className="pt-6 border-t border-[var(--vsc-gray-200)]">
+                      <Link
+                        href="/login"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block text-sm uppercase tracking-[0.18em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-accent)] transition-colors py-2"
+                      >
+                        Sign in
+                      </Link>
+                    </li>
+                  )}
+                </ul>
+              </nav>
+            </div>
+          </div>,
+          document.body
+        )}
 
       <AccountDrawer
         open={menuOpen && !!user}
@@ -353,6 +394,7 @@ export function Navbar() {
         displayName={displayName}
         userEmail={user?.email ?? ""}
         userInitial={userInitial}
+        photoURL={profile?.photoURL}
         cartCount={cartCount}
         onLogout={logout}
       />

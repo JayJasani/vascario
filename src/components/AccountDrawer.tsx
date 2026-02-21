@@ -17,6 +17,7 @@ interface AccountDrawerProps {
   displayName: string;
   userEmail: string;
   userInitial: string;
+  photoURL?: string;
   cartCount: number;
   onLogout: () => void;
 }
@@ -27,6 +28,7 @@ export function AccountDrawer({
   displayName,
   userEmail,
   userInitial,
+  photoURL,
   cartCount,
   onLogout,
 }: AccountDrawerProps) {
@@ -80,8 +82,12 @@ export function AccountDrawer({
       >
         <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--vsc-gray-200)]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] flex items-center justify-center text-sm font-bold">
-              {userInitial}
+            <div className="w-10 h-10 rounded-full bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] flex items-center justify-center text-sm font-bold overflow-hidden shrink-0">
+              {photoURL ? (
+                <img src={photoURL} alt="" className="w-full h-full object-cover" />
+              ) : (
+                userInitial
+              )}
             </div>
             <div>
               <p

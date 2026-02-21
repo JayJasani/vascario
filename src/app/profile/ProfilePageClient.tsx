@@ -36,6 +36,7 @@ export default function ProfilePageClient() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [photoUploading, setPhotoUploading] = useState(false);
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const [newAddressForm, setNewAddressForm] = useState<UserAddress | null>(null);
@@ -265,6 +266,80 @@ export default function ProfilePageClient() {
               Saved.
             </p>
           )}
+
+          {/* Profile photo */}
+          <div className="border-2 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] px-4 sm:px-6 py-5 sm:py-7 md:px-8 md:py-8 shadow-sm">
+            <h2
+              className="text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-700)] mb-4 sm:mb-6"
+              style={{ fontFamily: "var(--font-space-mono)" }}
+            >
+              Profile photo
+            </h2>
+            <div className="flex items-center gap-4 sm:gap-6">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] flex items-center justify-center text-2xl sm:text-3xl font-bold overflow-hidden shrink-0">
+                {profile?.photoURL ? (
+                  <img src={profile.photoURL} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  (displayName || profile?.firstName || profile?.email || "?").charAt(0).toUpperCase()
+                )}
+              </div>
+              <div>
+                <input
+                  type="file"
+                  id="profile-photo"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file || !user || photoUploading) return;
+                    if (file.size > 2 * 1024 * 1024) {
+                      setError("Image must be under 2MB");
+                      return;
+                    }
+                    setError(null);
+                    setPhotoUploading(true);
+                    try {
+                      const token = await user.getIdToken();
+                      const formData = new FormData();
+                      formData.append("file", file);
+                      const res = await fetch("/api/users/profile-photo", {
+                        method: "POST",
+                        headers: { Authorization: `Bearer ${token}` },
+                        body: formData,
+                      });
+                      if (!res.ok) {
+                        const data = await res.json().catch(() => ({}));
+                        throw new Error(data?.error ?? "Upload failed");
+                      }
+                      const { photoURL } = await res.json();
+                      window.dispatchEvent(
+                        new CustomEvent("vascario:profile-updated", {
+                          detail: { photoURL },
+                        })
+                      );
+                      await refreshProfile();
+                      setSuccess(true);
+                    } catch (err) {
+                      setError(err instanceof Error ? err.message : "Failed to upload");
+                    } finally {
+                      setPhotoUploading(false);
+                      e.target.value = "";
+                    }
+                  }}
+                />
+                <label
+                  htmlFor="profile-photo"
+                  className={`inline-block px-4 py-2 text-xs uppercase tracking-[0.2em] border-2 border-[var(--vsc-gray-900)] text-[var(--vsc-gray-900)] hover:bg-[var(--vsc-gray-900)] hover:text-[var(--vsc-cream)] transition-colors cursor-pointer ${photoUploading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  style={{ fontFamily: "var(--font-space-mono)" }}
+                >
+                  {photoUploading ? "Uploading..." : profile?.photoURL ? "Change photo" : "Upload photo"}
+                </label>
+                <p className="mt-2 text-[10px] text-[var(--vsc-gray-500)] uppercase tracking-[0.15em]" style={{ fontFamily: "var(--font-space-mono)" }}>
+                  JPEG, PNG, WebP or GIF. Max 2MB.
+                </p>
+              </div>
+            </div>
+          </div>
 
           {/* Profile form */}
           <div className="border-2 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] px-4 sm:px-6 py-5 sm:py-7 md:px-8 md:py-8 shadow-sm">
