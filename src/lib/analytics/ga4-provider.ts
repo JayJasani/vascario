@@ -14,15 +14,28 @@ function pushToDataLayer(payload: Record<string, unknown>) {
   window.dataLayer.push(payload);
 }
 
+function sendViaGtag<E extends AnalyticsEventName>(
+  event: E,
+  params: AnalyticsEventMap[E],
+) {
+  if (typeof window === "undefined" || !window.gtag) return false;
+  try {
+    window.gtag("event", event, params as Record<string, unknown>);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
- * GA4 provider that pushes events to `window.dataLayer`.
- * 
- * Events are sent to both:
- * 1. GTM (via dataLayer) - GTM forwards to GA4 if configured
- * 2. Direct GA4 (via gtag) - Direct integration via GoogleTagManager component
+ * GA4 provider that sends events to both dataLayer and gtag.
  *
- * GA4 e-commerce events automatically clear the previous ecommerce object
- * before pushing new data (per Google's recommendation).
+ * Events are sent via:
+ * 1. gtag() - Direct GA4 delivery (when NEXT_PUBLIC_GA4_MEASUREMENT_ID is set)
+ * 2. dataLayer - GTM can forward to GA4 if configured
+ *
+ * Set NEXT_PUBLIC_GA4_MEASUREMENT_ID in .env.local (e.g. G-XXXXXXXXXX) for events to trigger.
+ * Without it, only GTM loads; GTM must then be configured with a GA4 tag and triggers.
  */
 export class GA4Provider implements AnalyticsProvider {
   private readonly ECOMMERCE_EVENTS = new Set<string>([
@@ -41,16 +54,25 @@ export class GA4Provider implements AnalyticsProvider {
   ]);
 
   init(): void {
-    // GTM script is already loaded by GoogleTagManager component.
-    // Nothing extra needed here.
+    if (typeof window === "undefined") return;
+    const ga4Id = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID;
+    if (!ga4Id && process.env.NODE_ENV === "development") {
+      console.warn(
+        "[Analytics] NEXT_PUBLIC_GA4_MEASUREMENT_ID is not set. GA4 events will not trigger. " +
+          "Add it to .env.local (e.g. G-XXXXXXXXXX) or configure GTM to forward events to GA4.",
+      );
+    }
   }
 
   track<E extends AnalyticsEventName>(
     event: E,
     params: AnalyticsEventMap[E],
   ): void {
+    // 1. Send via gtag when available (direct GA4 — most reliable)
+    const sentViaGtag = sendViaGtag(event, params);
+
+    // 2. Also push to dataLayer for GTM
     if (this.ECOMMERCE_EVENTS.has(event)) {
-      // Clear previous ecommerce data per GA4 best practice
       pushToDataLayer({ ecommerce: null });
       pushToDataLayer({
         event,
@@ -58,6 +80,15 @@ export class GA4Provider implements AnalyticsProvider {
       });
     } else {
       pushToDataLayer({ event, ...params });
+    }
+
+    // Debug: log in dev when gtag isn't available
+    if (
+      !sentViaGtag &&
+      typeof window !== "undefined" &&
+      process.env.NODE_ENV === "development"
+    ) {
+      console.debug(`[Analytics] Event "${event}" sent to dataLayer (gtag not loaded). Check NEXT_PUBLIC_GA4_MEASUREMENT_ID.`, params);
     }
   }
 
