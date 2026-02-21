@@ -29,6 +29,11 @@ import {
     createReview as createReviewHelper,
     updateReview as updateReviewHelper,
     deleteReview as deleteReviewHelper,
+    getAllInvestments,
+    createInvestment as createInvestmentHelper,
+    updateInvestment,
+    deleteInvestment,
+    getTotalInvestment,
     type OrderStatus,
     type StaticContent,
     type Review,
@@ -44,6 +49,7 @@ export async function getDashboardStats() {
         pendingOrders,
         paidOrders,
         totalRevenue,
+        totalInvestment,
         activeProducts,
         lowStockAlerts,
         recentOrders,
@@ -52,6 +58,7 @@ export async function getDashboardStats() {
         countOrders("PENDING"),
         countOrders("PAID"),
         aggregateOrderTotal(),
+        getTotalInvestment(),
         getActiveProducts().then((products) => products.length),
         getLowStockAlerts().then((alerts) => alerts.length),
         getRecentOrdersWithItems(10),
@@ -62,6 +69,7 @@ export async function getDashboardStats() {
         pendingOrders,
         paidOrders,
         totalRevenue: totalRevenue.toString(),
+        totalInvestment: totalInvestment.toString(),
         activeProducts,
         lowStockAlerts,
         recentOrders: recentOrders.map((order) => ({
@@ -515,4 +523,65 @@ export async function deleteReviewAction(id: string) {
     revalidatePath("/admin/reviews");
     revalidatePath("/");
     revalidateTag(CACHE_TAGS.reviews, "max");
+}
+
+// ─── INVESTMENTS ─────────────────────────────────────────────────────────────────
+
+export async function getInvestmentsAction() {
+    const list = await getAllInvestments();
+    return list.map((i) => ({
+        id: i.id,
+        name: i.name,
+        description: i.description,
+        amount: i.amount.toString(),
+        createdAt: i.createdAt.toISOString(),
+        updatedAt: i.updatedAt.toISOString(),
+    }));
+}
+
+export async function createInvestmentAction(formData: FormData) {
+    const name = (formData.get("name") as string)?.trim();
+    const description = (formData.get("description") as string)?.trim() || "";
+    const amount = parseFloat((formData.get("amount") as string) || "0");
+    if (!name || isNaN(amount)) throw new Error("Name and amount are required.");
+    const inv = await createInvestmentHelper({ name, description, amount });
+    await createAuditLog({
+        action: "INVESTMENT_CREATED",
+        entity: "Investment",
+        entityId: inv.id,
+        details: { name, amount },
+    });
+    revalidatePath("/admin/investment");
+    revalidatePath("/admin");
+}
+
+export async function updateInvestmentAction(
+    id: string,
+    formData: FormData
+) {
+    const name = (formData.get("name") as string)?.trim();
+    const description = (formData.get("description") as string)?.trim() || "";
+    const amount = parseFloat((formData.get("amount") as string) || "0");
+    if (!name || isNaN(amount)) throw new Error("Name and amount are required.");
+    await updateInvestment(id, { name, description, amount });
+    await createAuditLog({
+        action: "INVESTMENT_UPDATED",
+        entity: "Investment",
+        entityId: id,
+        details: { name, amount },
+    });
+    revalidatePath("/admin/investment");
+    revalidatePath("/admin");
+}
+
+export async function deleteInvestmentAction(id: string) {
+    await deleteInvestment(id);
+    await createAuditLog({
+        action: "INVESTMENT_DELETED",
+        entity: "Investment",
+        entityId: id,
+        details: {},
+    });
+    revalidatePath("/admin/investment");
+    revalidatePath("/admin");
 }

@@ -35,12 +35,24 @@ export default async function AdminDashboard() {
             </div>
 
             {/* ── KPI STATS ── */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-6">
                 <StatWidget
                     label="Total Revenue"
                     value={`₹${Number(stats.totalRevenue).toLocaleString("en-IN")}`}
                     sublabel="All time"
                     accentColor="#BAFF00"
+                />
+                <StatWidget
+                    label="Total Investment"
+                    value={`₹${Number(stats.totalInvestment).toLocaleString("en-IN")}`}
+                    sublabel="All partners"
+                    accentColor="#00BFFF"
+                />
+                <StatWidget
+                    label="Net (Revenue − Investment)"
+                    value={`₹${(Number(stats.totalRevenue) - Number(stats.totalInvestment)).toLocaleString("en-IN")}`}
+                    sublabel={Number(stats.totalRevenue) >= Number(stats.totalInvestment) ? "In profit" : "In deficit"}
+                    accentColor={Number(stats.totalRevenue) >= Number(stats.totalInvestment) ? "#BAFF00" : "#FF3333"}
                 />
                 <StatWidget
                     label="Pending Orders"
@@ -76,6 +88,9 @@ export default async function AdminDashboard() {
                     </Link>
                     <Link href="/admin/inventory">
                         <AdminButton variant="secondary">Inventory</AdminButton>
+                    </Link>
+                    <Link href="/admin/investment">
+                        <AdminButton variant="secondary">Investments</AdminButton>
                     </Link>
                     <Link href="/admin/contact">
                         <AdminButton variant="secondary">Contact Queries</AdminButton>

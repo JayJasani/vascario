@@ -40,4 +40,5 @@ export const COLLECTIONS = {
     USERS: "users",
     STATIC_CONTENT: "staticContent",
     REVIEWS: "reviews",
+    INVESTMENTS: "investments",
 } as const;
