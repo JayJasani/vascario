@@ -14,7 +14,7 @@ import {
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { CURRENCIES } from "@/lib/currency";
+import { CURRENCIES, getFlagUrl } from "@/lib/currency";
 import { useCurrency } from "@/context/CurrencyContext";
 import { SearchPanel } from "@/components/SearchPanel";
 import { AccountDrawer } from "@/components/AccountDrawer";
@@ -175,7 +175,11 @@ export function Navbar() {
               aria-label="Select currency"
               style={{ fontFamily: "var(--font-space-mono)" }}
             >
-              <span className="text-sm sm:text-base">{CURRENCIES[currencyCode]?.flag || ""}</span>
+              <img
+                src={getFlagUrl(CURRENCIES[currencyCode]?.flagCode ?? "in")}
+                alt=""
+                className="w-5 h-[0.75rem] sm:w-6 sm:h-[0.9rem] object-cover rounded-sm"
+              />
               <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">{currencyCode}</span>
               <ChevronDownIcon className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform ${currencyOpen ? "rotate-180" : ""}`} />
             </button>
@@ -202,8 +206,12 @@ export function Navbar() {
                     className={`w-full text-left px-4 py-2 text-xs uppercase tracking-wider transition-colors flex items-center gap-2 ${currencyCode === code ? "bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)]" : "text-[var(--vsc-gray-900)] hover:bg-[var(--vsc-cream)]"}`}
                     style={{ fontFamily: "var(--font-space-mono)" }}
                   >
-                    <span className="text-base">{c.flag}</span>
-                    <span>{c.symbol} {code}</span>
+                    <img
+                      src={getFlagUrl(c.flagCode)}
+                      alt=""
+                      className="w-5 h-[0.75rem] object-cover rounded-sm shrink-0"
+                    />
+                    <span>{code}</span>
                   </button>
                 ))}
               </div>
@@ -345,8 +353,16 @@ export function Navbar() {
                     </li>
                   ))}
                   <li className="pt-6 border-t border-[var(--vsc-gray-200)]">
-                    <p className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.3em] mb-3">
-                      Currency — {CURRENCIES[currencyCode]?.flag} {currencyCode}
+                    <p className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.3em] mb-3 flex items-center gap-2">
+                      Currency
+                      <span className="normal-case flex items-center gap-1.5 text-[var(--vsc-gray-700)]">
+                        <img
+                          src={getFlagUrl(CURRENCIES[currencyCode]?.flagCode ?? "in")}
+                          alt=""
+                          className="w-4 h-3 object-cover rounded-sm"
+                        />
+                        {currencyCode}
+                      </span>
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {Object.entries(CURRENCIES).map(([code, c]) => (
@@ -358,13 +374,16 @@ export function Navbar() {
                             setCurrency(code);
                             setMobileMenuOpen(false);
                           }}
-                          className={`flex items-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-wider transition-colors border-2 ${
-                            currencyCode === code
+                          className={`flex items-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-wider transition-colors border-2 ${currencyCode === code
                               ? "bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] border-[var(--vsc-gray-900)]"
                               : "bg-transparent text-[var(--vsc-gray-600)] border-[var(--vsc-gray-200)] hover:border-[var(--vsc-gray-300)]"
-                          }`}
+                            }`}
                         >
-                          <span className="text-base">{c.flag}</span>
+                          <img
+                            src={getFlagUrl(c.flagCode)}
+                            alt=""
+                            className="w-5 h-[0.75rem] object-cover rounded-sm shrink-0"
+                          />
                           <span>{code}</span>
                         </button>
                       ))}

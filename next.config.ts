@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
         hostname: "www.mydesignation.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "flagcdn.com",
+        pathname: "/**",
+      },
     ],
     // Optimize image caching
     minimumCacheTTL: 31536000, // 1 year in seconds

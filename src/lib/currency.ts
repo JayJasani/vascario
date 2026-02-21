@@ -12,7 +12,8 @@ export interface CurrencyOption {
   /** Rate to convert from INR to this currency (1 INR = rate * this currency) */
   rateFromINR: number;
   locale: string;
-  flag: string;
+  /** ISO 3166-1 alpha-2 country code for flag image */
+  flagCode: string;
 }
 
 export const CURRENCIES: Record<string, CurrencyOption> = {
@@ -22,7 +23,7 @@ export const CURRENCIES: Record<string, CurrencyOption> = {
     name: "Indian Rupee",
     rateFromINR: 1,
     locale: "en-IN",
-    flag: "🇮🇳",
+    flagCode: "in",
   },
   USD: {
     code: "USD",
@@ -30,7 +31,7 @@ export const CURRENCIES: Record<string, CurrencyOption> = {
     name: "US Dollar",
     rateFromINR: 0.012,
     locale: "en-US",
-    flag: "🇺🇸",
+    flagCode: "us",
   },
   EUR: {
     code: "EUR",
@@ -38,7 +39,7 @@ export const CURRENCIES: Record<string, CurrencyOption> = {
     name: "Euro",
     rateFromINR: 0.011,
     locale: "de-DE",
-    flag: "🇪🇺",
+    flagCode: "eu",
   },
   GBP: {
     code: "GBP",
@@ -46,9 +47,14 @@ export const CURRENCIES: Record<string, CurrencyOption> = {
     name: "British Pound",
     rateFromINR: 0.0095,
     locale: "en-GB",
-    flag: "🇬🇧",
+    flagCode: "gb",
   },
 };
+
+const FLAG_BASE = "https://flagcdn.com/w40";
+export function getFlagUrl(flagCode: string): string {
+  return `${FLAG_BASE}/${flagCode.toLowerCase()}.png`;
+}
 
 export const CURRENCY_CODES = Object.keys(CURRENCIES) as (keyof typeof CURRENCIES)[];
 
