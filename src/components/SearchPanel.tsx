@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { type SearchItem } from "@/lib/search-data";
@@ -19,7 +20,10 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
   const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
   const { formatPrice } = useCurrency();
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (open) {
@@ -74,11 +78,20 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+      const lenis = (window as Window & { lenis?: { stop: () => void; start: () => void } }).lenis;
+      if (lenis) lenis.stop();
     } else {
       document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      const lenis = (window as Window & { lenis?: { stop: () => void; start: () => void } }).lenis;
+      if (lenis) lenis.start();
     }
     return () => {
       document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      const lenis = (window as Window & { lenis?: { start: () => void } }).lenis;
+      if (lenis) lenis.start();
     };
   }, [open]);
 
@@ -86,13 +99,13 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
     if (e.target === overlayRef.current) onClose();
   };
 
-  if (!open) return null;
+  if (!open || !mounted || typeof document === "undefined") return null;
 
-  return (
+  return createPortal(
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-[10vh] sm:pt-[15vh] px-3 sm:px-4 bg-[var(--vsc-gray-900)]/40 backdrop-blur-md animate-[fade-in_0.2s_ease-out]"
+      className="fixed inset-0 z-[100] flex items-start justify-center pt-[10vh] sm:pt-[15vh] px-3 sm:px-4 bg-[var(--vsc-gray-900)]/70 backdrop-blur-md animate-[fade-in_0.2s_ease-out]"
       role="dialog"
       aria-modal="true"
       aria-label="Search"
@@ -199,6 +212,7 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
