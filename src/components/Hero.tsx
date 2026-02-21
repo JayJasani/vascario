@@ -35,7 +35,7 @@ export function Hero({ onboard1VideoUrl = "/video/onboard1.webm", redirectUrl }:
       style={{ willChange: "opacity, transform" }}
     >
       {/* Background video (activated on user interaction to avoid heavy initial payload) */}
-      <div 
+      <div
         className={`absolute inset-0 z-0 ${redirectUrl ? 'cursor-pointer' : ''}`}
         onClick={(e) => {
           if (redirectUrl) {
@@ -85,34 +85,22 @@ export function Hero({ onboard1VideoUrl = "/video/onboard1.webm", redirectUrl }:
         /> */}
       </div>
 
-      {/* Title — massive, cropped at edges */}
-      <div className="relative z-10 w-full pb-12 sm:pb-16 md:pb-28 px-4 sm:px-6 md:px-12 lg:px-20">
-        {/* Oversized title that crops off-screen */}
-        <h1
-          className="text-hero leading-[0.85] tracking-[-0.05em] text-white select-none"
-          style={{
-            fontFamily: "var(--font-space-grotesk)",
-            fontSize: "clamp(3rem, 12vw, 16rem)",
-            marginLeft: "-0.04em",
-          }}
-        >
-          VASC
-          <span className="relative inline-flex items-baseline mx-[0.02em] -mr-[0.04em] -ml-[0.04em]">
-            <Image
-              src="/logo/arlogo.png"
-              alt="VASCARIO A logo"
-              width={200}
-              height={200}
-              className="block h-[.89em] w-auto translate-y-[0.11em]"
-              priority
-              sizes="(max-width: 640px) 72px, (max-width: 768px) 100px, 200px"
-            />
-          </span>
-          RIO
+      {/* Title — VASCARIO logo in blue-mark area, directly above tagline */}
+      <div className="absolute bottom-12 sm:bottom-16 md:bottom-28 left-4 sm:left-6 md:left-12 lg:left-20 z-10 flex flex-col items-start gap-0">
+        <h1 className="leading-none w-[min(24rem,82vw)] sm:w-[min(24rem,75vw)] md:w-[min(26rem,60vw)]">
+          <Image
+            src="/logo/main.svg"
+            alt="VASCARIO"
+            width={1200}
+            height={300}
+            className="w-full h-auto max-h-[5rem] sm:max-h-[5rem] md:max-h-[5.25rem] object-contain object-left select-none"
+            priority
+            sizes="(max-width: 640px) 70vw, (max-width: 768px) 65vw, 18rem"
+          />
         </h1>
 
-        {/* Tagline — monospace, offset */}
-        <div className="mt-4 sm:mt-6 md:mt-8 md:ml-2 flex flex-col md:flex-row md:items-end gap-3 sm:gap-4 md:gap-12">
+        {/* Tagline — immediately below logo, same left edge as blue mark */}
+        <div className="mt-2 sm:mt-2.5 md:mt-3 flex flex-col md:flex-row md:items-end gap-3 sm:gap-4 md:gap-12">
           <p
             className="text-[10px] sm:text-xs md:text-sm text-[var(--vsc-gray-400)] uppercase tracking-[0.25em] sm:tracking-[0.3em] max-w-md leading-relaxed"
             style={{ fontFamily: "var(--font-space-mono)" }}
@@ -133,24 +121,23 @@ export function Hero({ onboard1VideoUrl = "/video/onboard1.webm", redirectUrl }:
           </div>
         </div>
 
-        {/* Floating accent line & corner markers */}
-        <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 md:right-10 flex flex-col items-center gap-1">
-          <span
-            className="text-[9px] sm:text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.15em]"
-            style={{ fontFamily: "var(--font-space-mono)" }}
-          >
-            EST. 2024
-          </span>
-          <div className="w-3 h-3 sm:w-4 sm:h-4 border border-white rotate-45 opacity-60" />
-          <div
-            className="hidden sm:block w-px"
-            style={{
-              height: "clamp(60px, 8vh, 120px)",
-              background: "linear-gradient(180deg, white 0%, transparent 100%)",
-            }}
-          />
-        </div>
-
+      </div>
+      {/* Floating accent line & corner markers */}
+      <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 md:right-10 z-10 flex flex-col items-center gap-1">
+        <span
+          className="text-[9px] sm:text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.15em]"
+          style={{ fontFamily: "var(--font-space-mono)" }}
+        >
+          EST. 2024
+        </span>
+        <div className="w-3 h-3 sm:w-4 sm:h-4 border border-white rotate-45 opacity-60" />
+        <div
+          className="hidden sm:block w-px"
+          style={{
+            height: "clamp(60px, 8vh, 120px)",
+            background: "linear-gradient(180deg, white 0%, transparent 100%)",
+          }}
+        />
       </div>
     </section>
   );
