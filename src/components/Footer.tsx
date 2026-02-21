@@ -73,14 +73,20 @@ export function Footer() {
             Social
           </span>
           <ul className="space-y-2">
-            {["Instagram", "TikTok", "Twitter/X", "Discord"].map((item) => (
-              <li key={item}>
+            {[
+              { label: "Instagram", href: "https://www.instagram.com/vascario_?igsh=c3pqaW1rdmVpenRl" },
+              { label: "Facebook", href: "https://www.facebook.com/share/17yxYPnq3y/" },
+              { label: "X", href: "https://x.com/vascario_" },
+            ].map((item) => (
+              <li key={item.label}>
                 <Link
-                  href="#"
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-xs text-[var(--vsc-gray-500)] uppercase tracking-[0.15em] hover:text-[var(--vsc-gray-900)] transition-colors duration-200"
                   style={{ fontFamily: "var(--font-space-mono)" }}
                 >
-                  {item} ↗
+                  {item.label} ↗
                 </Link>
               </li>
             ))}
