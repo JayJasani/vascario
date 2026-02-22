@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { PrefetchLink } from "@/components/PrefetchLink";
+import Image from "next/image";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { getImageAlt } from "@/lib/seo-utils";
 import { hasDiscount } from "@/lib/discount";
 import { type SearchItem } from "@/lib/search-data";
 import { searchItems, getFeaturedSearchItems } from "@/app/storefront-actions";
@@ -180,10 +182,20 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
                       }}
                       className="flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-2.5 sm:py-3 text-[var(--vsc-gray-700)] hover:bg-[var(--vsc-gray-100)] hover:text-[var(--vsc-gray-900)] transition-colors duration-150 group"
                     >
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] flex items-center justify-center overflow-hidden">
-                        <span className="text-[9px] sm:text-[10px] text-[var(--vsc-gray-500)] uppercase">
-                          prod
-                        </span>
+                      <div className="relative w-12 h-12 sm:w-16 sm:h-16 shrink-0 bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] overflow-hidden">
+                        {item.image && !item.image.includes("placeholder") ? (
+                          <Image
+                            src={item.image}
+                            alt={getImageAlt("product", item.name)}
+                            fill
+                            className="object-cover object-center"
+                            sizes="64px"
+                          />
+                        ) : (
+                          <span className="absolute inset-0 flex items-center justify-center text-[9px] sm:text-[10px] text-[var(--vsc-gray-500)] uppercase">
+                            prod
+                          </span>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <span
@@ -252,10 +264,20 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
                       }}
                       className="flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-2.5 sm:py-3 text-[var(--vsc-gray-700)] hover:bg-[var(--vsc-gray-100)] hover:text-[var(--vsc-gray-900)] transition-colors duration-150 group"
                     >
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] flex items-center justify-center overflow-hidden">
-                        <span className="text-[9px] sm:text-[10px] text-[var(--vsc-gray-500)] uppercase">
-                          prod
-                        </span>
+                      <div className="relative w-12 h-12 sm:w-16 sm:h-16 shrink-0 bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] overflow-hidden">
+                        {item.image && !item.image.includes("placeholder") ? (
+                          <Image
+                            src={item.image}
+                            alt={getImageAlt("product", item.name)}
+                            fill
+                            className="object-cover object-center"
+                            sizes="64px"
+                          />
+                        ) : (
+                          <span className="absolute inset-0 flex items-center justify-center text-[9px] sm:text-[10px] text-[var(--vsc-gray-500)] uppercase">
+                            prod
+                          </span>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <span

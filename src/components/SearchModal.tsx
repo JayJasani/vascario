@@ -1,6 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { getImageAlt } from "@/lib/seo-utils";
 import Link from "next/link";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useEffect, useRef, useState } from "react";
@@ -150,10 +152,20 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                       onClick={onClose}
                       className="flex items-center gap-4 px-5 py-3 text-[var(--vsc-gray-700)] hover:bg-[var(--vsc-gray-100)] hover:text-[var(--vsc-gray-900)] transition-colors duration-150 group"
                     >
-                      <div className="w-10 h-10 shrink-0 bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] flex items-center justify-center overflow-hidden">
-                        <span className="text-[10px] text-[var(--vsc-gray-500)] uppercase">
-                          prod
-                        </span>
+                      <div className="relative w-14 h-14 shrink-0 bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] overflow-hidden">
+                        {item.image && !item.image.includes("placeholder") ? (
+                          <Image
+                            src={item.image}
+                            alt={getImageAlt("product", item.name)}
+                            fill
+                            className="object-cover object-center"
+                            sizes="56px"
+                          />
+                        ) : (
+                          <span className="absolute inset-0 flex items-center justify-center text-[10px] text-[var(--vsc-gray-500)] uppercase">
+                            prod
+                          </span>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <span
@@ -214,10 +226,20 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                       onClick={onClose}
                       className="flex items-center gap-4 px-5 py-3 text-[var(--vsc-gray-700)] hover:bg-[var(--vsc-gray-100)] hover:text-[var(--vsc-gray-900)] transition-colors duration-150 group"
                     >
-                      <div className="w-10 h-10 shrink-0 bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] flex items-center justify-center overflow-hidden">
-                        <span className="text-[10px] text-[var(--vsc-gray-500)] uppercase">
-                          prod
-                        </span>
+                      <div className="relative w-14 h-14 shrink-0 bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] overflow-hidden">
+                        {item.image && !item.image.includes("placeholder") ? (
+                          <Image
+                            src={item.image}
+                            alt={getImageAlt("product", item.name)}
+                            fill
+                            className="object-cover object-center"
+                            sizes="56px"
+                          />
+                        ) : (
+                          <span className="absolute inset-0 flex items-center justify-center text-[10px] text-[var(--vsc-gray-500)] uppercase">
+                            prod
+                          </span>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <span
