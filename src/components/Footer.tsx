@@ -31,7 +31,7 @@ export function Footer() {
       </div> */}
 
       {/* Accent divider */}
-      <div className="h-px bg-[var(--vsc-gray-200)] mx-4 sm:mx-6 md:mx-12 lg:mx-20" />
+      {/* <div className="h-px bg-[var(--vsc-gray-200)] mx-4 sm:mx-6 md:mx-12 lg:mx-20" /> */}
 
       {/* Footer content grid */}
       <div className="px-4 sm:px-6 md:px-12 lg:px-20 py-12 sm:py-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 md:gap-8">

@@ -252,10 +252,10 @@ export function ProductDetailClient({
       <Navbar />
 
       {/* Product section */}
-      <section className="pt-28 md:pt-36 pb-20 md:pb-32">
+      <section className="pt-28 sm:pt-24 md:pt-32 pb-12 sm:pb-24 md:pb-32">
         {/* Breadcrumb */}
         <div className="px-6 md:px-12 lg:px-20 mb-8">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Link
               href="/"
               className="text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors"
@@ -330,6 +330,7 @@ export function ProductDetailClient({
                           onClick={showPrevImage}
                           className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-full bg-[var(--vsc-black)]/60 border border-[var(--vsc-gray-600)] text-[var(--vsc-white)] flex items-center justify-center hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors text-lg sm:text-xl md:text-2xl"
                           aria-label="Previous image"
+                          suppressHydrationWarning
                         >
                           ‹
                         </button>
@@ -338,6 +339,7 @@ export function ProductDetailClient({
                           onClick={showNextImage}
                           className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-full bg-[var(--vsc-black)]/60 border border-[var(--vsc-gray-600)] text-[var(--vsc-white)] flex items-center justify-center hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors text-lg sm:text-xl md:text-2xl"
                           aria-label="Next image"
+                          suppressHydrationWarning
                         >
                           ›
                         </button>
@@ -425,6 +427,7 @@ export function ProductDetailClient({
                 {product.images.map((image, i) => (
                   <button
                     key={i}
+                    suppressHydrationWarning
                     onClick={() => {
                       setSelectedImageIndex(i);
                       trackImageGalleryNavigate({
@@ -542,6 +545,7 @@ export function ProductDetailClient({
                         <button
                           key={color}
                           type="button"
+                          suppressHydrationWarning
                           onClick={() => {
                             setSelectedColor(color);
                             trackSelectColor({
@@ -561,6 +565,7 @@ export function ProductDetailClient({
                       ) : (
                         <button
                           key={color}
+                          suppressHydrationWarning
                           onClick={() => {
                             setSelectedColor(color);
                             trackSelectColor({
@@ -602,6 +607,7 @@ export function ProductDetailClient({
                         <button
                           key={size}
                           type="button"
+                          suppressHydrationWarning
                           disabled={!inStock}
                           onClick={() => {
                             if (!inStock) return;
@@ -664,6 +670,7 @@ export function ProductDetailClient({
                 </span>
                 <div className="flex items-center border border-[var(--vsc-gray-700)] inline-flex">
                   <button
+                    suppressHydrationWarning
                     onClick={() => {
                       const next = Math.max(1, quantity - 1);
                       trackChangeQuantity({
@@ -687,6 +694,7 @@ export function ProductDetailClient({
                   </span>
                   <button
                     type="button"
+                    suppressHydrationWarning
                     onClick={() => {
                       const next = Math.min(quantity + 1, stockForSelectedSize);
                       trackChangeQuantity({
@@ -709,6 +717,7 @@ export function ProductDetailClient({
               {/* Add to Cart */}
               <button
                 type="button"
+                suppressHydrationWarning
                 disabled={!canAddToCart}
                 onClick={() => {
                   if (!user) {
@@ -787,6 +796,7 @@ export function ProductDetailClient({
               {/* Favourite toggle */}
               <button
                 type="button"
+                suppressHydrationWarning
                 onClick={() => {
                   if (!user) {
                     router.push(`/login?redirect=/product/${product.slug}`);
@@ -884,7 +894,7 @@ export function ProductDetailClient({
       </section>
 
       {/* Embroidery detail section */}
-      <section className="py-24 md:py-32 border-t border-[var(--vsc-gray-700)]">
+      <section className="pt-12 sm:pt-24 md:pt-32 pb-12 sm:pb-24 md:pb-32 border-t border-[var(--vsc-gray-700)]">
         <div className="px-6 md:px-12 lg:px-20">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
             <div>

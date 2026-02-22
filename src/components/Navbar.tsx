@@ -325,12 +325,31 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu — portaled to body so it isn't affected by Lenis transform on scroll */}
+      {/* Mobile Menu — full-screen overlay, covers navbar */}
       {mounted &&
         mobileMenuOpen &&
         createPortal(
-          <div className="md:hidden fixed inset-0 top-[73px] z-[60] bg-[var(--vsc-white)] border-t border-[var(--vsc-gray-200)]">
-            <div ref={mobileMenuRef} className="h-full overflow-y-auto">
+          <div className="md:hidden fixed inset-0 z-[60] flex flex-col bg-[var(--vsc-white)]">
+            <div className="flex shrink-0 items-center justify-between px-4 py-4 border-b border-[var(--vsc-gray-200)]">
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors"
+                aria-label="Close menu"
+              >
+                <XMarkIcon className="w-6 h-6" strokeWidth={1.5} />
+              </button>
+              <Link
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-xl font-bold tracking-[-0.06em] uppercase text-[var(--vsc-gray-900)]"
+                style={{ fontFamily: "var(--font-space-grotesk)" }}
+              >
+                VASC<span className="text-[var(--vsc-accent)]">A</span>RIO
+              </Link>
+              <div className="w-10" aria-hidden />
+            </div>
+            <div ref={mobileMenuRef} className="flex-1 overflow-y-auto min-h-0">
               <nav className="px-6 py-8" style={{ fontFamily: "var(--font-space-mono)" }}>
                 <ul className="space-y-6">
                   {([
