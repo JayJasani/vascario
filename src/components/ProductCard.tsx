@@ -54,13 +54,14 @@ export function ProductCard({ product, variant = "default", aspectClass, href }:
 
   return (
     <Link href={targetHref} className={linkClass} onClick={handleClick}>
-      {/* Image container with chromatic aberration */}
+      {/* Image container */}
       <div
-        className={`relative overflow-hidden bg-[var(--vsc-gray-800)] chromatic-hover ${aspect}`}
+        className={`relative overflow-hidden bg-[var(--vsc-gray-800)] ${aspect}`}
       >
-        <div className="absolute inset-0 bg-[var(--vsc-gray-900)] flex items-center justify-center">
+        <div className="absolute inset-0 bg-[var(--vsc-gray-900)]">
           {/* Placeholder pattern when no real image is available */}
-          <div className="absolute inset-0 opacity-10"
+          <div
+            className="absolute inset-0 opacity-10"
             style={{
               backgroundImage: `
                 linear-gradient(45deg, var(--vsc-gray-700) 25%, transparent 25%),
@@ -72,12 +73,6 @@ export function ProductCard({ product, variant = "default", aspectClass, href }:
               backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
             }}
           />
-          <span
-            className="text-[var(--vsc-gray-600)] text-xs uppercase tracking-[0.3em] z-10"
-            style={{ fontFamily: "var(--font-space-mono)" }}
-          >
-            {product.name}
-          </span>
         </div>
 
         {/* Snap zoom on hover */}
