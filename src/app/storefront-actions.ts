@@ -12,33 +12,15 @@ import {
     getActiveReviews as getActiveReviewsHelper,
 } from "@/lib/firebase-helpers";
 import { CACHE_TAGS } from "@/lib/storefront-cache";
-import type { SearchItem } from "@/lib/search-data";
+import type { SearchItem } from "@/models/search";
+import type { StorefrontProduct, StockBySize } from "@/models/storefront";
+
+export type { StorefrontProduct, StockBySize } from "@/models/storefront";
 
 // Cache TTL in seconds (live env: avoid hitting Firebase on every search/navigation)
 const CACHE_REVALIDATE = 60;
 
 // ─── PUBLIC STOREFRONT QUERIES ──────────────────────────────────────────────────
-
-export interface StorefrontProduct {
-    id: string;
-    name: string;
-    slug: string;
-    description: string;
-    price: number;
-    /** Original price before discount, shown crossed out when present */
-    cutPrice?: number | null;
-    images: string[];
-    colors: string[];
-    sizes: string[];
-    sku: string | null;
-    /** Total stock across all sizes. 0 = out of stock. */
-    totalStock: number;
-}
-
-export interface StockBySize {
-    size: string;
-    quantity: number;
-}
 
 /** Cached active products (shared by getActiveProducts + searchItems) for fast live env. */
 async function getCachedActiveProducts() {

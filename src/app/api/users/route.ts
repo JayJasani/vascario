@@ -2,17 +2,9 @@ import { NextRequest } from "next/server";
 import { getAuth } from "firebase-admin/auth";
 import { db, COLLECTIONS } from "@/lib/firebase";
 import { FieldValue } from "firebase-admin/firestore";
+import type { UserAddress } from "@/models/user";
 
-export interface UserAddress {
-  id: string;
-  label?: string;
-  line1: string;
-  line2?: string;
-  city: string;
-  state?: string;
-  postalCode: string;
-  country: string;
-}
+export type { UserAddress } from "@/models/user";
 
 function getToken(request: NextRequest): string | null {
   const authHeader = request.headers.get("Authorization");

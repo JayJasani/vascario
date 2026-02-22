@@ -1,16 +1,7 @@
 import { getActiveProducts } from "@/lib/firebase-helpers";
+import type { SearchItem } from "@/models/search";
 
-export interface SearchItem {
-  id: string;
-  name: string;
-  type: "product";
-  url: string;
-  image?: string;
-  price?: number;
-  /** Original price before discount, shown crossed out when present */
-  cutPrice?: number | null;
-  tag?: string;
-}
+export type { SearchItem } from "@/models/search";
 
 /**
  * Fetches all searchable products dynamically from Firebase

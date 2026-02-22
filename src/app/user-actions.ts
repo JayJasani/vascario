@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { getAuth } from "firebase-admin/auth";
 import { db, COLLECTIONS } from "@/lib/firebase";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import type { UserAddress } from "@/app/api/users/route";
+import type { UserAddress } from "@/models/user";
 
 // Helper to convert Firestore Timestamp to ISO string
 function convertTimestamp(timestamp: Timestamp | Date | undefined | null): string | undefined {

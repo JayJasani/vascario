@@ -1,5 +1,6 @@
 "use server";
 
+import { getString } from "@/lib/parse-form";
 import { createNewsletterSubscription } from "@/lib/firebase-helpers";
 
 export type NewsletterFormState = { success?: boolean; error?: string } | null;
@@ -7,7 +8,7 @@ export type NewsletterFormState = { success?: boolean; error?: string } | null;
 export async function subscribeToNewsletter(
   formData: FormData
 ): Promise<NewsletterFormState> {
-  const email = (formData.get("email") as string)?.trim();
+  const email = getString(formData, "email");
 
   if (!email) {
     return { error: "Please enter your email." };
