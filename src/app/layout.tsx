@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { Suspense } from "react";
 import { SmoothScroller } from "@/components/SmoothScroller";
+import { AppLoadGate } from "@/components/AppLoadGate";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { GoogleTagManagerHead, GoogleTagManagerNoScript } from "@/components/GoogleTagManager";
 import { GtmPageView } from "@/components/GtmPageView";
@@ -53,6 +54,10 @@ export default function RootLayout({
         />
       </head>
       <body className={`${spaceGrotesk.variable} ${spaceMono.variable}`}>
+        <div id="app-initial-loading" aria-hidden="true">
+          <span className="app-load-text">VASCARIO</span>
+        </div>
+        <AppLoadGate />
         <GoogleTagManagerNoScript />
         <SmoothScroller>
           <AuthProvider>

@@ -364,7 +364,7 @@ export default function OrderSuccessPageClient() {
       fallback={
         <main className="min-h-screen bg-[var(--vsc-cream)] flex items-center justify-center">
           <span
-            className="text-xs text-[var(--vsc-gray-400)] uppercase tracking-[0.3em] animate-pulse"
+            className="text-xs text-[var(--vsc-gray-400)] uppercase tracking-[0.3em]"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
             LOADING...

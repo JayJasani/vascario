@@ -27,7 +27,7 @@ export default async function AdminDashboard() {
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-[#BAFF00] animate-pulse" />
+                    <div className="w-2 h-2 bg-[#BAFF00]" />
                     <span className="font-mono text-[10px] text-[#666] tracking-[0.15em] uppercase">
                         Live
                     </span>

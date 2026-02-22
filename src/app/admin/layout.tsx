@@ -73,7 +73,7 @@ export default async function AdminLayout({
                         {/* System info footer */}
                         <div className="border-t-2 border-[#2A2A2A] px-6 py-4">
                             <div className="flex items-center gap-2 mb-3">
-                                <div className="w-2 h-2 bg-[#BAFF00] animate-pulse" />
+                                <div className="w-2 h-2 bg-[#BAFF00]" />
                                 <span className="text-[10px] text-[#666] tracking-[0.15em] uppercase">
                                     System Online
                                 </span>

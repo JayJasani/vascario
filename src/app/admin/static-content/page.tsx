@@ -365,7 +365,7 @@ export default function StaticContentPage() {
                                         </div>
                                         {isSaving && (
                                             <div className="flex items-center gap-1.5 text-[#BAFF00] px-2 py-1 bg-[#BAFF00]/10 rounded">
-                                                <div className="w-1.5 h-1.5 bg-[#BAFF00] animate-pulse rounded-full" />
+                                                <div className="w-1.5 h-1.5 bg-[#BAFF00] rounded-full" />
                                                 <span className="font-mono text-[10px] uppercase tracking-[0.1em]">
                                                     Saving
                                                 </span>
