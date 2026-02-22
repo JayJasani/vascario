@@ -1,7 +1,7 @@
 import { Navbar } from "@/components/Navbar"
 import { Hero } from "@/components/Hero"
 import { MarqueeStrip } from "@/components/MarqueeStrip"
-import { ProductShowcase } from "@/components/ProductShowcase"
+import { CollectionGrid } from "@/components/CollectionGrid"
 import { EditorialSection } from "@/components/EditorialSection"
 import { ReviewsSection } from "@/components/ReviewsSection"
 import { Footer } from "@/components/Footer"
@@ -43,7 +43,7 @@ export default async function Home() {
       <Navbar />
       <Hero onboard1VideoUrl={onboard1Url} redirectUrl={onboard1Redirect || undefined} />
       <MarqueeStrip />
-      <ProductShowcase products={products} />
+      <CollectionGrid products={products} />
       <EditorialSection 
         onboard2VideoUrl={onboard2Url} 
         tshirtCloseupUrl={tshirtCloseupUrl}
