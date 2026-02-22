@@ -435,8 +435,8 @@ export function ProductDetailClient({
                       });
                     }}
                     className={`relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 shrink-0 overflow-hidden border-2 transition-colors ${selectedImageIndex === i
-                        ? "border-[var(--vsc-accent)]"
-                        : "border-[var(--vsc-gray-700)] hover:border-[var(--vsc-gray-600)]"
+                      ? "border-[var(--vsc-accent)]"
+                      : "border-[var(--vsc-gray-700)] hover:border-[var(--vsc-gray-600)]"
                       }`}
                   >
                     <Image
@@ -551,8 +551,8 @@ export function ProductDetailClient({
                             });
                           }}
                           className={`w-8 h-8 shrink-0 border-2 transition-all duration-200 ${selectedColor === color
-                              ? "border-[var(--vsc-accent)] ring-2 ring-[var(--vsc-accent)] ring-offset-2 ring-offset-[var(--vsc-black)]"
-                              : "border-[var(--vsc-gray-700)] hover:border-[var(--vsc-gray-500)]"
+                            ? "border-[var(--vsc-accent)] ring-2 ring-[var(--vsc-accent)] ring-offset-2 ring-offset-[var(--vsc-black)]"
+                            : "border-[var(--vsc-gray-700)] hover:border-[var(--vsc-gray-500)]"
                             }`}
                           style={{ backgroundColor: color }}
                           title={color}
@@ -570,8 +570,8 @@ export function ProductDetailClient({
                             });
                           }}
                           className={`px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] border transition-all duration-200 ${selectedColor === color
-                              ? "bg-[var(--vsc-accent)] text-[var(--vsc-black)] border-[var(--vsc-accent)]"
-                              : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)]"
+                            ? "bg-[var(--vsc-accent)] text-[var(--vsc-black)] border-[var(--vsc-accent)]"
+                            : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)]"
                             }`}
                           style={{ fontFamily: "var(--font-space-mono)" }}
                         >
@@ -613,10 +613,10 @@ export function ProductDetailClient({
                             });
                           }}
                           className={`px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] border-2 transition-all duration-200 ${!inStock
-                              ? "opacity-50 cursor-not-allowed border-[var(--vsc-gray-700)] text-[var(--vsc-gray-500)]"
-                              : selectedSize === size
-                                ? "bg-[var(--vsc-accent)] text-[var(--vsc-white)] border-[var(--vsc-accent)] ring-2 ring-[var(--vsc-accent)] ring-offset-2 ring-offset-[var(--vsc-black)]"
-                                : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)]"
+                            ? "opacity-50 cursor-not-allowed border-[var(--vsc-gray-700)] text-[var(--vsc-gray-500)]"
+                            : selectedSize === size
+                              ? "bg-[var(--vsc-accent)] text-[var(--vsc-white)] border-[var(--vsc-accent)] ring-2 ring-[var(--vsc-accent)] ring-offset-2 ring-offset-[var(--vsc-black)]"
+                              : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)]"
                             }`}
                           style={{ fontFamily: "var(--font-space-mono)" }}
                           title={
@@ -767,8 +767,8 @@ export function ProductDetailClient({
                   });
                 }}
                 className={`w-full py-2.5 sm:py-3 text-xs sm:text-sm font-bold uppercase tracking-[0.2em] transition-all duration-200 ${canAddToCart
-                    ? "bg-[var(--vsc-accent)] text-black hover:bg-black hover:text-[var(--vsc-accent)] hover:shadow-[0_0_24px_var(--vsc-accent-dim)] cursor-pointer"
-                    : "bg-[var(--vsc-gray-700)] text-[var(--vsc-gray-500)] cursor-not-allowed"
+                  ? "bg-[var(--vsc-accent)] text-black hover:bg-black hover:text-[var(--vsc-accent)] hover:shadow-[0_0_24px_var(--vsc-accent-dim)] cursor-pointer"
+                  : "bg-[var(--vsc-gray-700)] text-[var(--vsc-gray-500)] cursor-not-allowed"
                   }`}
                 style={{
                   fontFamily: "var(--font-space-mono)",
