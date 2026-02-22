@@ -2,11 +2,13 @@
 
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { HexColorPicker } from "react-colorful";
-import { Palette } from "lucide-react";
+import { Palette, ChevronUp, ChevronDown, Pencil, Archive, ArchiveRestore, Trash2, Star } from "lucide-react";
+import { parseColorEntry, serializeColor } from "@/lib/hex-to-color-name";
+import { hasDiscount } from "@/lib/discount";
 import { AdminButton } from "@/components/admin/AdminButton";
 import { AdminInput, AdminTextarea } from "@/components/admin/AdminInput";
 import { AdminLoadingBlock } from "@/components/admin/AdminLoadingBlock";
-import { createProduct, toggleProductActive, updateProductAction, deleteDropAction } from "../actions";
+import { createProduct, toggleProductActive, toggleProductFeatured, updateProductAction, deleteDropAction } from "../actions";
 import useSWR from "swr";
 import Image from "next/image";
 
@@ -15,11 +17,13 @@ interface Product {
     name: string;
     description: string;
     price: string;
+    cutPrice: string | null;
     images: string[];
     colors: string[];
     sizes: string[];
     sku: string | null;
     isActive: boolean;
+    isFeatured?: boolean;
     createdAt: string;
 }
 
@@ -85,9 +89,9 @@ export default function DropsPage() {
     });
     const [showForm, setShowForm] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-    const [preview, setPreview] = useState({ name: "", price: "", description: "" });
+    const [preview, setPreview] = useState({ name: "", price: "", cutPrice: "", description: "" });
     const [formImages, setFormImages] = useState<string[]>([]);
-    const [formColors, setFormColors] = useState<string[]>(["#000000"]);
+    const [formColors, setFormColors] = useState<{ hex: string; name: string }[]>([{ hex: "#000000", name: "" }]);
     const [editingColor, setEditingColor] = useState<{ index: number; originalHex: string } | null>(null);
     const [pickerPlacement, setPickerPlacement] = useState<"top" | "bottom">("bottom");
     const [uploading, setUploading] = useState(false);
@@ -125,7 +129,7 @@ export default function DropsPage() {
             const target = e.target as Node;
             if (colorPickerRef.current && !colorPickerRef.current.contains(target)) {
                 setFormColors((prev) =>
-                    prev.map((c, i) => (i === index ? originalHex : c))
+                    prev.map((c, i) => (i === index ? { ...c, hex: originalHex } : c))
                 );
                 setEditingColor(null);
             }
@@ -161,12 +165,22 @@ export default function DropsPage() {
         setFormImages((prev) => prev.filter((_, i) => i !== index));
     }
 
+    function reorderImage(index: number, direction: "up" | "down") {
+        setFormImages((prev) => {
+            const next = [...prev];
+            const target = direction === "up" ? index - 1 : index + 1;
+            if (target < 0 || target >= next.length) return prev;
+            [next[index], next[target]] = [next[target], next[index]];
+            return next;
+        });
+    }
+
     async function handleExtractPalette(imageIndex = 0) {
         if (formImages.length === 0 || !formImages[imageIndex]) return;
         setExtractingPalette(true);
         try {
             const palette = await extractPaletteFromImage(formImages[imageIndex]);
-            setFormColors(palette);
+            setFormColors(palette.map((hex) => ({ hex, name: "" })));
         } catch (e) {
             console.error("Palette extraction failed:", e);
             alert("Could not extract palette. Ensure the image is accessible (CORS).");
@@ -178,16 +192,16 @@ export default function DropsPage() {
     function closeForm() {
         setShowForm(false);
         setEditingProduct(null);
-        setPreview({ name: "", price: "", description: "" });
+        setPreview({ name: "", price: "", cutPrice: "", description: "" });
         setFormImages([]);
-        setFormColors(["#000000"]);
+        setFormColors([{ hex: "#000000", name: "" }]);
         setEditingColor(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
     }
 
     async function handleSubmit(formData: FormData) {
         formData.set("images", formImages.join(","));
-        formData.set("colors", formColors.join(","));
+        formData.set("colors", formColors.map((c) => serializeColor(c.hex, c.name)).join(","));
         if (isEditMode && editingProduct) {
             await updateProductAction(editingProduct.id, formData);
         } else {
@@ -199,6 +213,11 @@ export default function DropsPage() {
 
     async function handleToggle(id: string) {
         await toggleProductActive(id);
+        mutate();
+    }
+
+    async function handleToggleFeatured(id: string) {
+        await toggleProductFeatured(id);
         mutate();
     }
 
@@ -223,25 +242,31 @@ export default function DropsPage() {
         setFormImages(product.images ?? []);
         setFormColors(
             product.colors?.length
-                ? product.colors.map((c) => (c.startsWith("#") ? c : `#${c}`))
-                : ["#000000"]
+                ? product.colors.map((c) => {
+                    const raw = c.startsWith("#") ? c : `#${c}`;
+                    const parts = raw.split("::", 2);
+                    const hex = parts[0]?.trim() ?? raw;
+                    const name = parts[1]?.trim() ?? "";
+                    return { hex, name };
+                  })
+                : [{ hex: "#000000", name: "" }]
         );
-        setPreview({ name: product.name, price: product.price, description: product.description });
+        setPreview({ name: product.name, price: product.price, cutPrice: product.cutPrice ?? "", description: product.description });
         if (fileInputRef.current) fileInputRef.current.value = "";
     }
 
     return (
-        <div className="space-y-10">
+        <div className="space-y-6">
             {/* ── PAGE HEADER ── */}
             <div className="flex items-end justify-between">
                 <div>
                     <h2
-                        className="text-2xl font-bold tracking-[-0.03em] uppercase"
+                        className="text-xl font-bold tracking-[-0.03em] uppercase"
                         style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
                     >
                         Drop Manager
                     </h2>
-                    <p className="font-mono text-xs text-[#666] tracking-[0.15em] uppercase mt-1">
+                    <p className="font-mono text-[10px] text-[#666] tracking-[0.15em] uppercase mt-0.5">
                         Product Uploads &amp; Management
                     </p>
                 </div>
@@ -253,9 +278,9 @@ export default function DropsPage() {
                         } else {
                             setShowForm(true);
                             setEditingProduct(null);
-                            setPreview({ name: "", price: "", description: "" });
+                            setPreview({ name: "", price: "", cutPrice: "", description: "" });
                             setFormImages([]);
-                            setFormColors(["#000000"]);
+                            setFormColors([{ hex: "#000000", name: "" }]);
                         }
                     }}
                 >
@@ -265,13 +290,13 @@ export default function DropsPage() {
 
             {/* ── FORM + LIVE PREVIEW ── */}
             {isFormOpen && (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     {/* Form */}
-                    <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-8">
-                        <span className="font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase block mb-6">
+                    <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-5">
+                        <span className="font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase block mb-4">
                             {isEditMode ? `Edit Drop // ${editingProduct?.name}` : "Create New Drop"}
                         </span>
-                        <form key={editingProduct?.id ?? "create"} action={handleSubmit} className="space-y-6">
+                        <form key={editingProduct?.id ?? "create"} action={handleSubmit} className="space-y-4">
                             <AdminInput
                                 label="Drop Name"
                                 name="name"
@@ -292,17 +317,28 @@ export default function DropsPage() {
                                     setPreview((p) => ({ ...p, description: e.target.value }))
                                 }
                             />
-                            <div className="grid grid-cols-2 gap-6">
+                            <div className="grid grid-cols-2 gap-4">
                                 <AdminInput
                                     label="Price"
                                     name="price"
                                     type="number"
                                     placeholder="2499"
                                     required
-                                    hint="INR"
+                                    hint="INR (selling price)"
                                     defaultValue={isEditMode ? editingProduct?.price : undefined}
                                     onChange={(e) =>
                                         setPreview((p) => ({ ...p, price: e.target.value }))
+                                    }
+                                />
+                                <AdminInput
+                                    label="Cut Price"
+                                    name="cutPrice"
+                                    type="number"
+                                    placeholder="2999"
+                                    hint="Optional (original price, shown crossed out)"
+                                    defaultValue={isEditMode ? (editingProduct?.cutPrice ?? "") : undefined}
+                                    onChange={(e) =>
+                                        setPreview((p) => ({ ...p, cutPrice: e.target.value }))
                                     }
                                 />
                                 <AdminInput
@@ -315,7 +351,7 @@ export default function DropsPage() {
                             </div>
                             {/* Image Upload */}
                             <div>
-                                <label className="block font-mono text-[10px] text-[#999] tracking-[0.2em] uppercase mb-2">
+                                <label className="block font-mono text-[9px] text-[#999] tracking-[0.15em] uppercase mb-1.5">
                                     Product Images
                                 </label>
                                 <input
@@ -329,14 +365,14 @@ export default function DropsPage() {
                                 />
                                 <label
                                     htmlFor="image-upload"
-                                    className={`block w-full px-4 py-3 border-2 border-[#2A2A2A] bg-[#0D0D0D] cursor-pointer hover:border-[#BAFF00] transition-colors flex items-center justify-center ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    className={`block w-full px-3 py-2 border-2 border-[#2A2A2A] bg-[#0D0D0D] cursor-pointer hover:border-[#BAFF00] transition-colors flex items-center justify-center ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}
                                 >
-                                    <span className="font-mono text-xs text-[#F5F5F0] tracking-[0.1em]">
+                                    <span className="font-mono text-[10px] text-[#F5F5F0] tracking-[0.1em]">
                                         {uploading ? "Uploading..." : formImages.length > 0 ? `✓ ${formImages.length} image(s) uploaded` : "+ Upload Images"}
                                     </span>
                                 </label>
                                 {formImages.length > 0 && (
-                                    <div className="mt-4 grid grid-cols-3 gap-3">
+                                    <div className="mt-3 grid grid-cols-3 gap-2">
                                         {formImages.map((url, index) => (
                                             <div key={index} className="relative group aspect-square">
                                                 <Image
@@ -345,6 +381,31 @@ export default function DropsPage() {
                                                     fill
                                                     className="object-cover border-2 border-[#2A2A2A]"
                                                 />
+                                                <div className="absolute bottom-0 left-0 right-0 px-2 py-1.5 flex items-center justify-between gap-2 bg-[#0D0D0D]/95 border-t-2 border-[#2A2A2A]">
+                                                    <div className="flex items-center gap-1">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => reorderImage(index, "up")}
+                                                            disabled={index === 0}
+                                                            className="w-8 h-7 bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center hover:border-[#BAFF00] hover:bg-[#252525] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[#2A2A2A] disabled:hover:bg-[#1A1A1A]"
+                                                            title="Move up"
+                                                        >
+                                                            <ChevronUp className="w-4 h-4 text-[#BAFF00]" />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => reorderImage(index, "down")}
+                                                            disabled={index === formImages.length - 1}
+                                                            className="w-8 h-7 bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center hover:border-[#BAFF00] hover:bg-[#252525] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[#2A2A2A] disabled:hover:bg-[#1A1A1A]"
+                                                            title="Move down"
+                                                        >
+                                                            <ChevronDown className="w-4 h-4 text-[#BAFF00]" />
+                                                        </button>
+                                                    </div>
+                                                    <span className="font-mono text-xs text-[#999] font-medium">
+                                                        #{index + 1}
+                                                    </span>
+                                                </div>
                                                 <button
                                                     type="button"
                                                     onClick={() => handleExtractPalette(index)}
@@ -366,10 +427,26 @@ export default function DropsPage() {
                                     </div>
                                 )}
                                 <p className="font-mono text-[10px] text-[#666] tracking-[0.1em] mt-2">
-                                    Upload multiple images (JPG, PNG, WebP)
+                                    Upload multiple images (JPG, PNG, WebP). Use ↑↓ to reorder, hover for palette/remove.
                                 </p>
                             </div>
-                            <div>
+                                <div>
+                                <label className="flex items-center gap-2 cursor-pointer group">
+                                    <input
+                                        type="checkbox"
+                                        name="isFeatured"
+                                        defaultChecked={isEditMode ? editingProduct?.isFeatured : undefined}
+                                        className="w-4 h-4 accent-[#BAFF00] bg-[#0D0D0D] border-2 border-[#2A2A2A] cursor-pointer focus:ring-[#BAFF00]"
+                                    />
+                                    <span className="font-mono text-xs text-[#F5F5F0] tracking-[0.1em] group-hover:text-[#BAFF00] transition-colors">
+                                        Featured in search (show when user opens search, no query)
+                                    </span>
+                                </label>
+                                <p className="font-mono text-[10px] text-[#666] tracking-[0.1em] mt-1 mb-4">
+                                    Good for promoting products — they appear first when customers open search.
+                                </p>
+                                </div>
+                                <div>
                                 <label className="block font-mono text-[10px] text-[#999] tracking-[0.2em] uppercase mb-2">
                                     Sizes
                                 </label>
@@ -404,23 +481,34 @@ export default function DropsPage() {
                                     Colors
                                 </label>
                                 <div className="flex flex-wrap items-center gap-4 pt-2">
-                                    {formColors.map((hex, index) => (
+                                    {formColors.map((entry, index) => (
                                         <div
-                                            key={`${hex}-${index}`}
+                                            key={`${entry.hex}-${index}`}
                                             className="flex items-center gap-2 p-2 border-2 border-[#2A2A2A] bg-[#0D0D0D]"
                                         >
                                             <button
                                                 type="button"
-                                                onClick={() => setEditingColor({ index, originalHex: hex })}
+                                                onClick={() => setEditingColor({ index, originalHex: entry.hex })}
                                                 className={`w-10 h-10 shrink-0 cursor-pointer border-2 rounded-sm transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#BAFF00] ${editingColor?.index === index
                                                         ? "border-[#BAFF00] ring-2 ring-[#BAFF00]"
                                                         : "border-[#2A2A2A]"
                                                     }`}
-                                                style={{ backgroundColor: hex }}
+                                                style={{ backgroundColor: entry.hex }}
                                                 title="Tap to open picker, then drag to select color"
                                             />
-                                            <span className="font-mono text-[10px] text-[#999] tracking-[0.1em] min-w-[4.5rem]">
-                                                {hex.toUpperCase()}
+                                            <input
+                                                type="text"
+                                                value={entry.name}
+                                                onChange={(e) =>
+                                                    setFormColors((prev) =>
+                                                        prev.map((c, i) => (i === index ? { ...c, name: e.target.value } : c))
+                                                    )
+                                                }
+                                                placeholder="Color name"
+                                                className="font-mono text-[10px] text-[#F5F5F0] tracking-[0.1em] w-24 sm:w-28 bg-transparent border border-[#2A2A2A] px-2 py-1.5 focus:border-[#BAFF00] focus:outline-none placeholder:text-[#555]"
+                                            />
+                                            <span className="font-mono text-[10px] text-[#666] tracking-[0.1em] min-w-[4rem]">
+                                                {entry.hex.toUpperCase()}
                                             </span>
                                             <button
                                                 type="button"
@@ -438,7 +526,7 @@ export default function DropsPage() {
                                     ))}
                                     <button
                                         type="button"
-                                        onClick={() => setFormColors((prev) => [...prev, "#000000"])}
+                                        onClick={() => setFormColors((prev) => [...prev, { hex: "#000000", name: "" }])}
                                         className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-[#2A2A2A] font-mono text-[10px] text-[#666] tracking-[0.1em] uppercase hover:border-[#BAFF00] hover:text-[#BAFF00] transition-colors"
                                     >
                                         + Add color
@@ -458,11 +546,11 @@ export default function DropsPage() {
                                         </span>
                                         <div className="[&_.react-colorful]:h-36 [&_.react-colorful]:w-full">
                                             <HexColorPicker
-                                                color={formColors[editingColor.index] ?? "#000000"}
+                                                color={formColors[editingColor.index]?.hex ?? "#000000"}
                                                 onChange={(newHex) =>
                                                     setFormColors((prev) =>
                                                         prev.map((c, i) =>
-                                                            i === editingColor.index ? newHex : c
+                                                            i === editingColor.index ? { ...c, hex: newHex } : c
                                                         )
                                                     )
                                                 }
@@ -486,7 +574,7 @@ export default function DropsPage() {
                                                 onClick={() => {
                                                     setFormColors((prev) =>
                                                         prev.map((c, i) =>
-                                                            i === editingColor.index ? editingColor.originalHex : c
+                                                            i === editingColor.index ? { ...c, hex: editingColor.originalHex } : c
                                                         )
                                                     );
                                                     setEditingColor(null);
@@ -498,7 +586,7 @@ export default function DropsPage() {
                                     </div>
                                 )}
                                 <p className="font-mono text-[10px] text-[#666] tracking-[0.1em] mt-2">
-                                    Tap swatch → drag on picker to select → Done
+                                    Tap swatch → drag on picker to select. Enter a color name (e.g. Black, Navy Blue) to show on the product page instead of hex.
                                 </p>
                             </div>
                             <div className="pt-4">
@@ -510,13 +598,13 @@ export default function DropsPage() {
                     </div>
 
                     {/* Live Preview */}
-                    <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-8">
-                        <span className="font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase block mb-6">
+                    <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-5">
+                        <span className="font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase block mb-4">
                             Live Preview // Storefront Card
                         </span>
-                        <div className="border-2 border-[#2A2A2A] bg-black p-6 max-w-sm">
+                        <div className="border-2 border-[#2A2A2A] bg-black p-4 max-w-sm">
                             {/* Product image preview */}
-                            <div className="aspect-[3/4] bg-[#1A1A1A] border border-[#2A2A2A] overflow-hidden mb-6 relative">
+                            <div className="aspect-[3/4] bg-[#1A1A1A] border border-[#2A2A2A] overflow-hidden mb-4 relative">
                                 {formImages.length > 0 ? (
                                     <Image
                                         src={formImages[0]}
@@ -549,9 +637,19 @@ export default function DropsPage() {
                                             <p key={idx}>{line}</p>
                                         ))}
                                 </div>
-                                <p className="font-mono text-lg text-[#BAFF00] font-bold tracking-[0.02em]">
-                                    {preview.price ? `₹${Number(preview.price).toLocaleString("en-IN")}` : "₹0"}
-                                </p>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    {hasDiscount(
+                                        preview.cutPrice?.trim() ? Number(preview.cutPrice) : null,
+                                        Number(preview.price) || 0
+                                    ) && (
+                                        <span className="font-mono text-sm text-[#666] line-through tracking-[0.02em]">
+                                            ₹{Number(preview.cutPrice).toLocaleString("en-IN")}
+                                        </span>
+                                    )}
+                                    <p className="font-mono text-lg text-[#BAFF00] font-bold tracking-[0.02em]">
+                                        {preview.price ? `₹${Number(preview.price).toLocaleString("en-IN")}` : "₹0"}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -563,8 +661,8 @@ export default function DropsPage() {
                 <AdminLoadingBlock />
             ) : (
             <div className="border-2 border-[#2A2A2A]">
-                <div className="px-6 py-4 border-b-2 border-[#2A2A2A] bg-[#0D0D0D]">
-                    <span className="font-mono text-xs text-[#F5F5F0] tracking-[0.15em] uppercase font-bold">
+                <div className="px-4 py-3 border-b-2 border-[#2A2A2A] bg-[#0D0D0D]">
+                    <span className="font-mono text-[10px] text-[#F5F5F0] tracking-[0.15em] uppercase font-bold">
                         All Drops ({products.length})
                     </span>
                 </div>
@@ -572,22 +670,19 @@ export default function DropsPage() {
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-[#2A2A2A]">
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     SKU
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Name
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Price
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Sizes
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
-                                    Status
-                                </th>
-                                <th className="px-6 py-3 text-right font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-right font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Actions
                                 </th>
                             </tr>
@@ -596,8 +691,8 @@ export default function DropsPage() {
                             {products.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={6}
-                                        className="px-6 py-12 text-center font-mono text-xs text-[#666] tracking-[0.1em]"
+                                        colSpan={5}
+                                        className="px-4 py-8 text-center font-mono text-[10px] text-[#666] tracking-[0.1em]"
                                     >
                                         NO DROPS DEPLOYED // CREATE YOUR FIRST DROP
                                     </td>
@@ -608,50 +703,78 @@ export default function DropsPage() {
                                         key={product.id}
                                         className="border-b border-[#1A1A1A] hover:bg-[#0D0D0D] transition-colors"
                                     >
-                                        <td className="px-6 py-4 font-mono text-xs text-[#BAFF00] tracking-[0.1em]">
-                                            {product.sku ?? "—"}
+                                        <td className="px-4 py-2.5">
+                                            <div className="flex flex-col gap-0.5">
+                                                <span className="font-mono text-[10px] text-[#BAFF00] tracking-[0.1em]">
+                                                    {product.sku ?? "—"}
+                                                </span>
+                                                <span
+                                                    className={`font-mono text-[10px] tracking-[0.2em] uppercase font-bold ${product.isActive ? "text-[#BAFF00]" : "text-[#666]"
+                                                        }`}
+                                                >
+                                                    {product.isActive ? "● LIVE" : "○ ARCHIVED"}
+                                                </span>
+                                            </div>
                                         </td>
-                                        <td className="px-6 py-4 font-mono text-xs text-[#F5F5F0] tracking-[0.05em] uppercase">
+                                        <td className="px-4 py-2.5 font-mono text-[10px] text-[#F5F5F0] tracking-[0.05em] uppercase">
                                             {product.name}
                                         </td>
-                                        <td className="px-6 py-4 font-mono text-sm text-[#F5F5F0] font-bold tracking-[0.05em]">
-                                            ₹{Number(product.price).toLocaleString("en-IN")}
+                                        <td className="px-4 py-2.5 font-mono text-xs tracking-[0.05em]">
+                                            <div className="flex flex-col gap-0.5">
+                                                {hasDiscount(product.cutPrice ? Number(product.cutPrice) : null, Number(product.price)) && product.cutPrice && (
+                                                    <span className="text-[#666] line-through">
+                                                        ₹{Number(product.cutPrice).toLocaleString("en-IN")}
+                                                    </span>
+                                                )}
+                                                <span className="text-[#F5F5F0] font-bold text-[#BAFF00]">
+                                                    ₹{Number(product.price).toLocaleString("en-IN")}
+                                                </span>
+                                            </div>
                                         </td>
-                                        <td className="px-6 py-4 font-mono text-[10px] text-[#999] tracking-[0.1em]">
+                                        <td className="px-4 py-2.5 font-mono text-[9px] text-[#999] tracking-[0.1em]">
                                             {product.sizes.join(" / ")}
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <span
-                                                className={`font-mono text-[10px] tracking-[0.2em] uppercase font-bold ${product.isActive ? "text-[#BAFF00]" : "text-[#666]"
-                                                    }`}
-                                            >
-                                                {product.isActive ? "● LIVE" : "○ ARCHIVED"}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2 flex-wrap">
+                                        <td className="px-4 py-2.5 text-right">
+                                            <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                                                <AdminButton
+                                                    variant={product.isFeatured ? "secondary" : "ghost"}
+                                                    size="sm"
+                                                    onClick={() => handleToggleFeatured(product.id)}
+                                                    disabled={!product.isActive}
+                                                    title={product.isFeatured ? "Remove from featured (search)" : "Feature in search"}
+                                                    className="!p-1.5 tracking-normal"
+                                                >
+                                                    <Star
+                                                        className={`w-4 h-4 ${product.isFeatured ? "fill-current text-[#BAFF00]" : ""}`}
+                                                    />
+                                                </AdminButton>
                                                 <AdminButton
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => openEdit(product)}
+                                                    title="Edit"
+                                                    className="!p-1.5 tracking-normal"
                                                 >
-                                                    Edit
+                                                    <Pencil className="w-3.5 h-3.5" />
                                                 </AdminButton>
                                                 <AdminButton
                                                     variant={product.isActive ? "ghost" : "secondary"}
                                                     size="sm"
                                                     onClick={() => handleToggle(product.id)}
+                                                    title={product.isActive ? "Archive" : "Reactivate"}
+                                                    className="!p-1.5 tracking-normal"
                                                 >
-                                                    {product.isActive ? "Archive" : "Reactivate"}
+                                                    {product.isActive ? <Archive className="w-3.5 h-3.5" /> : <ArchiveRestore className="w-3.5 h-3.5 text-[#FF3333]" />}
                                                 </AdminButton>
                                                 <AdminButton
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => handleDelete(product)}
                                                     disabled={deletingId === product.id}
-                                                    className="text-[#FF3333] hover:bg-[#FF3333]/10 hover:text-[#FF3333]"
+                                                    title="Delete"
+                                                    className="text-[#FF3333] hover:bg-[#FF3333]/10 hover:text-[#FF3333] !p-1.5 tracking-normal"
                                                 >
-                                                    {deletingId === product.id ? "…" : "Delete"}
+                                                    {deletingId === product.id ? "…" : <Trash2 className="w-3.5 h-3.5" />}
                                                 </AdminButton>
                                             </div>
                                         </td>

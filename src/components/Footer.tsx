@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { NewsletterForm } from "@/components/NewsletterForm";
+import { PrefetchLink } from "@/components/PrefetchLink";
 
 export function Footer() {
   return (
@@ -52,13 +53,13 @@ export function Footer() {
               { label: "Returns", href: "/returns" },
             ].map((item) => (
               <li key={item.label}>
-                <Link
+                <PrefetchLink
                   href={item.href}
                   className="text-xs text-[var(--vsc-gray-500)] uppercase tracking-[0.15em] hover:text-[var(--vsc-gray-900)] transition-colors duration-200"
                   style={{ fontFamily: "var(--font-space-mono)" }}
                 >
                   {item.label}
-                </Link>
+                </PrefetchLink>
               </li>
             ))}
           </ul>
@@ -103,22 +104,22 @@ export function Footer() {
           </span>
           <ul className="space-y-2">
             <li>
-              <Link
+              <PrefetchLink
                 href="/privacy-policy"
                 className="text-xs text-[var(--vsc-gray-500)] uppercase tracking-[0.15em] hover:text-[var(--vsc-gray-900)] transition-colors duration-200"
                 style={{ fontFamily: "var(--font-space-mono)" }}
               >
                 Privacy Policy
-              </Link>
+              </PrefetchLink>
             </li>
             <li>
-              <Link
+              <PrefetchLink
                 href="/terms-of-service"
                 className="text-xs text-[var(--vsc-gray-400)] uppercase tracking-[0.15em] hover:text-[var(--vsc-accent)] transition-colors duration-200"
                 style={{ fontFamily: "var(--font-space-mono)" }}
               >
                 Terms of Service
-              </Link>
+              </PrefetchLink>
             </li>
           </ul>
         </div>

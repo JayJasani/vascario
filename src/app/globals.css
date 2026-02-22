@@ -190,6 +190,31 @@
    KEYFRAME ANIMATIONS
    -------------------------------------------------------------------------- */
 
+/* App initial load — shown before JS hydrates */
+#app-initial-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--vsc-white);
+  transition: opacity 0.25s ease-out;
+}
+
+#app-initial-loading.app-loading-fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#app-initial-loading .app-load-text {
+  font-family: var(--font-space-mono), "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--vsc-gray-500);
+}
+
 /* Marquee — Infinite horizontal scroll */
 @keyframes marquee-scroll {
   0% {

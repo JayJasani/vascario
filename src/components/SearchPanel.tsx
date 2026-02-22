@@ -2,10 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import Link from "next/link";
+import { PrefetchLink } from "@/components/PrefetchLink";
+import Image from "next/image";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { getImageAlt } from "@/lib/seo-utils";
+import { hasDiscount } from "@/lib/discount";
 import { type SearchItem } from "@/lib/search-data";
-import { searchItems } from "@/app/storefront-actions";
+import { searchItems, getFeaturedSearchItems } from "@/app/storefront-actions";
 import { useCurrency } from "@/context/CurrencyContext";
 import { trackSearch, trackSelectSearchResult } from "@/lib/analytics";
 
@@ -45,11 +48,22 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
   }, [open, onClose]);
 
   useEffect(() => {
+    if (!open) return;
     let cancelled = false;
     const performSearch = async () => {
       if (!searchQuery.trim()) {
-        setResults([]);
-        setIsSearching(false);
+        try {
+          const items = await getFeaturedSearchItems();
+          if (!cancelled) {
+            setResults(items);
+            setIsSearching(false);
+          }
+        } catch (e) {
+          if (!cancelled) {
+            setResults([]);
+            setIsSearching(false);
+          }
+        }
         return;
       }
       setIsSearching(true);
@@ -68,12 +82,19 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
         }
       }
     };
+
+    // When query is empty, load featured immediately when search opens
+    if (!searchQuery.trim()) {
+      performSearch();
+      return () => { cancelled = true; };
+    }
+
     const timeoutId = setTimeout(performSearch, 300);
     return () => {
       cancelled = true;
       clearTimeout(timeoutId);
     };
-  }, [searchQuery]);
+  }, [open, searchQuery]);
 
   useEffect(() => {
     if (open) {
@@ -148,7 +169,7 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
               <ul className="py-1 sm:py-2">
                 {results.map((item) => (
                   <li key={`${item.type}-${item.id}`}>
-                    <Link
+                    <PrefetchLink
                       href={item.url}
                       onClick={() => {
                         trackSelectSearchResult({
@@ -161,10 +182,20 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
                       }}
                       className="flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-2.5 sm:py-3 text-[var(--vsc-gray-700)] hover:bg-[var(--vsc-gray-100)] hover:text-[var(--vsc-gray-900)] transition-colors duration-150 group"
                     >
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] flex items-center justify-center overflow-hidden">
-                        <span className="text-[9px] sm:text-[10px] text-[var(--vsc-gray-500)] uppercase">
-                          prod
-                        </span>
+                      <div className="relative w-12 h-12 sm:w-16 sm:h-16 shrink-0 bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] overflow-hidden">
+                        {item.image && !item.image.includes("placeholder") ? (
+                          <Image
+                            src={item.image}
+                            alt={getImageAlt("product", item.name)}
+                            fill
+                            className="object-cover object-center"
+                            sizes="64px"
+                          />
+                        ) : (
+                          <span className="absolute inset-0 flex items-center justify-center text-[9px] sm:text-[10px] text-[var(--vsc-gray-500)] uppercase">
+                            prod
+                          </span>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <span
@@ -181,14 +212,24 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
                         </span>
                       </div>
                       {item.price != null && (
-                        <span
-                          className="text-xs sm:text-sm font-bold text-[var(--vsc-gray-900)] shrink-0"
-                          style={{ fontFamily: "var(--font-space-mono)" }}
-                        >
-                          {formatPrice(item.price)}
-                        </span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {hasDiscount(item.cutPrice, item.price) && (
+                            <span
+                              className="text-xs text-[var(--vsc-gray-500)] line-through"
+                              style={{ fontFamily: "var(--font-space-mono)" }}
+                            >
+                              {formatPrice(item.cutPrice!)}
+                            </span>
+                          )}
+                          <span
+                            className="text-xs sm:text-sm font-bold text-[var(--vsc-gray-900)]"
+                            style={{ fontFamily: "var(--font-space-mono)" }}
+                          >
+                            {formatPrice(item.price)}
+                          </span>
+                        </div>
                       )}
-                    </Link>
+                    </PrefetchLink>
                   </li>
                 ))}
               </ul>
@@ -200,6 +241,81 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
                 No results for &quot;{searchQuery}&quot;
               </div>
             )
+          ) : results.length > 0 ? (
+            <>
+              <div
+                className="px-4 sm:px-5 pt-4 pb-1 font-mono text-[9px] sm:text-[10px] text-[var(--vsc-gray-500)] tracking-[0.15em] uppercase"
+              >
+                Featured
+              </div>
+              <ul className="py-1 sm:py-2">
+                {results.map((item) => (
+                  <li key={`${item.type}-${item.id}`}>
+                    <PrefetchLink
+                      href={item.url}
+                      onClick={() => {
+                        trackSelectSearchResult({
+                          search_term: "",
+                          item_id: item.id,
+                          item_name: item.name,
+                          index: results.indexOf(item),
+                        });
+                        onClose();
+                      }}
+                      className="flex items-center gap-2 sm:gap-4 px-3 sm:px-5 py-2.5 sm:py-3 text-[var(--vsc-gray-700)] hover:bg-[var(--vsc-gray-100)] hover:text-[var(--vsc-gray-900)] transition-colors duration-150 group"
+                    >
+                      <div className="relative w-12 h-12 sm:w-16 sm:h-16 shrink-0 bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] overflow-hidden">
+                        {item.image && !item.image.includes("placeholder") ? (
+                          <Image
+                            src={item.image}
+                            alt={getImageAlt("product", item.name)}
+                            fill
+                            className="object-cover object-center"
+                            sizes="64px"
+                          />
+                        ) : (
+                          <span className="absolute inset-0 flex items-center justify-center text-[9px] sm:text-[10px] text-[var(--vsc-gray-500)] uppercase">
+                            prod
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span
+                          className="block truncate font-medium text-sm sm:text-base text-[var(--vsc-gray-900)] group-hover:text-[var(--vsc-accent)]"
+                          style={{ fontFamily: "var(--font-space-grotesk)" }}
+                        >
+                          {item.name}
+                        </span>
+                        <span
+                          className="text-[9px] sm:text-[10px] text-[var(--vsc-gray-500)] uppercase tracking-wider"
+                          style={{ fontFamily: "var(--font-space-mono)" }}
+                        >
+                          {item.type} {item.tag && `· ${item.tag}`}
+                        </span>
+                      </div>
+                      {item.price != null && (
+                        <div className="flex items-center gap-2 shrink-0">
+                          {hasDiscount(item.cutPrice, item.price) && (
+                            <span
+                              className="text-xs text-[var(--vsc-gray-500)] line-through"
+                              style={{ fontFamily: "var(--font-space-mono)" }}
+                            >
+                              {formatPrice(item.cutPrice!)}
+                            </span>
+                          )}
+                          <span
+                            className="text-xs sm:text-sm font-bold text-[var(--vsc-gray-900)]"
+                            style={{ fontFamily: "var(--font-space-mono)" }}
+                          >
+                            {formatPrice(item.price)}
+                          </span>
+                        </div>
+                      )}
+                    </PrefetchLink>
+                  </li>
+                ))}
+              </ul>
+            </>
           ) : (
             <div
               className="py-8 sm:py-12 px-4 sm:px-5 text-center text-[var(--vsc-gray-500)] text-xs sm:text-sm"

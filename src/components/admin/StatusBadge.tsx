@@ -52,14 +52,14 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
     return (
         <span
             className={cn(
-                "inline-flex items-center gap-2 px-3 py-1 font-mono text-[10px] font-bold tracking-[0.2em] uppercase border",
+                "inline-flex items-center gap-1.5 px-2 py-0.5 font-mono text-[9px] font-bold tracking-[0.15em] uppercase border",
                 config.bg,
                 config.text,
                 "border-current/20",
                 className
             )}
         >
-            <span className="w-1.5 h-1.5 rounded-full bg-current" />
+            <span className="w-1 h-1 rounded-full bg-current" />
             {config.label}
         </span>
     );

@@ -3,6 +3,7 @@
 import { unstable_cache } from "next/cache";
 import {
     getActiveProducts as getActiveProductsHelper,
+    getFeaturedProducts as getFeaturedProductsHelper,
     getProductById as getProductByIdHelper,
     getProductBySlug as getProductBySlugHelper,
     getStockLevelsByProductId,
@@ -11,31 +12,15 @@ import {
     getActiveReviews as getActiveReviewsHelper,
 } from "@/lib/firebase-helpers";
 import { CACHE_TAGS } from "@/lib/storefront-cache";
-import type { SearchItem } from "@/lib/search-data";
+import type { SearchItem } from "@/models/search";
+import type { StorefrontProduct, StockBySize } from "@/models/storefront";
+
+export type { StorefrontProduct, StockBySize } from "@/models/storefront";
 
 // Cache TTL in seconds (live env: avoid hitting Firebase on every search/navigation)
 const CACHE_REVALIDATE = 60;
 
 // ─── PUBLIC STOREFRONT QUERIES ──────────────────────────────────────────────────
-
-export interface StorefrontProduct {
-    id: string;
-    name: string;
-    slug: string;
-    description: string;
-    price: number;
-    images: string[];
-    colors: string[];
-    sizes: string[];
-    sku: string | null;
-    /** Total stock across all sizes. 0 = out of stock. */
-    totalStock: number;
-}
-
-export interface StockBySize {
-    size: string;
-    quantity: number;
-}
 
 /** Cached active products (shared by getActiveProducts + searchItems) for fast live env. */
 async function getCachedActiveProducts() {
@@ -71,6 +56,7 @@ export async function getActiveProducts(): Promise<StorefrontProduct[]> {
         slug: p.slug,
         description: p.description,
         price: p.price,
+        cutPrice: p.cutPrice ?? null,
         images: p.images,
         colors: p.colors,
         sizes: p.sizes,
@@ -104,6 +90,7 @@ export async function getProductById(id: string): Promise<(StorefrontProduct & {
         slug: product.slug,
         description: product.description,
         price: product.price,
+        cutPrice: product.cutPrice ?? null,
         images: product.images,
         colors: product.colors,
         sizes: product.sizes,
@@ -140,6 +127,7 @@ export async function getProductBySlug(slug: string): Promise<(StorefrontProduct
         slug: product.slug,
         description: product.description,
         price: product.price,
+        cutPrice: product.cutPrice ?? null,
         images: product.images,
         colors: product.colors,
         sizes: product.sizes,
@@ -147,6 +135,34 @@ export async function getProductBySlug(slug: string): Promise<(StorefrontProduct
         totalStock,
         stockBySize,
     };
+}
+
+/**
+ * Featured products shown in search when query is empty (for promotions).
+ */
+export async function getFeaturedSearchItems(): Promise<SearchItem[]> {
+    try {
+        const featured = unstable_cache(
+            async () => getFeaturedProductsHelper(),
+            ["storefront", "featured-products"],
+            { revalidate: CACHE_REVALIDATE, tags: [CACHE_TAGS.activeProducts] }
+        )();
+
+        const products = await featured;
+
+        return products.map((product) => ({
+            id: product.id,
+            name: product.name,
+            type: "product" as const,
+            url: `/product/${product.slug}`,
+            image: product.images[0],
+            price: product.price,
+            cutPrice: product.cutPrice ?? null,
+        }));
+    } catch (error) {
+        console.error("Error fetching featured products:", error);
+        return [];
+    }
 }
 
 /**
@@ -168,6 +184,7 @@ export async function searchItems(query: string): Promise<SearchItem[]> {
             url: `/product/${product.slug}`,
             image: product.images[0],
             price: product.price,
+            cutPrice: product.cutPrice ?? null,
         }));
 
         // Filter by query

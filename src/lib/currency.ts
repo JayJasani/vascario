@@ -52,9 +52,9 @@ export const CURRENCIES: Record<string, CurrencyOption> = {
 };
 
 const FLAG_BASE = "https://flagcdn.com/w40";
-export function getFlagUrl(flagCode: string): string {
-  return `${FLAG_BASE}/${flagCode.toLowerCase()}.png`;
-}
+
+export const getFlagUrl = (flagCode: string): string =>
+  `${FLAG_BASE}/${flagCode.toLowerCase()}.png`;
 
 export const CURRENCY_CODES = Object.keys(CURRENCIES) as (keyof typeof CURRENCIES)[];
 

@@ -12,30 +12,30 @@ export default async function AdminDashboard() {
     const stats = await getDashboardStats();
 
     return (
-        <div className="space-y-10">
+        <div className="space-y-6">
             {/* ── PAGE HEADER ── */}
             <div className="flex items-end justify-between">
                 <div>
                     <h2
-                        className="text-2xl font-bold tracking-[-0.03em] uppercase"
+                        className="text-xl font-bold tracking-[-0.03em] uppercase"
                         style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
                     >
                         Command Center
                     </h2>
-                    <p className="font-mono text-xs text-[#666] tracking-[0.15em] uppercase mt-1">
+                    <p className="font-mono text-[10px] text-[#666] tracking-[0.15em] uppercase mt-0.5">
             // System Overview
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-[#BAFF00] animate-pulse" />
-                    <span className="font-mono text-[10px] text-[#666] tracking-[0.15em] uppercase">
+                <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 bg-[#BAFF00]" />
+                    <span className="font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase">
                         Live
                     </span>
                 </div>
             </div>
 
             {/* ── KPI STATS ── */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4">
                 <StatWidget
                     label="Total Revenue"
                     value={`₹${Number(stats.totalRevenue).toLocaleString("en-IN")}`}
@@ -75,11 +75,11 @@ export default async function AdminDashboard() {
             </div>
 
             {/* ── QUICK ACTIONS ── */}
-            <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-6">
-                <span className="font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase block mb-4">
+            <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-4">
+                <span className="font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase block mb-3">
                     Quick Actions
                 </span>
-                <div className="flex flex-wrap gap-4">
+                <div className="flex flex-wrap gap-2">
                     <Link href="/admin/drops">
                         <AdminButton variant="primary">New Drop</AdminButton>
                     </Link>
@@ -101,13 +101,13 @@ export default async function AdminDashboard() {
             {/* ── RECENT ORDERS TABLE ── */}
             <div className="border-2 border-[#2A2A2A]">
                 {/* Table header bar */}
-                <div className="px-6 py-4 border-b-2 border-[#2A2A2A] bg-[#0D0D0D] flex items-center justify-between">
-                    <span className="font-mono text-xs text-[#F5F5F0] tracking-[0.15em] uppercase font-bold">
+                <div className="px-4 py-3 border-b-2 border-[#2A2A2A] bg-[#0D0D0D] flex items-center justify-between">
+                    <span className="font-mono text-[10px] text-[#F5F5F0] tracking-[0.15em] uppercase font-bold">
                         Recent Orders
                     </span>
                     <Link
                         href="/admin/orders"
-                        className="font-mono text-[10px] text-[#BAFF00] tracking-[0.15em] uppercase hover:underline"
+                        className="font-mono text-[9px] text-[#BAFF00] tracking-[0.15em] uppercase hover:underline"
                     >
                         View All →
                     </Link>
@@ -118,19 +118,19 @@ export default async function AdminDashboard() {
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-[#2A2A2A]">
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Order ID
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Customer
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Items
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Status
                                 </th>
-                                <th className="px-6 py-3 text-right font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-right font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Amount
                                 </th>
                             </tr>
@@ -140,7 +140,7 @@ export default async function AdminDashboard() {
                                 <tr>
                                     <td
                                         colSpan={5}
-                                        className="px-6 py-12 text-center font-mono text-xs text-[#666] tracking-[0.1em]"
+                                        className="px-4 py-8 text-center font-mono text-[10px] text-[#666] tracking-[0.1em]"
                                     >
                                         NO ORDERS YET // WAITING FOR FIRST DROP
                                     </td>
@@ -151,26 +151,26 @@ export default async function AdminDashboard() {
                                         key={order.id}
                                         className="border-b border-[#1A1A1A] hover:bg-[#0D0D0D] transition-colors"
                                     >
-                                        <td className="px-6 py-4 font-mono text-xs text-[#BAFF00] tracking-[0.1em]">
+                                        <td className="px-4 py-2.5 font-mono text-[10px] text-[#BAFF00] tracking-[0.1em]">
                                             {order.id.slice(0, 8).toUpperCase()}
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <p className="font-mono text-xs text-[#F5F5F0] tracking-[0.05em] uppercase">
+                                        <td className="px-4 py-2.5">
+                                            <p className="font-mono text-[10px] text-[#F5F5F0] tracking-[0.05em] uppercase">
                                                 {order.customerName}
                                             </p>
-                                            <p className="font-mono text-[10px] text-[#666] tracking-[0.05em]">
+                                            <p className="font-mono text-[9px] text-[#666] tracking-[0.05em]">
                                                 {order.customerEmail}
                                             </p>
                                         </td>
-                                        <td className="px-6 py-4 font-mono text-[10px] text-[#999] tracking-[0.05em]">
+                                        <td className="px-4 py-2.5 font-mono text-[9px] text-[#999] tracking-[0.05em]">
                                             {order.items
                                                 .map((i: { productName: string; size: string }) => `${i.productName} (${i.size})`)
                                                 .join(", ")}
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-4 py-2.5">
                                             <StatusBadge status={order.status} />
                                         </td>
-                                        <td className="px-6 py-4 text-right font-mono text-sm text-[#F5F5F0] font-bold tracking-[0.05em]">
+                                        <td className="px-4 py-2.5 text-right font-mono text-xs text-[#F5F5F0] font-bold tracking-[0.05em]">
                                             ₹{Number(order.totalAmount).toLocaleString("en-IN")}
                                         </td>
                                     </tr>

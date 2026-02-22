@@ -1,14 +1,7 @@
 import { getActiveProducts } from "@/lib/firebase-helpers";
+import type { SearchItem } from "@/models/search";
 
-export interface SearchItem {
-  id: string;
-  name: string;
-  type: "product";
-  url: string;
-  image?: string;
-  price?: number;
-  tag?: string;
-}
+export type { SearchItem } from "@/models/search";
 
 /**
  * Fetches all searchable products dynamically from Firebase
@@ -26,6 +19,7 @@ export async function getAllSearchItems(): Promise<SearchItem[]> {
       url: `/product/${product.id}`,
       image: product.images[0],
       price: product.price,
+      cutPrice: product.cutPrice ?? null,
     }));
   } catch (error) {
     console.error("Error fetching search items:", error);

@@ -1,10 +1,14 @@
 "use client";
 
+import Image from "next/image";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { getImageAlt } from "@/lib/seo-utils";
 import Link from "next/link";
+import { useCurrency } from "@/context/CurrencyContext";
 import { useEffect, useRef, useState } from "react";
+import { hasDiscount } from "@/lib/discount";
 import { type SearchItem } from "@/lib/search-data";
-import { searchItems } from "@/app/storefront-actions";
+import { searchItems, getFeaturedSearchItems } from "@/app/storefront-actions";
 
 interface SearchModalProps {
   open: boolean;
@@ -17,6 +21,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
   const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     if (open) {
@@ -28,12 +33,16 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
   }, [open]);
 
   useEffect(() => {
+    if (!open) return;
     let cancelled = false;
 
     const performSearch = async () => {
       if (!searchQuery.trim()) {
-        setResults([]);
-        setIsSearching(false);
+        const items = await getFeaturedSearchItems();
+        if (!cancelled) {
+          setResults(items);
+          setIsSearching(false);
+        }
         return;
       }
 
@@ -53,13 +62,18 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
       }
     };
 
-    const timeoutId = setTimeout(performSearch, 300);
+    // When query is empty, load featured immediately when search opens
+    if (!searchQuery.trim()) {
+      performSearch();
+      return () => { cancelled = true; };
+    }
 
+    const timeoutId = setTimeout(performSearch, 300);
     return () => {
       cancelled = true;
       clearTimeout(timeoutId);
     };
-  }, [searchQuery]);
+  }, [open, searchQuery]);
 
   useEffect(() => {
     if (open) {
@@ -138,10 +152,20 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                       onClick={onClose}
                       className="flex items-center gap-4 px-5 py-3 text-[var(--vsc-gray-700)] hover:bg-[var(--vsc-gray-100)] hover:text-[var(--vsc-gray-900)] transition-colors duration-150 group"
                     >
-                      <div className="w-10 h-10 shrink-0 bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] flex items-center justify-center overflow-hidden">
-                        <span className="text-[10px] text-[var(--vsc-gray-500)] uppercase">
-                          prod
-                        </span>
+                      <div className="relative w-14 h-14 shrink-0 bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] overflow-hidden">
+                        {item.image && !item.image.includes("placeholder") ? (
+                          <Image
+                            src={item.image}
+                            alt={getImageAlt("product", item.name)}
+                            fill
+                            className="object-cover object-center"
+                            sizes="56px"
+                          />
+                        ) : (
+                          <span className="absolute inset-0 flex items-center justify-center text-[10px] text-[var(--vsc-gray-500)] uppercase">
+                            prod
+                          </span>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <span
@@ -158,12 +182,22 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                         </span>
                       </div>
                       {item.price != null && (
-                        <span
-                          className="text-sm font-bold text-[var(--vsc-gray-900)]"
-                          style={{ fontFamily: "var(--font-space-mono)" }}
-                        >
-                          ${item.price}
-                        </span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {item.price != null && hasDiscount(item.cutPrice, item.price) && (
+                            <span
+                              className="text-xs text-[var(--vsc-gray-500)] line-through"
+                              style={{ fontFamily: "var(--font-space-mono)" }}
+                            >
+                              {formatPrice(item.cutPrice!)}
+                            </span>
+                          )}
+                          <span
+                            className="text-sm font-bold text-[var(--vsc-gray-900)]"
+                            style={{ fontFamily: "var(--font-space-mono)" }}
+                          >
+                            {formatPrice(item.price)}
+                          </span>
+                        </div>
                       )}
                     </Link>
                   </li>
@@ -177,6 +211,73 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                 No results for &quot;{searchQuery}&quot;
               </div>
             )
+          ) : results.length > 0 ? (
+            <>
+              <div
+                className="px-5 pt-4 pb-1 font-mono text-[10px] text-[var(--vsc-gray-500)] tracking-[0.15em] uppercase"
+              >
+                Featured
+              </div>
+              <ul className="py-2">
+                {results.map((item) => (
+                  <li key={`${item.type}-${item.id}`}>
+                    <Link
+                      href={item.url}
+                      onClick={onClose}
+                      className="flex items-center gap-4 px-5 py-3 text-[var(--vsc-gray-700)] hover:bg-[var(--vsc-gray-100)] hover:text-[var(--vsc-gray-900)] transition-colors duration-150 group"
+                    >
+                      <div className="relative w-14 h-14 shrink-0 bg-[var(--vsc-gray-100)] border border-[var(--vsc-gray-200)] overflow-hidden">
+                        {item.image && !item.image.includes("placeholder") ? (
+                          <Image
+                            src={item.image}
+                            alt={getImageAlt("product", item.name)}
+                            fill
+                            className="object-cover object-center"
+                            sizes="56px"
+                          />
+                        ) : (
+                          <span className="absolute inset-0 flex items-center justify-center text-[10px] text-[var(--vsc-gray-500)] uppercase">
+                            prod
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span
+                          className="block truncate font-medium text-[var(--vsc-gray-900)] group-hover:text-[var(--vsc-accent)]"
+                          style={{ fontFamily: "var(--font-space-grotesk)" }}
+                        >
+                          {item.name}
+                        </span>
+                        <span
+                          className="text-[10px] text-[var(--vsc-gray-500)] uppercase tracking-wider"
+                          style={{ fontFamily: "var(--font-space-mono)" }}
+                        >
+                          {item.type} {item.tag && `· ${item.tag}`}
+                        </span>
+                      </div>
+                      {item.price != null && (
+                        <div className="flex items-center gap-2 shrink-0">
+                          {item.price != null && hasDiscount(item.cutPrice, item.price) && (
+                            <span
+                              className="text-xs text-[var(--vsc-gray-500)] line-through"
+                              style={{ fontFamily: "var(--font-space-mono)" }}
+                            >
+                              {formatPrice(item.cutPrice!)}
+                            </span>
+                          )}
+                          <span
+                            className="text-sm font-bold text-[var(--vsc-gray-900)]"
+                            style={{ fontFamily: "var(--font-space-mono)" }}
+                          >
+                            {formatPrice(item.price)}
+                          </span>
+                        </div>
+                      )}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
           ) : (
             <div
               className="py-12 px-5 text-center text-[var(--vsc-gray-500)] text-sm"

@@ -21,6 +21,8 @@ import {
   trackSelectSize,
   trackViewItem,
 } from "@/lib/analytics";
+import { getColorDisplayName, parseColorEntry } from "@/lib/hex-to-color-name";
+import { hasDiscount, getDiscountAmount } from "@/lib/discount";
 import { getImageAlt } from "@/lib/seo-utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -37,6 +39,8 @@ export interface ProductDetailData {
   name: string;
   slug: string;
   price: number;
+  /** Original price before discount, shown crossed out when present */
+  cutPrice?: number | null;
   description: string;
   sizes: string[];
   colors: string[];
@@ -112,6 +116,8 @@ export function ProductDetailClient({
   const [isZoomActive, setIsZoomActive] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [productDetailsOpen, setProductDetailsOpen] = useState(false);
+  const [additionalInfoOpen, setAdditionalInfoOpen] = useState(false);
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const { addItem } = useCart();
   const { user, loading } = useAuth();
@@ -179,6 +185,15 @@ export function ProductDetailClient({
       console.error("Failed to restore cart intent", err);
     }
   }, [user, loading, product.id]);
+
+  // Preload all product images so thumbnail tap shows main preview immediately
+  useEffect(() => {
+    if (typeof window === "undefined" || !product.images?.length) return;
+    product.images.forEach((src) => {
+      const img = new window.Image();
+      img.src = src;
+    });
+  }, [product.images]);
 
   const showPrevImage = () => {
     if (!hasMultipleImages) return;
@@ -296,19 +311,28 @@ export function ProductDetailClient({
               >
                 {currentImage ? (
                   <>
-                    <Image
-                      src={currentImage}
-                      alt={getImageAlt(
-                        "product",
-                        product.name,
-                        selectedImageIndex,
-                        product.images.length,
-                      )}
-                      fill
-                      className="object-cover"
-                      priority
-                      sizes="(max-width: 768px) 100vw, 45vw"
-                    />
+                    {/* Render all images stacked so they load in background; only selected is visible for instant tap-to-preview */}
+                    {product.images.map((image, i) => (
+                      <Image
+                        key={i}
+                        src={image}
+                        alt={getImageAlt(
+                          "product",
+                          product.name,
+                          i,
+                          product.images.length,
+                        )}
+                        fill
+                        className="object-cover transition-opacity duration-150"
+                        style={{
+                          opacity: selectedImageIndex === i ? 1 : 0,
+                          pointerEvents: selectedImageIndex === i ? "auto" : "none",
+                        }}
+                        priority={i === 0}
+                        loading={i === 0 ? undefined : "eager"}
+                        sizes="(max-width: 768px) 100vw, 45vw"
+                      />
+                    ))}
                     {/* Zoom lens overlay */}
                     {isZoomActive && (
                       <div
@@ -475,7 +499,15 @@ export function ProductDetailClient({
               </h1>
 
               {/* Price */}
-              <div className="flex items-baseline gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <div className="flex items-baseline gap-2 sm:gap-3 mb-4 sm:mb-6 flex-wrap">
+                {hasDiscount(product.cutPrice, product.price) && (
+                  <span
+                    className="text-base sm:text-lg text-[var(--vsc-gray-500)] line-through"
+                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  >
+                    {formatPrice(product.cutPrice!)}
+                  </span>
+                )}
                 <span
                   className="text-xl sm:text-2xl text-[var(--vsc-accent)] font-bold"
                   style={{ fontFamily: "var(--font-space-mono)" }}
@@ -488,47 +520,18 @@ export function ProductDetailClient({
                 >
                   {currencyCode}
                 </span>
+                {hasDiscount(product.cutPrice, product.price) && (
+                  <span
+                    className="text-sm sm:text-base text-[var(--vsc-accent)] font-bold"
+                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  >
+                    (Save {formatPrice(getDiscountAmount(product.cutPrice!, product.price))})
+                  </span>
+                )}
               </div>
 
               {/* Divider */}
               <div className="h-px bg-[var(--vsc-gray-700)] mb-4 sm:mb-6" />
-
-              {/* Description */}
-              <div className="mb-6 sm:mb-8">
-                <h2
-                  className="text-lg sm:text-xl font-bold text-[var(--vsc-white)] mb-3 sm:mb-4 uppercase tracking-[0.1em]"
-                  style={{ fontFamily: "var(--font-space-grotesk)", color: "black" }}
-                >
-                  Product Details
-                </h2>
-                <div
-                  className="text-xs sm:text-sm text-[var(--vsc-gray-400)] leading-relaxed space-y-2"
-                  style={{ fontFamily: "var(--font-space-mono)" }}
-                >
-                  {renderDescription(product.description)}
-                </div>
-                {/* Internal link to collection */}
-                <p
-                  className="mt-4 text-xs text-[var(--vsc-gray-500)]"
-                  style={{ fontFamily: "var(--font-space-mono)" }}
-                >
-                  Explore our complete{" "}
-                  <Link
-                    href="/collection"
-                    className="text-[var(--vsc-accent)] hover:text-[var(--vsc-white)] underline"
-                  >
-                    embroidered streetwear collection
-                  </Link>{" "}
-                  or view our{" "}
-                  <Link
-                    href="/lookbook"
-                    className="text-[var(--vsc-accent)] hover:text-[var(--vsc-white)] underline"
-                  >
-                    editorial lookbook
-                  </Link>
-                  .
-                </p>
-              </div>
 
               {/* Color selector */}
               {product.colors.length > 0 && (
@@ -537,11 +540,13 @@ export function ProductDetailClient({
                     className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.3em] block mb-3"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                   >
-                    Color — {selectedColor}
+                    Color — {getColorDisplayName(selectedColor)}
                   </span>
                   <div className="flex gap-2 flex-wrap items-center">
-                    {product.colors.map((color) =>
-                      isHexColor(color) ? (
+                    {product.colors.map((color) => {
+                      const parsed = parseColorEntry(color);
+                      const hasHex = !!parsed.hex && HEX_COLOR.test(parsed.hex);
+                      return hasHex ? (
                         <button
                           key={color}
                           type="button"
@@ -558,9 +563,9 @@ export function ProductDetailClient({
                             ? "border-[var(--vsc-accent)] ring-2 ring-[var(--vsc-accent)] ring-offset-2 ring-offset-[var(--vsc-black)]"
                             : "border-[var(--vsc-gray-700)] hover:border-[var(--vsc-gray-500)]"
                             }`}
-                          style={{ backgroundColor: color }}
-                          title={color}
-                          aria-label={`Color ${color}`}
+                          style={{ backgroundColor: parsed.hex }}
+                          title={parsed.displayName}
+                          aria-label={`Color ${parsed.displayName}`}
                         />
                       ) : (
                         <button
@@ -580,10 +585,10 @@ export function ProductDetailClient({
                             }`}
                           style={{ fontFamily: "var(--font-space-mono)" }}
                         >
-                          {color}
+                          {parsed.displayName || color}
                         </button>
-                      ),
-                    )}
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -618,13 +623,18 @@ export function ProductDetailClient({
                               size,
                             });
                           }}
-                          className={`px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] border-2 transition-all duration-200 ${!inStock
+                          className={`px-3 py-1.5 text-xs font-bold uppercase tracking-[0.15em] border-2 transition-all duration-200 ${!inStock
                             ? "opacity-50 cursor-not-allowed border-[var(--vsc-gray-700)] text-[var(--vsc-gray-500)]"
                             : selectedSize === size
-                              ? "bg-[var(--vsc-accent)] text-[var(--vsc-white)] border-[var(--vsc-accent)] ring-2 ring-[var(--vsc-accent)] ring-offset-2 ring-offset-[var(--vsc-black)]"
+                              ? "border-black ring-2 ring-black ring-offset-2 ring-offset-[var(--vsc-black)]"
                               : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)]"
                             }`}
-                          style={{ fontFamily: "var(--font-space-mono)" }}
+                          style={{
+                            fontFamily: "var(--font-space-mono)",
+                            ...(selectedSize === size && inStock
+                              ? { backgroundColor: "#000000", color: "#ffffff" }
+                              : {}),
+                          }}
                           title={
                             inStock ? `${sizeStock} in stock` : "Out of stock"
                           }
@@ -711,6 +721,58 @@ export function ProductDetailClient({
                   >
                     +
                   </button>
+                </div>
+              </div>
+
+              {/* Product Details — collapsible */}
+              <div className="mb-6 sm:mb-8">
+                <button
+                  type="button"
+                  onClick={() => setProductDetailsOpen((o) => !o)}
+                  className="w-full flex items-center justify-between gap-4 text-left"
+                  aria-expanded={productDetailsOpen}
+                  aria-controls="product-details-content"
+                >
+                  <h2
+                    className="text-lg sm:text-xl font-bold text-[var(--vsc-white)] uppercase tracking-[0.1em]"
+                    style={{ fontFamily: "var(--font-space-grotesk)", color: "black" }}
+                  >
+                    Product Details
+                  </h2>
+                  <span
+                    className={`shrink-0 text-[var(--vsc-accent)] transition-transform duration-200 ${productDetailsOpen ? "rotate-180" : ""}`}
+                    aria-hidden
+                  >
+                    ▼
+                  </span>
+                </button>
+                <div id="product-details-content" className="pt-4">
+                  <div
+                    className={`text-xs sm:text-sm text-[var(--vsc-gray-400)] leading-relaxed space-y-2 transition-[line-clamp] duration-200 ${!productDetailsOpen ? "line-clamp-3" : ""}`}
+                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  >
+                    {renderDescription(product.description)}
+                  </div>
+                  <p
+                    className={`mt-4 text-xs text-[var(--vsc-gray-500)] ${!productDetailsOpen ? "hidden" : ""}`}
+                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  >
+                    Explore our complete{" "}
+                    <Link
+                      href="/collection"
+                      className="text-[var(--vsc-accent)] hover:text-[var(--vsc-white)] underline"
+                    >
+                      embroidered streetwear collection
+                    </Link>{" "}
+                    or view our{" "}
+                    <Link
+                      href="/lookbook"
+                      className="text-[var(--vsc-accent)] hover:text-[var(--vsc-white)] underline"
+                    >
+                      editorial lookbook
+                    </Link>
+                    .
+                  </p>
                 </div>
               </div>
 
@@ -808,6 +870,7 @@ export function ProductDetailClient({
                     name: product.name,
                     slug: product.slug,
                     price: product.price,
+                    cutPrice: product.cutPrice ?? null,
                     image: product.images[0] ?? "",
                   });
                   const wishlistItem = {
@@ -837,55 +900,77 @@ export function ProductDetailClient({
                   : "Add to favourites"}
               </button>
 
-              {/* SKU & Additional Info */}
+              {/* SKU & Additional Info — collapsible */}
               <div className="mt-8 pt-6 border-t border-[var(--vsc-gray-700)]">
-                <h2
-                  className="text-lg sm:text-xl font-bold text-[var(--vsc-white)] mb-4 uppercase tracking-[0.1em]"
-                  style={{ fontFamily: "var(--font-space-grotesk)", color: "black" }}
+                <button
+                  type="button"
+                  onClick={() => setAdditionalInfoOpen((o) => !o)}
+                  className="w-full flex items-center justify-between gap-4 text-left"
+                  aria-expanded={additionalInfoOpen}
+                  aria-controls="additional-info-content"
                 >
-                  Additional Information
-                </h2>
-                {product.sku && (
-                  <div className="flex items-start gap-3 mb-3">
-                    <span className="text-[var(--vsc-accent)] text-xs mt-0.5">
-                      —
-                    </span>
-                    <span
-                      className="text-xs text-[var(--vsc-gray-400)] uppercase tracking-[0.1em]"
-                      style={{ fontFamily: "var(--font-space-mono)" }}
-                    >
-                      SKU: {product.sku}
-                    </span>
-                  </div>
-                )}
-                {/* Internal links to shipping and returns */}
-                <div className="mt-4 space-y-2">
-                  <p
-                    className="text-xs text-[var(--vsc-gray-500)]"
-                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  <h2
+                    className="text-lg sm:text-xl font-bold text-[var(--vsc-white)] uppercase tracking-[0.1em]"
+                    style={{ fontFamily: "var(--font-space-grotesk)", color: "black" }}
                   >
-                    <Link
-                      href="/shipping"
-                      className="text-[var(--vsc-accent)] hover:text-[var(--vsc-white)] underline"
-                    >
-                      Free shipping
-                    </Link>{" "}
-                    across India. View our{" "}
-                    <Link
-                      href="/returns"
-                      className="text-[var(--vsc-accent)] hover:text-[var(--vsc-white)] underline"
-                    >
-                      returns policy
-                    </Link>{" "}
-                    or check the{" "}
-                    <Link
-                      href="/size-chart"
-                      className="text-[var(--vsc-accent)] hover:text-[var(--vsc-white)] underline"
-                    >
-                      size chart
-                    </Link>
-                    .
-                  </p>
+                    Additional Information
+                  </h2>
+                  <span
+                    className={`shrink-0 text-[var(--vsc-accent)] transition-transform duration-200 ${additionalInfoOpen ? "rotate-180" : ""}`}
+                    aria-hidden
+                  >
+                    ▼
+                  </span>
+                </button>
+                <div
+                  id="additional-info-content"
+                  className={`grid transition-[grid-template-rows] duration-200 ease-out ${additionalInfoOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+                >
+                  <div className="overflow-hidden">
+                    <div className="pt-4">
+                      {product.sku && (
+                        <div className="flex items-start gap-3 mb-3">
+                          <span className="text-[var(--vsc-accent)] text-xs mt-0.5">
+                            —
+                          </span>
+                          <span
+                            className="text-xs text-[var(--vsc-gray-400)] uppercase tracking-[0.1em]"
+                            style={{ fontFamily: "var(--font-space-mono)" }}
+                          >
+                            SKU: {product.sku}
+                          </span>
+                        </div>
+                      )}
+                      <div className="mt-4 space-y-2">
+                        <p
+                          className="text-xs text-[var(--vsc-gray-500)]"
+                          style={{ fontFamily: "var(--font-space-mono)" }}
+                        >
+                          <Link
+                            href="/shipping"
+                            className="text-[var(--vsc-accent)] hover:text-[var(--vsc-white)] underline"
+                          >
+                            Free shipping
+                          </Link>{" "}
+                          across India. View our{" "}
+                          <Link
+                            href="/returns"
+                            className="text-[var(--vsc-accent)] hover:text-[var(--vsc-white)] underline"
+                          >
+                            returns policy
+                          </Link>{" "}
+                          or check the{" "}
+                          <Link
+                            href="/size-chart"
+                            className="text-[var(--vsc-accent)] hover:text-[var(--vsc-white)] underline"
+                          >
+                            size chart
+                          </Link>
+                          .
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

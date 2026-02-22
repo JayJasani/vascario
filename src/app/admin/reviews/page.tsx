@@ -137,16 +137,16 @@ export default function AdminReviewsPage() {
     }
 
     return (
-        <div className="space-y-10">
+        <div className="space-y-6">
             <div className="flex items-end justify-between">
                 <div>
                     <h2
-                        className="text-2xl font-bold tracking-[-0.03em] uppercase"
+                        className="text-xl font-bold tracking-[-0.03em] uppercase"
                         style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
                     >
                         User Reviews
                     </h2>
-                    <p className="font-mono text-xs text-[#666] tracking-[0.15em] uppercase mt-1">
+                    <p className="font-mono text-[10px] text-[#666] tracking-[0.15em] uppercase mt-0.5">
                         // Add and manage reviews shown on the storefront
                     </p>
                 </div>
@@ -154,7 +154,7 @@ export default function AdminReviewsPage() {
                     type="button"
                     onClick={() => mutate()}
                     disabled={isValidating}
-                    className="font-mono text-[10px] tracking-[0.15em] uppercase px-4 py-2 border-2 border-[#2A2A2A] hover:border-[#BAFF00] hover:text-[#BAFF00] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="font-mono text-[9px] tracking-[0.15em] uppercase px-3 py-1.5 border-2 border-[#2A2A2A] hover:border-[#BAFF00] hover:text-[#BAFF00] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                     {isValidating ? "REFRESHING…" : "REFRESH"}
                 </button>
@@ -164,8 +164,8 @@ export default function AdminReviewsPage() {
                 <div
                     className={
                         message.type === "success"
-                            ? "font-mono text-xs text-[#BAFF00] tracking-[0.1em]"
-                            : "font-mono text-xs text-[#FF3333] tracking-[0.1em]"
+                            ? "font-mono text-[10px] text-[#BAFF00] tracking-[0.1em]"
+                            : "font-mono text-[10px] text-[#FF3333] tracking-[0.1em]"
                     }
                 >
                     {message.text}
@@ -173,11 +173,11 @@ export default function AdminReviewsPage() {
             )}
 
             {/* Add new review */}
-            <div className="border-2 border-[#2A2A2A] p-6 bg-[#0D0D0D]">
-                <h3 className="font-mono text-[10px] text-[#999] tracking-[0.2em] uppercase font-bold mb-4">
+            <div className="border-2 border-[#2A2A2A] p-4 bg-[#0D0D0D]">
+                <h3 className="font-mono text-[9px] text-[#999] tracking-[0.15em] uppercase font-bold mb-3">
                     Add review
                 </h3>
-                <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
                         <AdminInput
                             label="Author name"
@@ -230,22 +230,22 @@ export default function AdminReviewsPage() {
                         <table className="w-full">
                             <thead>
                                 <tr className="border-b border-[#2A2A2A] bg-[#0D0D0D]">
-                                    <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                    <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                         Author
                                     </th>
-                                    <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                    <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                         Review
                                     </th>
-                                    <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold w-20">
+                                    <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold w-20">
                                         Rating
                                     </th>
-                                    <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold w-24">
+                                    <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold w-24">
                                         Order
                                     </th>
-                                    <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold w-24">
+                                    <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold w-24">
                                         Status
                                     </th>
-                                    <th className="px-6 py-3 text-right font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold w-32">
+                                    <th className="px-4 py-2 text-right font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold w-32">
                                         Actions
                                     </th>
                                 </tr>
@@ -255,7 +255,7 @@ export default function AdminReviewsPage() {
                                     <tr>
                                         <td
                                             colSpan={6}
-                                            className="px-6 py-12 text-center font-mono text-xs text-[#666] tracking-[0.1em]"
+                                            className="px-4 py-8 text-center font-mono text-[10px] text-[#666] tracking-[0.1em]"
                                         >
                                             NO REVIEWS YET — ADD ONE ABOVE
                                         </td>
@@ -267,7 +267,7 @@ export default function AdminReviewsPage() {
                                                 key={r.id}
                                                 className="border-b border-[#1A1A1A] bg-[#0D0D0D]"
                                             >
-                                                <td colSpan={6} className="px-6 py-4">
+                                                <td colSpan={6} className="px-4 py-2.5">
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                         <AdminInput
                                                             label="Author"
@@ -359,19 +359,19 @@ export default function AdminReviewsPage() {
                                                 key={r.id}
                                                 className="border-b border-[#1A1A1A] hover:bg-[#0D0D0D] transition-colors"
                                             >
-                                                <td className="px-6 py-4 font-mono text-xs text-[#F5F5F0] tracking-[0.05em]">
+                                                <td className="px-4 py-2.5 font-mono text-[10px] text-[#F5F5F0] tracking-[0.05em]">
                                                     {r.authorName}
                                                 </td>
-                                                <td className="px-6 py-4 font-mono text-[10px] text-[#999] tracking-[0.05em] max-w-xs">
+                                                <td className="px-4 py-2.5 font-mono text-[10px] text-[#999] tracking-[0.05em] max-w-xs">
                                                     <span className="line-clamp-2">{r.text}</span>
                                                 </td>
-                                                <td className="px-6 py-4 font-mono text-[10px] text-[#666]">
+                                                <td className="px-4 py-2.5 font-mono text-[10px] text-[#666]">
                                                     {r.rating != null ? `${r.rating} ★` : "—"}
                                                 </td>
-                                                <td className="px-6 py-4 font-mono text-[10px] text-[#666]">
+                                                <td className="px-4 py-2.5 font-mono text-[10px] text-[#666]">
                                                     {r.sortOrder}
                                                 </td>
-                                                <td className="px-6 py-4">
+                                                <td className="px-4 py-2.5">
                                                     <span
                                                         className={
                                                             r.isActive
@@ -382,7 +382,7 @@ export default function AdminReviewsPage() {
                                                         {r.isActive ? "Visible" : "Hidden"}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 text-right">
+                                                <td className="px-4 py-2.5 text-right">
                                                     <div className="flex justify-end gap-2">
                                                         <button
                                                             type="button"

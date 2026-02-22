@@ -14,6 +14,8 @@ export interface FavouriteItem {
   name: string;
   slug: string;
   price: number;
+  /** Original price before discount, shown crossed out when present */
+  cutPrice?: number | null;
   image: string;
 }
 

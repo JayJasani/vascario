@@ -1,5 +1,6 @@
 "use server";
 
+import { getString } from "@/lib/parse-form";
 import { createContactSubmission } from "@/lib/firebase-helpers";
 
 export type ContactFormState = { success?: boolean; error?: string } | null;
@@ -8,10 +9,10 @@ export async function submitContactAction(
   _prev: ContactFormState,
   formData: FormData
 ): Promise<ContactFormState> {
-  const firstName = (formData.get("firstName") as string)?.trim();
-  const lastName = (formData.get("lastName") as string)?.trim();
-  const email = (formData.get("email") as string)?.trim();
-  const query = (formData.get("query") as string)?.trim();
+  const firstName = getString(formData, "firstName");
+  const lastName = getString(formData, "lastName");
+  const email = getString(formData, "email");
+  const query = getString(formData, "query");
 
   if (!firstName || !lastName || !email || !query) {
     return { error: "Please fill in all fields." };

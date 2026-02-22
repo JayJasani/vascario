@@ -2,12 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useFavourites } from "@/context/FavouritesContext";
+import { hasDiscount } from "@/lib/discount";
 import { getImageAlt } from "@/lib/seo-utils";
 
 export function FavouritesClient() {
+  const router = useRouter();
   const { user } = useAuth();
   const { formatPrice } = useCurrency();
   const { items } = useFavourites();
@@ -99,11 +102,14 @@ export function FavouritesClient() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((item) => (
+          {items.map((item) => {
+            const href = `/product/${item.slug || item.id}`;
+            return (
             <Link
               key={item.id}
-              href={`/product/${item.slug || item.id}`}
+              href={href}
               className="group border border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] hover:border-[var(--vsc-gray-900)] transition-colors duration-200"
+              onMouseEnter={() => router.prefetch(href)}
             >
               <div className="relative aspect-[3/4] bg-[var(--vsc-gray-100)] overflow-hidden">
                 {item.image && (
@@ -117,22 +123,33 @@ export function FavouritesClient() {
                   />
                 )}
               </div>
-              <div className="px-4 py-3 flex items-center justify-between">
+              <div className="px-4 py-3 flex items-center justify-between gap-2">
                 <span
                   className="text-xs font-bold uppercase tracking-[0.1em] text-[var(--vsc-gray-900)] truncate"
                   style={{ fontFamily: "var(--font-space-grotesk)" }}
                 >
                   {item.name}
                 </span>
-                <span
-                  className="text-xs font-bold text-[var(--vsc-gray-900)]"
-                  style={{ fontFamily: "var(--font-space-mono)" }}
-                >
-                  {formatPrice(item.price)}
-                </span>
+                <div className="flex items-center gap-2 shrink-0">
+                  {hasDiscount(item.cutPrice, item.price) && item.cutPrice != null && (
+                    <span
+                      className="text-xs text-[var(--vsc-gray-500)] line-through"
+                      style={{ fontFamily: "var(--font-space-mono)" }}
+                    >
+                      {formatPrice(item.cutPrice)}
+                    </span>
+                  )}
+                  <span
+                    className="text-xs font-bold text-[var(--vsc-gray-900)]"
+                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  >
+                    {formatPrice(item.price)}
+                  </span>
+                </div>
               </div>
             </Link>
-          ))}
+          );
+          })}
         </div>
       )}
     </section>
