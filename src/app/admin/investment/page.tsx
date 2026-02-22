@@ -140,16 +140,16 @@ export default function AdminInvestmentPage() {
     const totalAmount = investments?.reduce((sum, i) => sum + parseFloat(i.amount || "0"), 0) ?? 0;
 
     return (
-        <div className="space-y-10">
+        <div className="space-y-6">
             <div className="flex items-end justify-between">
                 <div>
                     <h2
-                        className="text-2xl font-bold tracking-[-0.03em] uppercase"
+                        className="text-xl font-bold tracking-[-0.03em] uppercase"
                         style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
                     >
                         Investment
                     </h2>
-                    <p className="font-mono text-xs text-[#666] tracking-[0.15em] uppercase mt-1">
+                    <p className="font-mono text-[10px] text-[#666] tracking-[0.15em] uppercase mt-0.5">
                         // Track investments by name and description (6 partners)
                     </p>
                 </div>
@@ -157,7 +157,7 @@ export default function AdminInvestmentPage() {
                     type="button"
                     onClick={() => mutate()}
                     disabled={isValidating}
-                    className="font-mono text-[10px] tracking-[0.15em] uppercase px-4 py-2 border-2 border-[#2A2A2A] hover:border-[#BAFF00] hover:text-[#BAFF00] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="font-mono text-[9px] tracking-[0.15em] uppercase px-3 py-1.5 border-2 border-[#2A2A2A] hover:border-[#BAFF00] hover:text-[#BAFF00] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                     {isValidating ? "REFRESHING…" : "REFRESH"}
                 </button>
@@ -167,8 +167,8 @@ export default function AdminInvestmentPage() {
                 <div
                     className={
                         message.type === "success"
-                            ? "font-mono text-xs text-[#BAFF00] tracking-[0.1em]"
-                            : "font-mono text-xs text-[#FF3333] tracking-[0.1em]"
+                            ? "font-mono text-[10px] text-[#BAFF00] tracking-[0.1em]"
+                            : "font-mono text-[10px] text-[#FF3333] tracking-[0.1em]"
                     }
                 >
                     {message.text}
@@ -176,11 +176,11 @@ export default function AdminInvestmentPage() {
             )}
 
             {/* Add new investment */}
-            <div className="border-2 border-[#2A2A2A] p-6 bg-[#0D0D0D]">
-                <h3 className="font-mono text-[10px] text-[#999] tracking-[0.2em] uppercase font-bold mb-4">
+            <div className="border-2 border-[#2A2A2A] p-4 bg-[#0D0D0D]">
+                <h3 className="font-mono text-[9px] text-[#999] tracking-[0.15em] uppercase font-bold mb-3">
                     Add investment
                 </h3>
-                <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <AdminInput
                         label="Investor name"
                         value={form.name}
@@ -216,11 +216,11 @@ export default function AdminInvestmentPage() {
 
             {/* Summary */}
             {investments && investments.length > 0 && (
-                <div className="border-2 border-[#2A2A2A] p-6 bg-[#0D0D0D]">
-                    <span className="font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase">
+                <div className="border-2 border-[#2A2A2A] p-4 bg-[#0D0D0D]">
+                    <span className="font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase">
                         Total Investment
                     </span>
-                    <p className="font-mono text-2xl font-bold text-[#BAFF00] tracking-[-0.02em] mt-2">
+                    <p className="font-mono text-xl font-bold text-[#BAFF00] tracking-[-0.02em] mt-1.5">
                         ₹{totalAmount.toLocaleString("en-IN")}
                     </p>
                 </div>
@@ -235,19 +235,19 @@ export default function AdminInvestmentPage() {
                         <table className="w-full">
                             <thead>
                                 <tr className="border-b border-[#2A2A2A] bg-[#0D0D0D]">
-                                    <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                    <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                         Name
                                     </th>
-                                    <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                    <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                         Description
                                     </th>
-                                    <th className="px-6 py-3 text-right font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                    <th className="px-4 py-2 text-right font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                         Amount
                                     </th>
-                                    <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                    <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                         Date
                                     </th>
-                                    <th className="px-6 py-3 text-right font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold w-32">
+                                    <th className="px-4 py-2 text-right font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold w-32">
                                         Actions
                                     </th>
                                 </tr>
@@ -257,7 +257,7 @@ export default function AdminInvestmentPage() {
                                     <tr>
                                         <td
                                             colSpan={5}
-                                            className="px-6 py-12 text-center font-mono text-xs text-[#666] tracking-[0.1em]"
+                                            className="px-4 py-8 text-center font-mono text-[10px] text-[#666] tracking-[0.1em]"
                                         >
                                             NO INVESTMENTS YET — ADD ONE ABOVE
                                         </td>
@@ -269,7 +269,7 @@ export default function AdminInvestmentPage() {
                                                 key={inv.id}
                                                 className="border-b border-[#1A1A1A] bg-[#0D0D0D]"
                                             >
-                                                <td colSpan={5} className="px-6 py-4">
+                                                <td colSpan={5} className="px-4 py-2.5">
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                         <AdminInput
                                                             label="Investor name"
@@ -334,25 +334,25 @@ export default function AdminInvestmentPage() {
                                                 key={inv.id}
                                                 className="border-b border-[#1A1A1A] hover:bg-[#0D0D0D] transition-colors"
                                             >
-                                                <td className="px-6 py-4 font-mono text-xs text-[#F5F5F0] tracking-[0.05em]">
+                                                <td className="px-4 py-2.5 font-mono text-[10px] text-[#F5F5F0] tracking-[0.05em]">
                                                     {inv.name}
                                                 </td>
-                                                <td className="px-6 py-4 font-mono text-[10px] text-[#999] tracking-[0.05em] max-w-md">
+                                                <td className="px-4 py-2.5 font-mono text-[10px] text-[#999] tracking-[0.05em] max-w-md">
                                                     <span className="line-clamp-2">
                                                         {inv.description || "—"}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 text-right font-mono text-sm font-bold text-[#BAFF00] tracking-[0.05em]">
+                                                <td className="px-4 py-2.5 text-right font-mono text-xs font-bold text-[#BAFF00] tracking-[0.05em]">
                                                     ₹{Number(inv.amount).toLocaleString("en-IN")}
                                                 </td>
-                                                <td className="px-6 py-4 font-mono text-[10px] text-[#666] tracking-[0.05em]">
+                                                <td className="px-4 py-2.5 font-mono text-[10px] text-[#666] tracking-[0.05em]">
                                                     {new Date(inv.createdAt).toLocaleDateString("en-IN", {
                                                         day: "2-digit",
                                                         month: "short",
                                                         year: "numeric",
                                                     })}
                                                 </td>
-                                                <td className="px-6 py-4 text-right">
+                                                <td className="px-4 py-2.5 text-right">
                                                     <div className="flex justify-end gap-2">
                                                         <button
                                                             type="button"

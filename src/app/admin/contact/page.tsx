@@ -21,17 +21,17 @@ export default function AdminContactPage() {
     const { data: submissions, mutate, isValidating } = useSWR("admin-contact", fetchContactSubmissions);
 
     return (
-        <div className="space-y-10">
+        <div className="space-y-6">
             {/* ── PAGE HEADER ── */}
             <div className="flex items-end justify-between">
                 <div>
                     <h2
-                        className="text-2xl font-bold tracking-[-0.03em] uppercase"
+                        className="text-xl font-bold tracking-[-0.03em] uppercase"
                         style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
                     >
                         Contact Queries
                     </h2>
-                    <p className="font-mono text-xs text-[#666] tracking-[0.15em] uppercase mt-1">
+                    <p className="font-mono text-[10px] text-[#666] tracking-[0.15em] uppercase mt-0.5">
                         // Inquiries from contact form
                     </p>
                 </div>
@@ -39,7 +39,7 @@ export default function AdminContactPage() {
                     type="button"
                     onClick={() => mutate()}
                     disabled={isValidating}
-                    className="font-mono text-[10px] tracking-[0.15em] uppercase px-4 py-2 border-2 border-[#2A2A2A] hover:border-[#BAFF00] hover:text-[#BAFF00] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="font-mono text-[9px] tracking-[0.15em] uppercase px-3 py-1.5 border-2 border-[#2A2A2A] hover:border-[#BAFF00] hover:text-[#BAFF00] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                     {isValidating ? "REFRESHING…" : "REFRESH"}
                 </button>
@@ -54,16 +54,16 @@ export default function AdminContactPage() {
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-[#2A2A2A] bg-[#0D0D0D]">
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Date
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Name
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Email
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Query
                                 </th>
                             </tr>
@@ -73,7 +73,7 @@ export default function AdminContactPage() {
                                 <tr>
                                     <td
                                         colSpan={4}
-                                        className="px-6 py-12 text-center font-mono text-xs text-[#666] tracking-[0.1em]"
+                                        className="px-4 py-8 text-center font-mono text-[10px] text-[#666] tracking-[0.1em]"
                                     >
                                         NO CONTACT SUBMISSIONS YET
                                     </td>
@@ -84,7 +84,7 @@ export default function AdminContactPage() {
                                         key={sub.id}
                                         className="border-b border-[#1A1A1A] hover:bg-[#0D0D0D] transition-colors"
                                     >
-                                        <td className="px-6 py-4 font-mono text-[10px] text-[#666] tracking-[0.1em] whitespace-nowrap">
+                                        <td className="px-4 py-2.5 font-mono text-[9px] text-[#666] tracking-[0.1em] whitespace-nowrap">
                                             {new Date(sub.createdAt).toLocaleDateString("en-IN", {
                                                 day: "2-digit",
                                                 month: "short",
@@ -93,18 +93,18 @@ export default function AdminContactPage() {
                                                 minute: "2-digit",
                                             })}
                                         </td>
-                                        <td className="px-6 py-4 font-mono text-xs text-[#F5F5F0] tracking-[0.05em]">
+                                        <td className="px-4 py-2.5 font-mono text-[10px] text-[#F5F5F0] tracking-[0.05em]">
                                             {sub.firstName} {sub.lastName}
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-4 py-2.5">
                                             <a
                                                 href={`mailto:${sub.email}`}
-                                                className="font-mono text-xs text-[#BAFF00] hover:underline tracking-[0.05em]"
+                                                className="font-mono text-[10px] text-[#BAFF00] hover:underline tracking-[0.05em]"
                                             >
                                                 {sub.email}
                                             </a>
                                         </td>
-                                        <td className="px-6 py-4 font-mono text-[10px] text-[#999] tracking-[0.05em] max-w-md">
+                                        <td className="px-4 py-2.5 font-mono text-[9px] text-[#999] tracking-[0.05em] max-w-md">
                                             <span className="line-clamp-3">{sub.query}</span>
                                         </td>
                                     </tr>

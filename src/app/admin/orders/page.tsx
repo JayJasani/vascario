@@ -73,30 +73,30 @@ export default function OrdersPage() {
     }
 
     return (
-        <div className="space-y-10">
+        <div className="space-y-6">
             {/* ── PAGE HEADER ── */}
             <div className="flex items-end justify-between">
                 <div>
                     <h2
-                        className="text-2xl font-bold tracking-[-0.03em] uppercase"
+                        className="text-xl font-bold tracking-[-0.03em] uppercase"
                         style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
                     >
                         Order Pipeline
                     </h2>
-                    <p className="font-mono text-xs text-[#666] tracking-[0.15em] uppercase mt-1">
+                    <p className="font-mono text-[10px] text-[#666] tracking-[0.15em] uppercase mt-0.5">
             // Fulfillment &amp; Tracking
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-[#BAFF00]" />
-                    <span className="font-mono text-[10px] text-[#666] tracking-[0.15em] uppercase">
+                <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 bg-[#BAFF00]" />
+                    <span className="font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase">
                         Polling 5s
                     </span>
                 </div>
             </div>
 
             {/* ── FILTER TABS ── */}
-            <div className="flex flex-wrap gap-2 border-2 border-[#2A2A2A] bg-[#0D0D0D] p-3">
+            <div className="flex flex-wrap gap-1.5 border-2 border-[#2A2A2A] bg-[#0D0D0D] p-2">
                 {TABS.map((tab) => (
                     <button
                         key={tab.value}
@@ -115,7 +115,7 @@ export default function OrdersPage() {
             {orders === undefined ? (
                 <AdminLoadingBlock />
             ) : filteredOrders && filteredOrders.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {filteredOrders.map((order) => (
                         <DataCard
                             key={order.id}
@@ -180,45 +180,45 @@ export default function OrdersPage() {
             {/* ── TRACKING MODAL ── */}
             {trackingModal && (
                 <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-                    <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-8 w-full max-w-md">
-                        <div className="flex items-center justify-between mb-6">
-                            <span className="font-mono text-xs text-[#F5F5F0] tracking-[0.15em] uppercase font-bold">
+                    <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-5 w-full max-w-md">
+                        <div className="flex items-center justify-between mb-4">
+                            <span className="font-mono text-[10px] text-[#F5F5F0] tracking-[0.15em] uppercase font-bold">
                                 Add Tracking Info
                             </span>
                             <button
                                 onClick={() => setTrackingModal(null)}
-                                className="font-mono text-xs text-[#666] hover:text-[#FF3333] transition-colors cursor-pointer"
+                                className="font-mono text-[10px] text-[#666] hover:text-[#FF3333] transition-colors cursor-pointer"
                             >
                                 ✕
                             </button>
                         </div>
                         <form
                             onSubmit={(e) => handleTracking(e, trackingModal)}
-                            className="space-y-6"
+                            className="space-y-4"
                         >
-                            <div className="space-y-2">
-                                <label className="block font-mono text-[10px] text-[#999] tracking-[0.2em] uppercase font-bold">
+                            <div className="space-y-1.5">
+                                <label className="block font-mono text-[9px] text-[#999] tracking-[0.15em] uppercase font-bold">
                                     Carrier
                                 </label>
                                 <input
                                     name="carrier"
                                     required
                                     placeholder="FEDEX / USPS / DHL"
-                                    className="w-full bg-black border-2 border-[#2A2A2A] text-[#F5F5F0] font-mono text-sm px-6 py-4 tracking-[0.05em] uppercase placeholder:text-[#333] focus:border-[#BAFF00] focus:outline-none transition-colors"
+                                    className="w-full bg-black border-2 border-[#2A2A2A] text-[#F5F5F0] font-mono text-xs px-4 py-2.5 tracking-[0.05em] uppercase placeholder:text-[#333] focus:border-[#BAFF00] focus:outline-none transition-colors"
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <label className="block font-mono text-[10px] text-[#999] tracking-[0.2em] uppercase font-bold">
+                            <div className="space-y-1.5">
+                                <label className="block font-mono text-[9px] text-[#999] tracking-[0.15em] uppercase font-bold">
                                     Tracking Number
                                 </label>
                                 <input
                                     name="trackingNumber"
                                     required
                                     placeholder="1Z999AA10123456784"
-                                    className="w-full bg-black border-2 border-[#2A2A2A] text-[#F5F5F0] font-mono text-sm px-6 py-4 tracking-[0.05em] placeholder:text-[#333] focus:border-[#BAFF00] focus:outline-none transition-colors"
+                                    className="w-full bg-black border-2 border-[#2A2A2A] text-[#F5F5F0] font-mono text-xs px-4 py-2.5 tracking-[0.05em] placeholder:text-[#333] focus:border-[#BAFF00] focus:outline-none transition-colors"
                                 />
                             </div>
-                            <div className="flex gap-4 pt-2">
+                            <div className="flex gap-2 pt-1">
                                 <AdminButton type="submit" variant="primary">
                                     Ship Order
                                 </AdminButton>

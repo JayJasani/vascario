@@ -40,48 +40,48 @@ export default async function AdminLayout({
             {isAuthenticated ? (
                 <>
                     {/* ── SIDEBAR ── */}
-                    <aside className="w-64 border-r-2 border-[#2A2A2A] flex flex-col shrink-0 sticky top-0 h-screen">
+                    <aside className="w-52 border-r-2 border-[#2A2A2A] flex flex-col shrink-0 sticky top-0 h-screen">
                         {/* Brand block */}
-                        <div className="px-6 py-6 border-b-2 border-[#2A2A2A]">
+                        <div className="px-4 py-4 border-b-2 border-[#2A2A2A]">
                             <Link href="/admin">
                                 <h1
-                                    className="text-xl font-bold tracking-[-0.03em] uppercase"
+                                    className="text-base font-bold tracking-[-0.03em] uppercase"
                                     style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
                                 >
                                     VASCARIO
                                 </h1>
-                                <p className="text-[10px] text-[#666] tracking-[0.2em] uppercase mt-1">
+                                <p className="text-[9px] text-[#666] tracking-[0.2em] uppercase mt-0.5">
                   // Command Center
                                 </p>
                             </Link>
                         </div>
 
                         {/* Navigation */}
-                        <nav className="flex-1 py-4">
+                        <nav className="flex-1 py-2">
                             {navItems.map((item) => (
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    className="flex items-center gap-4 px-6 py-4 text-xs tracking-[0.2em] uppercase text-[#999] hover:text-[#BAFF00] hover:bg-[#0D0D0D] border-l-2 border-transparent hover:border-[#BAFF00] transition-all"
+                                    className="flex items-center gap-3 px-4 py-2.5 text-[10px] tracking-[0.15em] uppercase text-[#999] hover:text-[#BAFF00] hover:bg-[#0D0D0D] border-l-2 border-transparent hover:border-[#BAFF00] transition-all"
                                 >
-                                    <span className="text-base">{item.icon}</span>
+                                    <span className="text-sm">{item.icon}</span>
                                     {item.label}
                                 </Link>
                             ))}
                         </nav>
 
                         {/* System info footer */}
-                        <div className="border-t-2 border-[#2A2A2A] px-6 py-4">
-                            <div className="flex items-center gap-2 mb-3">
-                                <div className="w-2 h-2 bg-[#BAFF00]" />
-                                <span className="text-[10px] text-[#666] tracking-[0.15em] uppercase">
+                        <div className="border-t-2 border-[#2A2A2A] px-4 py-3">
+                            <div className="flex items-center gap-1.5 mb-2">
+                                <div className="w-1.5 h-1.5 bg-[#BAFF00]" />
+                                <span className="text-[9px] text-[#666] tracking-[0.15em] uppercase">
                                     System Online
                                 </span>
                             </div>
                             <form action={logoutAction}>
                                 <button
                                     type="submit"
-                                    className="w-full text-left text-[10px] text-[#666] tracking-[0.15em] uppercase hover:text-[#FF3333] transition-colors"
+                                    className="w-full text-left text-[9px] text-[#666] tracking-[0.15em] uppercase hover:text-[#FF3333] transition-colors"
                                 >
                                     ✕ DISCONNECT
                                 </button>
@@ -90,12 +90,12 @@ export default async function AdminLayout({
                     </aside>
 
                     {/* ── MAIN CONTENT ── */}
-                    <main className="flex-1 flex flex-col min-h-screen">
+                    <main className="flex-1 flex flex-col min-h-screen text-sm">
                         {/* Top bar */}
-                        <header className="border-b-2 border-[#2A2A2A] px-8 py-4 flex items-center justify-between shrink-0">
-                            <div className="flex items-center gap-3">
-                                <div className="w-3 h-3 border-2 border-[#BAFF00]" />
-                                <span className="text-xs tracking-[0.2em] uppercase text-[#666]">
+                        <header className="border-b-2 border-[#2A2A2A] px-5 py-2.5 flex items-center justify-between shrink-0">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2.5 h-2.5 border-2 border-[#BAFF00]" />
+                                <span className="text-[10px] tracking-[0.2em] uppercase text-[#666]">
                                     VASCARIO // CMD
                                 </span>
                             </div>
@@ -103,7 +103,7 @@ export default async function AdminLayout({
                         </header>
 
                         {/* Page content */}
-                        <div className="flex-1 p-8">{children}</div>
+                        <div className="flex-1 p-5">{children}</div>
                     </main>
                 </>
             ) : (
@@ -116,7 +116,7 @@ export default async function AdminLayout({
 
 function SystemClock() {
     return (
-        <div className="font-mono text-xs text-[#666] tracking-[0.15em]">
+        <div className="font-mono text-[10px] text-[#666] tracking-[0.15em]">
             <span className="text-[#BAFF00]">●</span>{" "}
             <span suppressHydrationWarning>
                 {new Date().toLocaleDateString("en-US", {

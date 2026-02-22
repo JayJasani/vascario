@@ -177,12 +177,12 @@ export default function StaticContentPage() {
                 <div className="flex items-end justify-between">
                     <div>
                         <h2
-                            className="text-2xl font-bold tracking-[-0.03em] uppercase"
+                            className="text-xl font-bold tracking-[-0.03em] uppercase"
                             style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
                         >
                             Static Content
                         </h2>
-                        <p className="font-mono text-xs text-[#666] tracking-[0.15em] uppercase mt-1">
+                        <p className="font-mono text-[10px] text-[#666] tracking-[0.15em] uppercase mt-0.5">
                             // Manage onboarding videos and images
                         </p>
                     </div>
@@ -192,30 +192,30 @@ export default function StaticContentPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-4 rounded-sm">
                         <div className="flex items-center justify-between">
-                            <span className="font-mono text-xs text-[#666] uppercase tracking-[0.15em]">
+                            <span className="font-mono text-[10px] text-[#666] uppercase tracking-[0.15em]">
                                 Total Items
                             </span>
-                            <span className="text-xl font-bold text-[#BAFF00]">
+                            <span className="text-lg font-bold text-[#BAFF00]">
                                 {totalItems}
                             </span>
                         </div>
                     </div>
                     <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-4 rounded-sm">
                         <div className="flex items-center justify-between">
-                            <span className="font-mono text-xs text-[#666] uppercase tracking-[0.15em]">
+                            <span className="font-mono text-[10px] text-[#666] uppercase tracking-[0.15em]">
                                 Uploaded
                             </span>
-                            <span className="text-xl font-bold text-[#BAFF00]">
+                            <span className="text-lg font-bold text-[#BAFF00]">
                                 {uploadedItems}/{totalItems}
                             </span>
                         </div>
                     </div>
                     <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-4 rounded-sm">
                         <div className="flex items-center justify-between">
-                            <span className="font-mono text-xs text-[#666] uppercase tracking-[0.15em]">
+                            <span className="font-mono text-[10px] text-[#666] uppercase tracking-[0.15em]">
                                 With Redirect
                             </span>
-                            <span className="text-xl font-bold text-[#BAFF00]">
+                            <span className="text-lg font-bold text-[#BAFF00]">
                                 {itemsWithRedirect}
                             </span>
                         </div>
@@ -224,7 +224,7 @@ export default function StaticContentPage() {
             </div>
 
             {/* ── CONTENT ITEMS ── */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {STATIC_CONTENT_ITEMS.map((item) => {
                     const existingContent = getContentForKey(item.key);
                     const isUploading = uploading[item.key] || false;
@@ -237,7 +237,7 @@ export default function StaticContentPage() {
                     return (
                         <div
                             key={item.key}
-                            className="bg-[#0D0D0D] border border-[#333] rounded-lg p-6 hover:border-[#444] transition-colors flex flex-col"
+                            className="bg-[#0D0D0D] border border-[#333] rounded-lg p-4 hover:border-[#444] transition-colors flex flex-col"
                         >
                             {/* Status Message */}
                             {message && (
@@ -286,11 +286,11 @@ export default function StaticContentPage() {
                                     ) : (
                                         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
                                             <div className="w-14 h-14 border-2 border-[#444] rounded-lg flex items-center justify-center bg-[#1A1A1A]">
-                                                <span className="text-2xl text-[#666]">
+                                                <span className="text-xl text-[#666]">
                                                     {item.type === "video" ? "🎥" : "🖼️"}
                                                 </span>
                                             </div>
-                                            <span className="font-mono text-xs text-[#666] uppercase tracking-[0.15em]">
+                                            <span className="font-mono text-[10px] text-[#666] uppercase tracking-[0.15em]">
                                                 No {item.type}
                                             </span>
                                         </div>

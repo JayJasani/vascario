@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { HexColorPicker } from "react-colorful";
-import { Palette, ChevronUp, ChevronDown } from "lucide-react";
+import { Palette, ChevronUp, ChevronDown, Pencil, Archive, ArchiveRestore, Trash2 } from "lucide-react";
 import { hasDiscount } from "@/lib/discount";
 import { AdminButton } from "@/components/admin/AdminButton";
 import { AdminInput, AdminTextarea } from "@/components/admin/AdminInput";
@@ -249,17 +249,17 @@ export default function DropsPage() {
     }
 
     return (
-        <div className="space-y-10">
+        <div className="space-y-6">
             {/* ── PAGE HEADER ── */}
             <div className="flex items-end justify-between">
                 <div>
                     <h2
-                        className="text-2xl font-bold tracking-[-0.03em] uppercase"
+                        className="text-xl font-bold tracking-[-0.03em] uppercase"
                         style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
                     >
                         Drop Manager
                     </h2>
-                    <p className="font-mono text-xs text-[#666] tracking-[0.15em] uppercase mt-1">
+                    <p className="font-mono text-[10px] text-[#666] tracking-[0.15em] uppercase mt-0.5">
                         Product Uploads &amp; Management
                     </p>
                 </div>
@@ -283,13 +283,13 @@ export default function DropsPage() {
 
             {/* ── FORM + LIVE PREVIEW ── */}
             {isFormOpen && (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     {/* Form */}
-                    <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-8">
-                        <span className="font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase block mb-6">
+                    <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-5">
+                        <span className="font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase block mb-4">
                             {isEditMode ? `Edit Drop // ${editingProduct?.name}` : "Create New Drop"}
                         </span>
-                        <form key={editingProduct?.id ?? "create"} action={handleSubmit} className="space-y-6">
+                        <form key={editingProduct?.id ?? "create"} action={handleSubmit} className="space-y-4">
                             <AdminInput
                                 label="Drop Name"
                                 name="name"
@@ -310,7 +310,7 @@ export default function DropsPage() {
                                     setPreview((p) => ({ ...p, description: e.target.value }))
                                 }
                             />
-                            <div className="grid grid-cols-2 gap-6">
+                            <div className="grid grid-cols-2 gap-4">
                                 <AdminInput
                                     label="Price"
                                     name="price"
@@ -344,7 +344,7 @@ export default function DropsPage() {
                             </div>
                             {/* Image Upload */}
                             <div>
-                                <label className="block font-mono text-[10px] text-[#999] tracking-[0.2em] uppercase mb-2">
+                                <label className="block font-mono text-[9px] text-[#999] tracking-[0.15em] uppercase mb-1.5">
                                     Product Images
                                 </label>
                                 <input
@@ -358,14 +358,14 @@ export default function DropsPage() {
                                 />
                                 <label
                                     htmlFor="image-upload"
-                                    className={`block w-full px-4 py-3 border-2 border-[#2A2A2A] bg-[#0D0D0D] cursor-pointer hover:border-[#BAFF00] transition-colors flex items-center justify-center ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    className={`block w-full px-3 py-2 border-2 border-[#2A2A2A] bg-[#0D0D0D] cursor-pointer hover:border-[#BAFF00] transition-colors flex items-center justify-center ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}
                                 >
-                                    <span className="font-mono text-xs text-[#F5F5F0] tracking-[0.1em]">
+                                    <span className="font-mono text-[10px] text-[#F5F5F0] tracking-[0.1em]">
                                         {uploading ? "Uploading..." : formImages.length > 0 ? `✓ ${formImages.length} image(s) uploaded` : "+ Upload Images"}
                                     </span>
                                 </label>
                                 {formImages.length > 0 && (
-                                    <div className="mt-4 grid grid-cols-3 gap-3">
+                                    <div className="mt-3 grid grid-cols-3 gap-2">
                                         {formImages.map((url, index) => (
                                             <div key={index} className="relative group aspect-square">
                                                 <Image
@@ -580,13 +580,13 @@ export default function DropsPage() {
                     </div>
 
                     {/* Live Preview */}
-                    <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-8">
-                        <span className="font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase block mb-6">
+                    <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-5">
+                        <span className="font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase block mb-4">
                             Live Preview // Storefront Card
                         </span>
-                        <div className="border-2 border-[#2A2A2A] bg-black p-6 max-w-sm">
+                        <div className="border-2 border-[#2A2A2A] bg-black p-4 max-w-sm">
                             {/* Product image preview */}
-                            <div className="aspect-[3/4] bg-[#1A1A1A] border border-[#2A2A2A] overflow-hidden mb-6 relative">
+                            <div className="aspect-[3/4] bg-[#1A1A1A] border border-[#2A2A2A] overflow-hidden mb-4 relative">
                                 {formImages.length > 0 ? (
                                     <Image
                                         src={formImages[0]}
@@ -643,8 +643,8 @@ export default function DropsPage() {
                 <AdminLoadingBlock />
             ) : (
             <div className="border-2 border-[#2A2A2A]">
-                <div className="px-6 py-4 border-b-2 border-[#2A2A2A] bg-[#0D0D0D]">
-                    <span className="font-mono text-xs text-[#F5F5F0] tracking-[0.15em] uppercase font-bold">
+                <div className="px-4 py-3 border-b-2 border-[#2A2A2A] bg-[#0D0D0D]">
+                    <span className="font-mono text-[10px] text-[#F5F5F0] tracking-[0.15em] uppercase font-bold">
                         All Drops ({products.length})
                     </span>
                 </div>
@@ -652,28 +652,19 @@ export default function DropsPage() {
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-[#2A2A2A]">
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     SKU
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Name
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Price
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
-                                    Cut Price
-                                </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Sizes
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
-                                    Status
-                                </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
-                                    Featured
-                                </th>
-                                <th className="px-6 py-3 text-right font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-right font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Actions
                                 </th>
                             </tr>
@@ -682,8 +673,8 @@ export default function DropsPage() {
                             {products.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={8}
-                                        className="px-6 py-12 text-center font-mono text-xs text-[#666] tracking-[0.1em]"
+                                        colSpan={5}
+                                        className="px-4 py-8 text-center font-mono text-[10px] text-[#666] tracking-[0.1em]"
                                     >
                                         NO DROPS DEPLOYED // CREATE YOUR FIRST DROP
                                     </td>
@@ -694,64 +685,76 @@ export default function DropsPage() {
                                         key={product.id}
                                         className="border-b border-[#1A1A1A] hover:bg-[#0D0D0D] transition-colors"
                                     >
-                                        <td className="px-6 py-4 font-mono text-xs text-[#BAFF00] tracking-[0.1em]">
-                                            {product.sku ?? "—"}
+                                        <td className="px-4 py-2.5">
+                                            <div className="flex flex-col gap-0.5">
+                                                <span className="font-mono text-[10px] text-[#BAFF00] tracking-[0.1em]">
+                                                    {product.sku ?? "—"}
+                                                </span>
+                                                <span
+                                                    className={`font-mono text-[10px] tracking-[0.2em] uppercase font-bold ${product.isActive ? "text-[#BAFF00]" : "text-[#666]"
+                                                        }`}
+                                                >
+                                                    {product.isActive ? "● LIVE" : "○ ARCHIVED"}
+                                                </span>
+                                            </div>
                                         </td>
-                                        <td className="px-6 py-4 font-mono text-xs text-[#F5F5F0] tracking-[0.05em] uppercase">
+                                        <td className="px-4 py-2.5 font-mono text-[10px] text-[#F5F5F0] tracking-[0.05em] uppercase">
                                             {product.name}
                                         </td>
-                                        <td className="px-6 py-4 font-mono text-sm text-[#F5F5F0] font-bold tracking-[0.05em]">
-                                            ₹{Number(product.price).toLocaleString("en-IN")}
+                                        <td className="px-4 py-2.5 font-mono text-xs tracking-[0.05em]">
+                                            <div className="flex flex-col gap-0.5">
+                                                {hasDiscount(product.cutPrice ? Number(product.cutPrice) : null, Number(product.price)) && product.cutPrice && (
+                                                    <span className="text-[#666] line-through">
+                                                        ₹{Number(product.cutPrice).toLocaleString("en-IN")}
+                                                    </span>
+                                                )}
+                                                <span className="text-[#F5F5F0] font-bold text-[#BAFF00]">
+                                                    ₹{Number(product.price).toLocaleString("en-IN")}
+                                                </span>
+                                            </div>
                                         </td>
-                                        <td className="px-6 py-4 font-mono text-sm text-[#666] tracking-[0.05em]">
-                                            {product.cutPrice ? `₹${Number(product.cutPrice).toLocaleString("en-IN")}` : "—"}
-                                        </td>
-                                        <td className="px-6 py-4 font-mono text-[10px] text-[#999] tracking-[0.1em]">
+                                        <td className="px-4 py-2.5 font-mono text-[9px] text-[#999] tracking-[0.1em]">
                                             {product.sizes.join(" / ")}
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <span
-                                                className={`font-mono text-[10px] tracking-[0.2em] uppercase font-bold ${product.isActive ? "text-[#BAFF00]" : "text-[#666]"
-                                                    }`}
-                                            >
-                                                {product.isActive ? "● LIVE" : "○ ARCHIVED"}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <AdminButton
-                                                variant={product.isFeatured ? "secondary" : "ghost"}
-                                                size="sm"
-                                                onClick={() => handleToggleFeatured(product.id)}
-                                                disabled={!product.isActive}
-                                                title={product.isFeatured ? "Remove from featured (search)" : "Feature in search"}
-                                            >
-                                                {product.isFeatured ? "★ Featured" : "☆ Feature"}
-                                            </AdminButton>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2 flex-wrap">
+                                        <td className="px-4 py-2.5 text-right">
+                                            <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                                                <AdminButton
+                                                    variant={product.isFeatured ? "secondary" : "ghost"}
+                                                    size="sm"
+                                                    onClick={() => handleToggleFeatured(product.id)}
+                                                    disabled={!product.isActive}
+                                                    title={product.isFeatured ? "Remove from featured (search)" : "Feature in search"}
+                                                    className="!text-base leading-none !p-1.5 min-w-[2rem] tracking-normal"
+                                                >
+                                                    {product.isFeatured ? "★" : "☆"}
+                                                </AdminButton>
                                                 <AdminButton
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => openEdit(product)}
+                                                    title="Edit"
+                                                    className="!p-1.5 tracking-normal"
                                                 >
-                                                    Edit
+                                                    <Pencil className="w-3.5 h-3.5" />
                                                 </AdminButton>
                                                 <AdminButton
                                                     variant={product.isActive ? "ghost" : "secondary"}
                                                     size="sm"
                                                     onClick={() => handleToggle(product.id)}
+                                                    title={product.isActive ? "Archive" : "Reactivate"}
+                                                    className="!p-1.5 tracking-normal"
                                                 >
-                                                    {product.isActive ? "Archive" : "Reactivate"}
+                                                    {product.isActive ? <Archive className="w-3.5 h-3.5" /> : <ArchiveRestore className="w-3.5 h-3.5" />}
                                                 </AdminButton>
                                                 <AdminButton
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => handleDelete(product)}
                                                     disabled={deletingId === product.id}
-                                                    className="text-[#FF3333] hover:bg-[#FF3333]/10 hover:text-[#FF3333]"
+                                                    title="Delete"
+                                                    className="text-[#FF3333] hover:bg-[#FF3333]/10 hover:text-[#FF3333] !p-1.5 tracking-normal"
                                                 >
-                                                    {deletingId === product.id ? "…" : "Delete"}
+                                                    {deletingId === product.id ? "…" : <Trash2 className="w-3.5 h-3.5" />}
                                                 </AdminButton>
                                             </div>
                                         </td>

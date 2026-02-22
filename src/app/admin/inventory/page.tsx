@@ -57,34 +57,34 @@ export default function InventoryPage() {
     }
 
     return (
-        <div className="space-y-10">
+        <div className="space-y-6">
             {/* ── PAGE HEADER ── */}
             <div className="flex items-end justify-between">
                 <div>
                     <h2
-                        className="text-2xl font-bold tracking-[-0.03em] uppercase"
+                        className="text-xl font-bold tracking-[-0.03em] uppercase"
                         style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
                     >
                         Inventory Matrix
                     </h2>
-                    <p className="font-mono text-xs text-[#666] tracking-[0.15em] uppercase mt-1">
+                    <p className="font-mono text-[10px] text-[#666] tracking-[0.15em] uppercase mt-0.5">
             // Stock Control Grid
                     </p>
                 </div>
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-4">
                     {/* Legend */}
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-3 bg-[#BAFF00]/30 border border-[#BAFF00]/50" />
-                            <span className="font-mono text-[10px] text-[#666] tracking-[0.1em]">OK</span>
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1">
+                            <div className="w-2.5 h-2.5 bg-[#BAFF00]/30 border border-[#BAFF00]/50" />
+                            <span className="font-mono text-[9px] text-[#666] tracking-[0.1em]">OK</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-3 bg-[#FFD600]/30 border border-[#FFD600]/50" />
-                            <span className="font-mono text-[10px] text-[#666] tracking-[0.1em]">LOW</span>
+                        <div className="flex items-center gap-1">
+                            <div className="w-2.5 h-2.5 bg-[#FFD600]/30 border border-[#FFD600]/50" />
+                            <span className="font-mono text-[9px] text-[#666] tracking-[0.1em]">LOW</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-3 bg-[#FF3333]/30 border border-[#FF3333]/50" />
-                            <span className="font-mono text-[10px] text-[#666] tracking-[0.1em]">OUT</span>
+                        <div className="flex items-center gap-1">
+                            <div className="w-2.5 h-2.5 bg-[#FF3333]/30 border border-[#FF3333]/50" />
+                            <span className="font-mono text-[9px] text-[#666] tracking-[0.1em]">OUT</span>
                         </div>
                     </div>
                 </div>
@@ -98,21 +98,21 @@ export default function InventoryPage() {
                 <table className="w-full">
                     <thead>
                         <tr className="border-b-2 border-[#2A2A2A] bg-[#0D0D0D]">
-                            <th className="px-6 py-4 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold min-w-[200px] sticky left-0 bg-[#0D0D0D] z-10 border-r-2 border-[#2A2A2A]">
+                            <th className="px-4 py-2.5 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold min-w-[180px] sticky left-0 bg-[#0D0D0D] z-10 border-r-2 border-[#2A2A2A]">
                                 Product
                             </th>
-                            <th className="px-4 py-4 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold min-w-[100px]">
+                            <th className="px-3 py-2.5 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold min-w-[80px]">
                                 SKU
                             </th>
                             {allSizes.map((size) => (
                                 <th
                                     key={size}
-                                    className="px-4 py-4 text-center font-mono text-[10px] text-[#F5F5F0] tracking-[0.2em] uppercase font-bold min-w-[90px] border-l border-[#2A2A2A]"
+                                    className="px-3 py-2.5 text-center font-mono text-[9px] text-[#F5F5F0] tracking-[0.15em] uppercase font-bold min-w-[70px] border-l border-[#2A2A2A]"
                                 >
                                     {size}
                                 </th>
                             ))}
-                            <th className="px-4 py-4 text-center font-mono text-[10px] text-[#BAFF00] tracking-[0.2em] uppercase font-bold min-w-[90px] border-l-2 border-[#2A2A2A]">
+                            <th className="px-3 py-2.5 text-center font-mono text-[9px] text-[#BAFF00] tracking-[0.15em] uppercase font-bold min-w-[70px] border-l-2 border-[#2A2A2A]">
                                 Total
                             </th>
                         </tr>
@@ -122,7 +122,7 @@ export default function InventoryPage() {
                             <tr>
                                 <td
                                     colSpan={allSizes.length + 3}
-                                    className="px-6 py-12 text-center font-mono text-xs text-[#666] tracking-[0.1em]"
+                                    className="px-4 py-8 text-center font-mono text-[10px] text-[#666] tracking-[0.1em]"
                                 >
                                     NO PRODUCTS IN INVENTORY // ADD DROPS FIRST
                                 </td>
@@ -139,10 +139,10 @@ export default function InventoryPage() {
                                         key={product.id}
                                         className="border-b border-[#1A1A1A] hover:bg-[#0D0D0D]/50 transition-colors"
                                     >
-                                        <td className="px-6 py-4 font-mono text-xs text-[#F5F5F0] tracking-[0.05em] uppercase sticky left-0 bg-black z-10 border-r-2 border-[#2A2A2A]">
+                                        <td className="px-4 py-2.5 font-mono text-[10px] text-[#F5F5F0] tracking-[0.05em] uppercase sticky left-0 bg-black z-10 border-r-2 border-[#2A2A2A]">
                                             {product.name}
                                         </td>
-                                        <td className="px-4 py-4 font-mono text-[10px] text-[#BAFF00] tracking-[0.1em]">
+                                        <td className="px-3 py-2.5 font-mono text-[9px] text-[#BAFF00] tracking-[0.1em]">
                                             {product.sku ?? "—"}
                                         </td>
                                         {allSizes.map((size) => {
@@ -153,7 +153,7 @@ export default function InventoryPage() {
                                                 return (
                                                     <td
                                                         key={size}
-                                                        className="px-4 py-4 text-center font-mono text-[10px] text-[#333] border-l border-[#2A2A2A]"
+                                                        className="px-3 py-2.5 text-center font-mono text-[9px] text-[#333] border-l border-[#2A2A2A]"
                                                     >
                                                         —
                                                     </td>
@@ -166,7 +166,7 @@ export default function InventoryPage() {
                                             return (
                                                 <td
                                                     key={size}
-                                                    className={`px-4 py-4 text-center border-l border-[#2A2A2A] ${getStockColor(
+                                                    className={`px-3 py-2.5 text-center border-l border-[#2A2A2A] ${getStockColor(
                                                         stockItem.quantity,
                                                         stockItem.lowThreshold
                                                     )}`}
@@ -209,7 +209,7 @@ export default function InventoryPage() {
                                                 </td>
                                             );
                                         })}
-                                        <td className="px-4 py-4 text-center font-mono text-sm text-[#F5F5F0] font-bold border-l-2 border-[#2A2A2A]">
+                                        <td className="px-3 py-2.5 text-center font-mono text-xs text-[#F5F5F0] font-bold border-l-2 border-[#2A2A2A]">
                                             {totalStock}
                                         </td>
                                     </tr>
@@ -223,7 +223,7 @@ export default function InventoryPage() {
 
             {/* ── ALERT SUMMARY ── */}
             {products && products.length > 0 && (
-                <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-6">
+                <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-4">
                     <span className="font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase block mb-4">
                         Stock Alerts
                     </span>

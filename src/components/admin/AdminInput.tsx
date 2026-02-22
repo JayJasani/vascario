@@ -9,17 +9,17 @@ interface AdminInputProps extends InputHTMLAttributes<HTMLInputElement> {
 const AdminInput = forwardRef<HTMLInputElement, AdminInputProps>(
     ({ label, hint, className, ...props }, ref) => {
         return (
-            <div className="space-y-2">
-                <label className="block font-mono text-[10px] text-[#999] tracking-[0.2em] uppercase font-bold">
+            <div className="space-y-1.5">
+                <label className="block font-mono text-[9px] text-[#999] tracking-[0.15em] uppercase font-bold">
                     {label}
                     {hint && (
-                        <span className="ml-3 font-normal text-[#666]">// {hint}</span>
+                        <span className="ml-2 font-normal text-[#666]">// {hint}</span>
                     )}
                 </label>
                 <input
                     ref={ref}
                     className={cn(
-                        "w-full bg-[#0D0D0D] border-2 border-[#2A2A2A] text-[#F5F5F0] font-mono text-sm px-6 py-4 tracking-[0.05em] placeholder:text-[#333] placeholder:uppercase focus:border-[#BAFF00] focus:outline-none transition-colors",
+                        "w-full bg-[#0D0D0D] border-2 border-[#2A2A2A] text-[#F5F5F0] font-mono text-xs px-4 py-2.5 tracking-[0.05em] placeholder:text-[#333] placeholder:uppercase focus:border-[#BAFF00] focus:outline-none transition-colors",
                         className
                     )}
                     {...props}
@@ -39,17 +39,17 @@ interface AdminTextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement>
 const AdminTextarea = forwardRef<HTMLTextAreaElement, AdminTextareaProps>(
     ({ label, hint, className, ...props }, ref) => {
         return (
-            <div className="space-y-2">
-                <label className="block font-mono text-[10px] text-[#999] tracking-[0.2em] uppercase font-bold">
+            <div className="space-y-1.5">
+                <label className="block font-mono text-[9px] text-[#999] tracking-[0.15em] uppercase font-bold">
                     {label}
                     {hint && (
-                        <span className="ml-3 font-normal text-[#666]">// {hint}</span>
+                        <span className="ml-2 font-normal text-[#666]">// {hint}</span>
                     )}
                 </label>
                 <textarea
                     ref={ref}
                     className={cn(
-                        "w-full bg-[#0D0D0D] border-2 border-[#2A2A2A] text-[#F5F5F0] font-mono text-sm px-6 py-4 tracking-[0.05em] placeholder:text-[#333] placeholder:uppercase focus:border-[#BAFF00] focus:outline-none transition-colors resize-y min-h-[120px]",
+                        "w-full bg-[#0D0D0D] border-2 border-[#2A2A2A] text-[#F5F5F0] font-mono text-xs px-4 py-2.5 tracking-[0.05em] placeholder:text-[#333] placeholder:uppercase focus:border-[#BAFF00] focus:outline-none transition-colors resize-y min-h-[88px]",
                         className
                     )}
                     {...props}
@@ -70,17 +70,17 @@ interface AdminSelectProps extends InputHTMLAttributes<HTMLSelectElement> {
 const AdminSelect = forwardRef<HTMLSelectElement, AdminSelectProps>(
     ({ label, hint, className, options, ...props }, ref) => {
         return (
-            <div className="space-y-2">
-                <label className="block font-mono text-[10px] text-[#999] tracking-[0.2em] uppercase font-bold">
+            <div className="space-y-1.5">
+                <label className="block font-mono text-[9px] text-[#999] tracking-[0.15em] uppercase font-bold">
                     {label}
                     {hint && (
-                        <span className="ml-3 font-normal text-[#666]">// {hint}</span>
+                        <span className="ml-2 font-normal text-[#666]">// {hint}</span>
                     )}
                 </label>
                 <select
                     ref={ref}
                     className={cn(
-                        "w-full bg-[#0D0D0D] border-2 border-[#2A2A2A] text-[#F5F5F0] font-mono text-sm px-6 py-4 tracking-[0.05em] focus:border-[#BAFF00] focus:outline-none transition-colors cursor-pointer appearance-none",
+                        "w-full bg-[#0D0D0D] border-2 border-[#2A2A2A] text-[#F5F5F0] font-mono text-xs px-4 py-2.5 tracking-[0.05em] focus:border-[#BAFF00] focus:outline-none transition-colors cursor-pointer appearance-none",
                         className
                     )}
                     {...props}
