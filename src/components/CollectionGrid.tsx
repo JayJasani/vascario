@@ -145,6 +145,10 @@ export function CollectionGrid({ products, compactTopPadding }: CollectionGridPr
           </div>
         )}
       </div>
+
+      <div className="px-4 sm:px-6 md:px-12 lg:px-20 mt-6 sm:mt-10">
+        <div className="w-full h-px bg-[var(--vsc-accent)]" aria-hidden />
+      </div>
     </section>
   )
 }
