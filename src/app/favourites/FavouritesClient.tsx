@@ -2,12 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useFavourites } from "@/context/FavouritesContext";
 import { getImageAlt } from "@/lib/seo-utils";
 
 export function FavouritesClient() {
+  const router = useRouter();
   const { user } = useAuth();
   const { formatPrice } = useCurrency();
   const { items } = useFavourites();
@@ -99,11 +101,14 @@ export function FavouritesClient() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((item) => (
+          {items.map((item) => {
+            const href = `/product/${item.slug || item.id}`;
+            return (
             <Link
               key={item.id}
-              href={`/product/${item.slug || item.id}`}
+              href={href}
               className="group border border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] hover:border-[var(--vsc-gray-900)] transition-colors duration-200"
+              onMouseEnter={() => router.prefetch(href)}
             >
               <div className="relative aspect-[3/4] bg-[var(--vsc-gray-100)] overflow-hidden">
                 {item.image && (
@@ -132,7 +137,8 @@ export function FavouritesClient() {
                 </span>
               </div>
             </Link>
-          ))}
+          );
+          })}
         </div>
       )}
     </section>

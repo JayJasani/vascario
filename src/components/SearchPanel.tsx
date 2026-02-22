@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import Link from "next/link";
+import { PrefetchLink } from "@/components/PrefetchLink";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { type SearchItem } from "@/lib/search-data";
 import { searchItems } from "@/app/storefront-actions";
@@ -148,7 +148,7 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
               <ul className="py-1 sm:py-2">
                 {results.map((item) => (
                   <li key={`${item.type}-${item.id}`}>
-                    <Link
+                    <PrefetchLink
                       href={item.url}
                       onClick={() => {
                         trackSelectSearchResult({
@@ -188,7 +188,7 @@ export function SearchPanel({ open, onClose }: SearchPanelProps) {
                           {formatPrice(item.price)}
                         </span>
                       )}
-                    </Link>
+                    </PrefetchLink>
                   </li>
                 ))}
               </ul>

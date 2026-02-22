@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import Link from "next/link";
+import { PrefetchLink } from "@/components/PrefetchLink";
 import {
   HeartIcon,
   ShoppingBagIcon,
@@ -119,34 +119,34 @@ export function AccountDrawer({
         >
           <ul className="space-y-1">
             <li>
-              <Link
+              <PrefetchLink
                 href="/profile"
                 onClick={onClose}
                 className="flex items-center gap-3 px-4 py-3 text-[var(--vsc-gray-700)] hover:bg-[var(--vsc-gray-100)] hover:text-[var(--vsc-gray-900)] transition-colors text-xs uppercase tracking-[0.18em]"
               >
                 <UserCircleIcon className="w-5 h-5 shrink-0" strokeWidth={1.5} />
                 Profile
-              </Link>
+              </PrefetchLink>
             </li>
             <li>
-              <Link
+              <PrefetchLink
                 href="/favourites"
                 onClick={onClose}
                 className="flex items-center gap-3 px-4 py-3 text-[var(--vsc-gray-700)] hover:bg-[var(--vsc-gray-100)] hover:text-[var(--vsc-gray-900)] transition-colors text-xs uppercase tracking-[0.18em]"
               >
                 <HeartIcon className="w-5 h-5 shrink-0" strokeWidth={1.5} />
                 Favourites
-              </Link>
+              </PrefetchLink>
             </li>
             <li>
-              <Link
+              <PrefetchLink
                 href="/cart"
                 onClick={onClose}
                 className="flex items-center gap-3 px-4 py-3 text-[var(--vsc-gray-700)] hover:bg-[var(--vsc-gray-100)] hover:text-[var(--vsc-gray-900)] transition-colors text-xs uppercase tracking-[0.18em]"
               >
                 <ShoppingBagIcon className="w-5 h-5 shrink-0" strokeWidth={1.5} />
                 Bag {cartCount > 0 ? `(${cartCount})` : ""}
-              </Link>
+              </PrefetchLink>
             </li>
           </ul>
         </nav>

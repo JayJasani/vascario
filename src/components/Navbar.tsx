@@ -12,9 +12,13 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { CURRENCIES, getFlagUrl } from "@/lib/currency";
+import { CURRENCIES } from "@/lib/currency";
+
+const getFlagUrl = (code: string) =>
+  `https://flagcdn.com/w40/${code.toLowerCase()}.png`;
 import { useCurrency } from "@/context/CurrencyContext";
 import { SearchPanel } from "@/components/SearchPanel";
 import { AccountDrawer } from "@/components/AccountDrawer";
@@ -26,7 +30,14 @@ import {
   trackClickNavLink,
 } from "@/lib/analytics";
 
+const NAV_LINKS = [
+  { href: "/collection", label: "Collection" },
+  { href: "/lookbook", label: "Lookbook" },
+  { href: "/about", label: "About" },
+] as const;
+
 export function Navbar() {
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [currencyOpen, setCurrencyOpen] = useState(false);
@@ -133,7 +144,13 @@ export function Navbar() {
         </button>
 
         {/* Logo — brutalist, cropped feeling */}
-        <Link href="/" className="text-display flex-1 md:flex-none text-center md:text-left">
+        <Link
+          href="/"
+          prefetch
+          onMouseEnter={() => router.prefetch("/")}
+          onPointerDown={() => router.prefetch("/")}
+          className="text-display flex-1 md:flex-none text-center md:text-left"
+        >
           <span
             className="text-xl sm:text-2xl md:text-3xl font-bold tracking-[-0.06em] uppercase text-[var(--vsc-gray-900)]"
             style={{ fontFamily: "var(--font-space-grotesk)" }}
@@ -146,15 +163,13 @@ export function Navbar() {
 
         {/* Nav Links — monospace, minimal */}
         <div className="hidden md:flex items-center gap-8">
-          {([
-            { href: "/collection", label: "Collection" },
-            { href: "/favourites", label: "Favourites" },
-            { href: "/lookbook", label: "Lookbook" },
-            { href: "/about", label: "About" },
-          ] as const).map((link) => (
+          {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
+              prefetch
+              onMouseEnter={() => router.prefetch(link.href)}
+              onPointerDown={() => router.prefetch(link.href)}
               onClick={() => trackClickNavLink({ link_text: link.label, link_url: link.href, location: "header" })}
               className="text-mono text-xs uppercase tracking-[0.2em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200"
               style={{ fontFamily: "var(--font-space-mono)" }}
@@ -234,6 +249,9 @@ export function Navbar() {
           {/* Favourites icon */}
           <Link
             href="/favourites"
+            prefetch
+            onMouseEnter={() => router.prefetch("/favourites")}
+            onPointerDown={() => router.prefetch("/favourites")}
             className="p-2 sm:p-3 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent"
             aria-label="View favourites"
           >
@@ -243,6 +261,9 @@ export function Navbar() {
           {/* Cart icon */}
           <Link
             href="/cart"
+            prefetch
+            onMouseEnter={() => router.prefetch("/cart")}
+            onPointerDown={() => router.prefetch("/cart")}
             className="relative p-2 sm:p-3 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent"
             aria-label="View bag"
           >
@@ -278,6 +299,9 @@ export function Navbar() {
           {!user && (
             <Link
               href="/login"
+              prefetch
+              onMouseEnter={() => router.prefetch("/login")}
+              onPointerDown={() => router.prefetch("/login")}
               className="md:hidden p-3 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-accent)] text-[10px] uppercase tracking-[0.18em]"
               style={{ fontFamily: "var(--font-space-mono)" }}
             >
@@ -315,6 +339,9 @@ export function Navbar() {
             ) : (
               <Link
                 href="/login"
+                prefetch
+                onMouseEnter={() => router.prefetch("/login")}
+                onPointerDown={() => router.prefetch("/login")}
                 className="text-[10px] text-[var(--vsc-gray-500)] uppercase tracking-[0.18em] hover:text-[var(--vsc-accent)]"
                 style={{ fontFamily: "var(--font-space-mono)" }}
               >
@@ -333,15 +360,13 @@ export function Navbar() {
             <div ref={mobileMenuRef} className="h-full overflow-y-auto">
               <nav className="px-6 py-8" style={{ fontFamily: "var(--font-space-mono)" }}>
                 <ul className="space-y-6">
-                  {([
-                    { href: "/collection", label: "Collection" },
-                    { href: "/favourites", label: "Favourites" },
-                    { href: "/lookbook", label: "Lookbook" },
-                    { href: "/about", label: "About" },
-                  ] as const).map((link) => (
+                  {NAV_LINKS.map((link) => (
                     <li key={link.href}>
                       <Link
                         href={link.href}
+                        prefetch
+                        onMouseEnter={() => router.prefetch(link.href)}
+                        onPointerDown={() => router.prefetch(link.href)}
                         onClick={() => {
                           trackClickNavLink({ link_text: link.label, link_url: link.href, location: "mobile_menu" });
                           setMobileMenuOpen(false);
@@ -393,6 +418,9 @@ export function Navbar() {
                     <li className="pt-6 border-t border-[var(--vsc-gray-200)]">
                       <Link
                         href="/login"
+                        prefetch
+                        onMouseEnter={() => router.prefetch("/login")}
+                        onPointerDown={() => router.prefetch("/login")}
                         onClick={() => setMobileMenuOpen(false)}
                         className="block text-sm uppercase tracking-[0.18em] text-[var(--vsc-gray-500)] hover:text-[var(--vsc-accent)] transition-colors py-2"
                       >

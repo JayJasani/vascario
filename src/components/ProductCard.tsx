@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useCurrency } from "@/context/CurrencyContext"
 import { getImageAlt } from "@/lib/seo-utils"
 import { trackSelectItem } from "@/lib/analytics"
@@ -25,6 +26,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, variant = "default", aspectClass, href }: ProductCardProps) {
+  const router = useRouter()
   const { formatPrice } = useCurrency()
   const isFeatured = variant === "featured"
   const isGrid = variant === "grid"
@@ -53,7 +55,12 @@ export function ProductCard({ product, variant = "default", aspectClass, href }:
   }
 
   return (
-    <Link href={targetHref} className={linkClass} onClick={handleClick}>
+    <Link
+      href={targetHref}
+      className={linkClass}
+      onClick={handleClick}
+      onMouseEnter={() => router.prefetch(targetHref)}
+    >
       {/* Image container */}
       <div
         className={`relative overflow-hidden bg-[var(--vsc-gray-800)] ${aspect}`}
