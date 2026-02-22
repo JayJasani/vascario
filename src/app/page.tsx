@@ -43,7 +43,7 @@ export default async function Home() {
       <Navbar />
       <Hero onboard1VideoUrl={onboard1Url} redirectUrl={onboard1Redirect || undefined} />
       <MarqueeStrip />
-      <CollectionGrid products={products} />
+      <CollectionGrid products={products} compactTopPadding />
       <EditorialSection 
         onboard2VideoUrl={onboard2Url} 
         tshirtCloseupUrl={tshirtCloseupUrl}

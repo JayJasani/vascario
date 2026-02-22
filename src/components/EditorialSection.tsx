@@ -5,17 +5,17 @@ import { useEffect, useRef, useState } from "react"
 import { getImageAlt } from "@/lib/seo-utils"
 
 interface EditorialSectionProps {
-  onboard2VideoUrl?: string;
-  tshirtCloseupUrl?: string;
-  onboard2RedirectUrl?: string;
-  tshirtCloseupRedirectUrl?: string;
+    onboard2VideoUrl?: string;
+    tshirtCloseupUrl?: string;
+    onboard2RedirectUrl?: string;
+    tshirtCloseupRedirectUrl?: string;
 }
 
-export function EditorialSection({ 
-  onboard2VideoUrl = "/video/onboard2.webm",
-  tshirtCloseupUrl = "/tshirt/closeup.png",
-  onboard2RedirectUrl,
-  tshirtCloseupRedirectUrl,
+export function EditorialSection({
+    onboard2VideoUrl = "/video/onboard2.webm",
+    tshirtCloseupUrl = "/tshirt/closeup.png",
+    onboard2RedirectUrl,
+    tshirtCloseupRedirectUrl,
 }: EditorialSectionProps) {
     const sectionRef = useRef<HTMLElement>(null)
     const [hasEnteredViewport, setHasEnteredViewport] = useState(false)
@@ -39,7 +39,7 @@ export function EditorialSection({
     }, [])
 
     return (
-        <section id="editorial" ref={sectionRef} className="py-28 md:py-40 relative overflow-hidden">
+        <section id="editorial" ref={sectionRef} className="pt-12 sm:pt-24 md:pt-32 relative overflow-hidden">
             {/* Background accent line */}
             <div
                 className="absolute left-0 top-1/2 w-full h-px opacity-10"
@@ -47,7 +47,7 @@ export function EditorialSection({
             />
 
             {/* Header with giant overlapping text */}
-            <div className="relative px-6 md:px-12 lg:px-20 mb-16 md:mb-24">
+            <div className="relative px-6 md:px-12 lg:px-20 mb-8 sm:mb-14">
                 <span
                     className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.3em] block mb-4 reveal"
                     style={{ fontFamily: "var(--font-space-mono)" }}
@@ -56,10 +56,7 @@ export function EditorialSection({
                 </span>
                 <h2
                     className="text-section text-[var(--vsc-gray-900)] leading-[0.9] reveal"
-                    style={{
-                        fontFamily: "var(--font-space-grotesk)",
-                        fontSize: "clamp(3rem, 8vw, 8rem)",
-                    }}
+                    style={{ fontFamily: "var(--font-space-grotesk)" }}
                 >
                     WEAR
                     <br />
@@ -74,7 +71,7 @@ export function EditorialSection({
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10">
                     {/* Large editorial image / motion, only loaded once the section enters the viewport */}
                     <div className="md:col-span-7 reveal">
-                        <div 
+                        <div
                             className={`relative aspect-[4/5] bg-[var(--vsc-gray-900)] overflow-hidden border border-[var(--vsc-gray-700)] group ${onboard2RedirectUrl ? 'cursor-pointer' : ''}`}
                             onClick={(e) => {
                                 if (onboard2RedirectUrl) {
@@ -131,7 +128,7 @@ export function EditorialSection({
                     <div className="md:col-span-5 flex flex-col gap-6 md:gap-10">
                         {/* Smaller image */}
                         <div className="reveal" style={{ transitionDelay: "100ms" }}>
-                            <div 
+                            <div
                                 className={`relative aspect-square bg-[var(--vsc-gray-900)] overflow-hidden border border-[var(--vsc-gray-700)] group ${tshirtCloseupRedirectUrl ? 'cursor-pointer' : ''}`}
                                 onClick={(e) => {
                                     if (tshirtCloseupRedirectUrl) {
@@ -182,7 +179,7 @@ export function EditorialSection({
 
                         {/* Text block */}
                         <div
-                            className="border border-[var(--vsc-gray-700)] p-6 md:p-8 flex-1 flex flex-col justify-between reveal"
+                            className="border border-[var(--vsc-gray-700)] pt-12 px-6 pb-6 md:p-8 flex-1 flex flex-col justify-between reveal"
                             style={{ transitionDelay: "200ms" }}
                         >
                             <div>
@@ -215,18 +212,8 @@ export function EditorialSection({
                 </div>
             </div>
 
-            {/* Bottom accent strip */}
-            <div className="mt-16 md:mt-24 px-6 md:px-12 lg:px-20">
-                <div className="flex items-center gap-4 reveal">
-                    <div className="flex-1 h-px bg-[var(--vsc-gray-800)]" />
-                    <span
-                        className="text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.3em]"
-                        style={{ fontFamily: "var(--font-space-mono)" }}
-                    >
-                        Vascario · S1
-                    </span>
-                    <div className="flex-1 h-px bg-[var(--vsc-gray-800)]" />
-                </div>
+            <div className="px-4 sm:px-6 md:px-12 lg:px-20 mt-6 sm:mt-10">
+                <div className="w-full h-px bg-[var(--vsc-gray-800)]" />
             </div>
         </section>
     )

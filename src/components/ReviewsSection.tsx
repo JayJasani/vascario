@@ -67,8 +67,8 @@ export function ReviewsSection({ reviews }: ReviewsSectionProps) {
     if (!reviews.length) return null;
 
     return (
-        <section id="reviews" ref={sectionRef} className="py-24 md:py-32">
-            <div className="px-6 md:px-12 lg:px-20 mb-14">
+        <section id="reviews" ref={sectionRef} className="pt-12 sm:pt-24 md:pt-32 pb-12 sm:pb-24 md:pb-32">
+            <div className="px-6 md:px-12 lg:px-20 mb-8 sm:mb-14">
                 <span
                     className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.3em] block mb-3 reveal"
                     style={{ fontFamily: "var(--font-space-mono)" }}

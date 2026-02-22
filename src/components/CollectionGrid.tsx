@@ -19,9 +19,11 @@ interface Product {
 
 interface CollectionGridProps {
   products: Product[]
+  /** When true (home page), uses less top padding on mobile */
+  compactTopPadding?: boolean
 }
 
-export function CollectionGrid({ products }: CollectionGridProps) {
+export function CollectionGrid({ products, compactTopPadding }: CollectionGridProps) {
   const sectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
@@ -56,8 +58,11 @@ export function CollectionGrid({ products }: CollectionGridProps) {
   }, [])
 
   return (
-    <section ref={sectionRef} className="reveal py-16 sm:py-24 md:py-32">
-      <div className="px-4 sm:px-6 md:px-12 lg:px-20 mb-10 sm:mb-14">
+    <section
+      ref={sectionRef}
+      className={`reveal ${compactTopPadding ? "pt-12 sm:pt-24 md:pt-32" : "pt-28 sm:pt-24 md:pt-32 pb-12 sm:pb-24 md:pb-32"}`}
+    >
+      <div className="px-4 sm:px-6 md:px-12 lg:px-20 mb-6 sm:mb-14">
         <div className="flex items-end justify-between">
           <div>
             <span
@@ -141,9 +146,7 @@ export function CollectionGrid({ products }: CollectionGridProps) {
       </div>
 
       <div className="px-4 sm:px-6 md:px-12 lg:px-20 mt-6 sm:mt-10">
-        <div className="w-full h-px bg-[var(--vsc-gray-800)] relative">
-          <div className="absolute left-0 top-0 w-1/4 h-px bg-[var(--vsc-accent)]" />
-        </div>
+        <div className="w-full h-px bg-[var(--vsc-accent)]" aria-hidden />
       </div>
     </section>
   )
