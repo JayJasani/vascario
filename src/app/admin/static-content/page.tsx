@@ -27,6 +27,7 @@ const STATIC_CONTENT_ITEMS = [
     { key: "onboard1", label: "Onboard Video 1", type: "video" as const, description: "Hero section background video" },
     { key: "onboard2", label: "Onboard Video 2", type: "video" as const, description: "Editorial section video" },
     { key: "tshirtCloseup", label: "T-Shirt Closeup Image", type: "image" as const, description: "Editorial section closeup image" },
+    { key: "making_process", label: "Making Process", type: "video" as const, description: "Making process video" },
 ];
 
 async function fetchStaticContent(): Promise<StaticContentItem[]> {

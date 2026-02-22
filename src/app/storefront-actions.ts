@@ -193,6 +193,7 @@ type StaticContentUrls = {
     onboard1: string;
     onboard2: string;
     tshirtCloseup: string;
+    making_process: string;
     onboard1Redirect?: string | null;
     onboard2Redirect?: string | null;
     tshirtCloseupRedirect?: string | null;
@@ -206,16 +207,18 @@ async function getCachedStaticContent(): Promise<StaticContentUrls> {
     const cachedFn = unstable_cache(
         async (): Promise<StaticContentUrls> => {
             try {
-                const [onboard1, onboard2, tshirtCloseup] = await Promise.all([
+                const [onboard1, onboard2, tshirtCloseup, making_process] = await Promise.all([
                     getStaticContentByKey("onboard1"),
                     getStaticContentByKey("onboard2"),
                     getStaticContentByKey("tshirtCloseup"),
+                    getStaticContentByKey("making_process"),
                 ]);
 
                 return {
                     onboard1: onboard1?.url || "/video/onboard1.webm",
                     onboard2: onboard2?.url || "/video/onboard2.webm",
                     tshirtCloseup: tshirtCloseup?.url || "/tshirt/closeup.png",
+                    making_process: making_process?.url || "",
                     onboard1Redirect: onboard1?.redirectUrl || null,
                     onboard2Redirect: onboard2?.redirectUrl || null,
                     tshirtCloseupRedirect: tshirtCloseup?.redirectUrl || null,
@@ -227,6 +230,7 @@ async function getCachedStaticContent(): Promise<StaticContentUrls> {
                     onboard1: "/video/onboard1.webm",
                     onboard2: "/video/onboard2.webm",
                     tshirtCloseup: "/tshirt/closeup.png",
+                    making_process: "",
                     onboard1Redirect: null,
                     onboard2Redirect: null,
                     tshirtCloseupRedirect: null,

@@ -98,8 +98,10 @@ function renderDescription(text: string) {
 
 export function ProductDetailClient({
   product,
+  makingProcessVideoUrl,
 }: {
   product: ProductDetailData;
+  makingProcessVideoUrl?: string;
 }) {
   // Set "M" as default size if available, otherwise empty string
   const defaultSize = product.sizes.includes("M") ? "M" : "";
@@ -924,28 +926,39 @@ export function ProductDetailClient({
                 feel, a quality that lasts.
               </p>
             </div>
-            <div className="relative aspect-square bg-[var(--vsc-gray-900)] border border-[var(--vsc-gray-700)]">
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div
-                  className="absolute inset-0 opacity-[0.08]"
-                  style={{
-                    backgroundImage: `radial-gradient(circle at center, var(--vsc-accent) 1px, transparent 1px)`,
-                    backgroundSize: "12px 12px",
-                  }}
+            <div className="relative aspect-square bg-[var(--vsc-gray-900)] border border-[var(--vsc-gray-700)] overflow-hidden">
+              {makingProcessVideoUrl ? (
+                <video
+                  src={makingProcessVideoUrl}
+                  playsInline
+                  loop
+                  muted
+                  autoPlay
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
-                <span
-                  className="text-[var(--vsc-gray-600)] text-xs uppercase tracking-[0.4em] z-10"
-                  style={{ fontFamily: "var(--font-space-mono)" }}
-                >
-                  Macro Detail
-                </span>
-                <span
-                  className="text-[var(--vsc-gray-700)] text-6xl font-bold mt-2 z-10"
-                  style={{ fontFamily: "var(--font-space-grotesk)" }}
-                >
-                  ×4
-                </span>
-              </div>
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div
+                    className="absolute inset-0 opacity-[0.08]"
+                    style={{
+                      backgroundImage: `radial-gradient(circle at center, var(--vsc-accent) 1px, transparent 1px)`,
+                      backgroundSize: "12px 12px",
+                    }}
+                  />
+                  <span
+                    className="text-[var(--vsc-gray-600)] text-xs uppercase tracking-[0.4em] z-10"
+                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  >
+                    Macro Detail
+                  </span>
+                  <span
+                    className="text-[var(--vsc-gray-700)] text-6xl font-bold mt-2 z-10"
+                    style={{ fontFamily: "var(--font-space-grotesk)" }}
+                  >
+                    ×4
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

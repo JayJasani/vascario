@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation"
 import type { Metadata } from "next"
-import { getProductBySlug, getProductById } from "@/app/storefront-actions"
+import { getProductBySlug, getProductById, getStaticContentUrls } from "@/app/storefront-actions"
 import { ProductDetailClient } from "./ProductDetailClient"
 import { getProductMetadata } from "@/lib/seo-config"
 import { ProductStructuredDataServer, BreadcrumbStructuredDataServer } from "@/components/StructuredDataServer"
@@ -71,6 +71,8 @@ export default async function ProductDetailPage({
         notFound()
     }
 
+    const staticContent = await getStaticContentUrls()
+
     // Breadcrumb items for structured data
     const breadcrumbItems = [
         { name: "Home", url: SEO_BASE.siteUrl },
@@ -95,7 +97,7 @@ export default async function ProductDetailPage({
             />
             <BreadcrumbStructuredDataServer items={breadcrumbItems} />
             <ResourcePreloader images={criticalImages} />
-            <ProductDetailClient product={product} />
+            <ProductDetailClient product={product} makingProcessVideoUrl={staticContent.making_process || undefined} />
         </>
     )
 }
