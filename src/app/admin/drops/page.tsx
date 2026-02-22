@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { HexColorPicker } from "react-colorful";
-import { Palette, ChevronUp, ChevronDown, Pencil, Archive, ArchiveRestore, Trash2 } from "lucide-react";
+import { Palette, ChevronUp, ChevronDown, Pencil, Archive, ArchiveRestore, Trash2, Star } from "lucide-react";
+import { parseColorEntry, serializeColor } from "@/lib/hex-to-color-name";
 import { hasDiscount } from "@/lib/discount";
 import { AdminButton } from "@/components/admin/AdminButton";
 import { AdminInput, AdminTextarea } from "@/components/admin/AdminInput";
@@ -90,7 +91,7 @@ export default function DropsPage() {
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [preview, setPreview] = useState({ name: "", price: "", cutPrice: "", description: "" });
     const [formImages, setFormImages] = useState<string[]>([]);
-    const [formColors, setFormColors] = useState<string[]>(["#000000"]);
+    const [formColors, setFormColors] = useState<{ hex: string; name: string }[]>([{ hex: "#000000", name: "" }]);
     const [editingColor, setEditingColor] = useState<{ index: number; originalHex: string } | null>(null);
     const [pickerPlacement, setPickerPlacement] = useState<"top" | "bottom">("bottom");
     const [uploading, setUploading] = useState(false);
@@ -128,7 +129,7 @@ export default function DropsPage() {
             const target = e.target as Node;
             if (colorPickerRef.current && !colorPickerRef.current.contains(target)) {
                 setFormColors((prev) =>
-                    prev.map((c, i) => (i === index ? originalHex : c))
+                    prev.map((c, i) => (i === index ? { ...c, hex: originalHex } : c))
                 );
                 setEditingColor(null);
             }
@@ -179,7 +180,7 @@ export default function DropsPage() {
         setExtractingPalette(true);
         try {
             const palette = await extractPaletteFromImage(formImages[imageIndex]);
-            setFormColors(palette);
+            setFormColors(palette.map((hex) => ({ hex, name: "" })));
         } catch (e) {
             console.error("Palette extraction failed:", e);
             alert("Could not extract palette. Ensure the image is accessible (CORS).");
@@ -193,14 +194,14 @@ export default function DropsPage() {
         setEditingProduct(null);
         setPreview({ name: "", price: "", cutPrice: "", description: "" });
         setFormImages([]);
-        setFormColors(["#000000"]);
+        setFormColors([{ hex: "#000000", name: "" }]);
         setEditingColor(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
     }
 
     async function handleSubmit(formData: FormData) {
         formData.set("images", formImages.join(","));
-        formData.set("colors", formColors.join(","));
+        formData.set("colors", formColors.map((c) => serializeColor(c.hex, c.name)).join(","));
         if (isEditMode && editingProduct) {
             await updateProductAction(editingProduct.id, formData);
         } else {
@@ -241,8 +242,14 @@ export default function DropsPage() {
         setFormImages(product.images ?? []);
         setFormColors(
             product.colors?.length
-                ? product.colors.map((c) => (c.startsWith("#") ? c : `#${c}`))
-                : ["#000000"]
+                ? product.colors.map((c) => {
+                    const raw = c.startsWith("#") ? c : `#${c}`;
+                    const parts = raw.split("::", 2);
+                    const hex = parts[0]?.trim() ?? raw;
+                    const name = parts[1]?.trim() ?? "";
+                    return { hex, name };
+                  })
+                : [{ hex: "#000000", name: "" }]
         );
         setPreview({ name: product.name, price: product.price, cutPrice: product.cutPrice ?? "", description: product.description });
         if (fileInputRef.current) fileInputRef.current.value = "";
@@ -273,7 +280,7 @@ export default function DropsPage() {
                             setEditingProduct(null);
                             setPreview({ name: "", price: "", cutPrice: "", description: "" });
                             setFormImages([]);
-                            setFormColors(["#000000"]);
+                            setFormColors([{ hex: "#000000", name: "" }]);
                         }
                     }}
                 >
@@ -474,23 +481,34 @@ export default function DropsPage() {
                                     Colors
                                 </label>
                                 <div className="flex flex-wrap items-center gap-4 pt-2">
-                                    {formColors.map((hex, index) => (
+                                    {formColors.map((entry, index) => (
                                         <div
-                                            key={`${hex}-${index}`}
+                                            key={`${entry.hex}-${index}`}
                                             className="flex items-center gap-2 p-2 border-2 border-[#2A2A2A] bg-[#0D0D0D]"
                                         >
                                             <button
                                                 type="button"
-                                                onClick={() => setEditingColor({ index, originalHex: hex })}
+                                                onClick={() => setEditingColor({ index, originalHex: entry.hex })}
                                                 className={`w-10 h-10 shrink-0 cursor-pointer border-2 rounded-sm transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#BAFF00] ${editingColor?.index === index
                                                         ? "border-[#BAFF00] ring-2 ring-[#BAFF00]"
                                                         : "border-[#2A2A2A]"
                                                     }`}
-                                                style={{ backgroundColor: hex }}
+                                                style={{ backgroundColor: entry.hex }}
                                                 title="Tap to open picker, then drag to select color"
                                             />
-                                            <span className="font-mono text-[10px] text-[#999] tracking-[0.1em] min-w-[4.5rem]">
-                                                {hex.toUpperCase()}
+                                            <input
+                                                type="text"
+                                                value={entry.name}
+                                                onChange={(e) =>
+                                                    setFormColors((prev) =>
+                                                        prev.map((c, i) => (i === index ? { ...c, name: e.target.value } : c))
+                                                    )
+                                                }
+                                                placeholder="Color name"
+                                                className="font-mono text-[10px] text-[#F5F5F0] tracking-[0.1em] w-24 sm:w-28 bg-transparent border border-[#2A2A2A] px-2 py-1.5 focus:border-[#BAFF00] focus:outline-none placeholder:text-[#555]"
+                                            />
+                                            <span className="font-mono text-[10px] text-[#666] tracking-[0.1em] min-w-[4rem]">
+                                                {entry.hex.toUpperCase()}
                                             </span>
                                             <button
                                                 type="button"
@@ -508,7 +526,7 @@ export default function DropsPage() {
                                     ))}
                                     <button
                                         type="button"
-                                        onClick={() => setFormColors((prev) => [...prev, "#000000"])}
+                                        onClick={() => setFormColors((prev) => [...prev, { hex: "#000000", name: "" }])}
                                         className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-[#2A2A2A] font-mono text-[10px] text-[#666] tracking-[0.1em] uppercase hover:border-[#BAFF00] hover:text-[#BAFF00] transition-colors"
                                     >
                                         + Add color
@@ -528,11 +546,11 @@ export default function DropsPage() {
                                         </span>
                                         <div className="[&_.react-colorful]:h-36 [&_.react-colorful]:w-full">
                                             <HexColorPicker
-                                                color={formColors[editingColor.index] ?? "#000000"}
+                                                color={formColors[editingColor.index]?.hex ?? "#000000"}
                                                 onChange={(newHex) =>
                                                     setFormColors((prev) =>
                                                         prev.map((c, i) =>
-                                                            i === editingColor.index ? newHex : c
+                                                            i === editingColor.index ? { ...c, hex: newHex } : c
                                                         )
                                                     )
                                                 }
@@ -556,7 +574,7 @@ export default function DropsPage() {
                                                 onClick={() => {
                                                     setFormColors((prev) =>
                                                         prev.map((c, i) =>
-                                                            i === editingColor.index ? editingColor.originalHex : c
+                                                            i === editingColor.index ? { ...c, hex: editingColor.originalHex } : c
                                                         )
                                                     );
                                                     setEditingColor(null);
@@ -568,7 +586,7 @@ export default function DropsPage() {
                                     </div>
                                 )}
                                 <p className="font-mono text-[10px] text-[#666] tracking-[0.1em] mt-2">
-                                    Tap swatch → drag on picker to select → Done
+                                    Tap swatch → drag on picker to select. Enter a color name (e.g. Black, Navy Blue) to show on the product page instead of hex.
                                 </p>
                             </div>
                             <div className="pt-4">
@@ -724,9 +742,11 @@ export default function DropsPage() {
                                                     onClick={() => handleToggleFeatured(product.id)}
                                                     disabled={!product.isActive}
                                                     title={product.isFeatured ? "Remove from featured (search)" : "Feature in search"}
-                                                    className="!text-base leading-none !p-1.5 min-w-[2rem] tracking-normal"
+                                                    className="!p-1.5 tracking-normal"
                                                 >
-                                                    {product.isFeatured ? "★" : "☆"}
+                                                    <Star
+                                                        className={`w-4 h-4 ${product.isFeatured ? "fill-current text-[#BAFF00]" : ""}`}
+                                                    />
                                                 </AdminButton>
                                                 <AdminButton
                                                     variant="ghost"
@@ -744,7 +764,7 @@ export default function DropsPage() {
                                                     title={product.isActive ? "Archive" : "Reactivate"}
                                                     className="!p-1.5 tracking-normal"
                                                 >
-                                                    {product.isActive ? <Archive className="w-3.5 h-3.5" /> : <ArchiveRestore className="w-3.5 h-3.5" />}
+                                                    {product.isActive ? <Archive className="w-3.5 h-3.5" /> : <ArchiveRestore className="w-3.5 h-3.5 text-[#FF3333]" />}
                                                 </AdminButton>
                                                 <AdminButton
                                                     variant="ghost"

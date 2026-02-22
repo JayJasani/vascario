@@ -131,7 +131,7 @@ export function FavouritesClient() {
                   {item.name}
                 </span>
                 <div className="flex items-center gap-2 shrink-0">
-                  {hasDiscount(item.cutPrice, item.price) && (
+                  {hasDiscount(item.cutPrice, item.price) && item.cutPrice != null && (
                     <span
                       className="text-xs text-[var(--vsc-gray-500)] line-through"
                       style={{ fontFamily: "var(--font-space-mono)" }}
