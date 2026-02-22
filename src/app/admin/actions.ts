@@ -423,8 +423,8 @@ export async function getStaticContent() {
 }
 
 export async function updateStaticContent(
-    key: string, 
-    url: string, 
+    key: string,
+    url: string,
     type: "video" | "image",
     redirectUrl?: string | null
 ) {
@@ -444,17 +444,18 @@ export async function updateStaticContent(
 
     revalidatePath("/admin/static-content");
     revalidatePath("/");
+    revalidatePath("/product/[slug]", "page");
     revalidateTag(CACHE_TAGS.STATIC_CONTENT, "max");
-    
+
     return content;
 }
 
 export async function deleteStaticContentAction(key: string) {
     const content = await getStaticContentByKey(key);
-    
+
     if (content) {
         await deleteStaticContent(key);
-        
+
         await createAuditLog({
             action: "STATIC_CONTENT_DELETED",
             entity: "StaticContent",
@@ -467,6 +468,7 @@ export async function deleteStaticContentAction(key: string) {
 
     revalidatePath("/admin/static-content");
     revalidatePath("/");
+    revalidatePath("/product/[slug]", "page");
     revalidateTag(CACHE_TAGS.STATIC_CONTENT, "max");
 }
 
