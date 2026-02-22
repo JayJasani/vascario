@@ -2,11 +2,12 @@
 
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { HexColorPicker } from "react-colorful";
-import { Palette } from "lucide-react";
+import { Palette, ChevronUp, ChevronDown } from "lucide-react";
+import { hasDiscount } from "@/lib/discount";
 import { AdminButton } from "@/components/admin/AdminButton";
 import { AdminInput, AdminTextarea } from "@/components/admin/AdminInput";
 import { AdminLoadingBlock } from "@/components/admin/AdminLoadingBlock";
-import { createProduct, toggleProductActive, updateProductAction, deleteDropAction } from "../actions";
+import { createProduct, toggleProductActive, toggleProductFeatured, updateProductAction, deleteDropAction } from "../actions";
 import useSWR from "swr";
 import Image from "next/image";
 
@@ -15,11 +16,13 @@ interface Product {
     name: string;
     description: string;
     price: string;
+    cutPrice: string | null;
     images: string[];
     colors: string[];
     sizes: string[];
     sku: string | null;
     isActive: boolean;
+    isFeatured?: boolean;
     createdAt: string;
 }
 
@@ -85,7 +88,7 @@ export default function DropsPage() {
     });
     const [showForm, setShowForm] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-    const [preview, setPreview] = useState({ name: "", price: "", description: "" });
+    const [preview, setPreview] = useState({ name: "", price: "", cutPrice: "", description: "" });
     const [formImages, setFormImages] = useState<string[]>([]);
     const [formColors, setFormColors] = useState<string[]>(["#000000"]);
     const [editingColor, setEditingColor] = useState<{ index: number; originalHex: string } | null>(null);
@@ -161,6 +164,16 @@ export default function DropsPage() {
         setFormImages((prev) => prev.filter((_, i) => i !== index));
     }
 
+    function reorderImage(index: number, direction: "up" | "down") {
+        setFormImages((prev) => {
+            const next = [...prev];
+            const target = direction === "up" ? index - 1 : index + 1;
+            if (target < 0 || target >= next.length) return prev;
+            [next[index], next[target]] = [next[target], next[index]];
+            return next;
+        });
+    }
+
     async function handleExtractPalette(imageIndex = 0) {
         if (formImages.length === 0 || !formImages[imageIndex]) return;
         setExtractingPalette(true);
@@ -178,7 +191,7 @@ export default function DropsPage() {
     function closeForm() {
         setShowForm(false);
         setEditingProduct(null);
-        setPreview({ name: "", price: "", description: "" });
+        setPreview({ name: "", price: "", cutPrice: "", description: "" });
         setFormImages([]);
         setFormColors(["#000000"]);
         setEditingColor(null);
@@ -199,6 +212,11 @@ export default function DropsPage() {
 
     async function handleToggle(id: string) {
         await toggleProductActive(id);
+        mutate();
+    }
+
+    async function handleToggleFeatured(id: string) {
+        await toggleProductFeatured(id);
         mutate();
     }
 
@@ -226,7 +244,7 @@ export default function DropsPage() {
                 ? product.colors.map((c) => (c.startsWith("#") ? c : `#${c}`))
                 : ["#000000"]
         );
-        setPreview({ name: product.name, price: product.price, description: product.description });
+        setPreview({ name: product.name, price: product.price, cutPrice: product.cutPrice ?? "", description: product.description });
         if (fileInputRef.current) fileInputRef.current.value = "";
     }
 
@@ -253,7 +271,7 @@ export default function DropsPage() {
                         } else {
                             setShowForm(true);
                             setEditingProduct(null);
-                            setPreview({ name: "", price: "", description: "" });
+                            setPreview({ name: "", price: "", cutPrice: "", description: "" });
                             setFormImages([]);
                             setFormColors(["#000000"]);
                         }
@@ -299,10 +317,21 @@ export default function DropsPage() {
                                     type="number"
                                     placeholder="2499"
                                     required
-                                    hint="INR"
+                                    hint="INR (selling price)"
                                     defaultValue={isEditMode ? editingProduct?.price : undefined}
                                     onChange={(e) =>
                                         setPreview((p) => ({ ...p, price: e.target.value }))
+                                    }
+                                />
+                                <AdminInput
+                                    label="Cut Price"
+                                    name="cutPrice"
+                                    type="number"
+                                    placeholder="2999"
+                                    hint="Optional (original price, shown crossed out)"
+                                    defaultValue={isEditMode ? (editingProduct?.cutPrice ?? "") : undefined}
+                                    onChange={(e) =>
+                                        setPreview((p) => ({ ...p, cutPrice: e.target.value }))
                                     }
                                 />
                                 <AdminInput
@@ -345,6 +374,31 @@ export default function DropsPage() {
                                                     fill
                                                     className="object-cover border-2 border-[#2A2A2A]"
                                                 />
+                                                <div className="absolute bottom-0 left-0 right-0 px-2 py-1.5 flex items-center justify-between gap-2 bg-[#0D0D0D]/95 border-t-2 border-[#2A2A2A]">
+                                                    <div className="flex items-center gap-1">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => reorderImage(index, "up")}
+                                                            disabled={index === 0}
+                                                            className="w-8 h-7 bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center hover:border-[#BAFF00] hover:bg-[#252525] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[#2A2A2A] disabled:hover:bg-[#1A1A1A]"
+                                                            title="Move up"
+                                                        >
+                                                            <ChevronUp className="w-4 h-4 text-[#BAFF00]" />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => reorderImage(index, "down")}
+                                                            disabled={index === formImages.length - 1}
+                                                            className="w-8 h-7 bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center hover:border-[#BAFF00] hover:bg-[#252525] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[#2A2A2A] disabled:hover:bg-[#1A1A1A]"
+                                                            title="Move down"
+                                                        >
+                                                            <ChevronDown className="w-4 h-4 text-[#BAFF00]" />
+                                                        </button>
+                                                    </div>
+                                                    <span className="font-mono text-xs text-[#999] font-medium">
+                                                        #{index + 1}
+                                                    </span>
+                                                </div>
                                                 <button
                                                     type="button"
                                                     onClick={() => handleExtractPalette(index)}
@@ -366,10 +420,26 @@ export default function DropsPage() {
                                     </div>
                                 )}
                                 <p className="font-mono text-[10px] text-[#666] tracking-[0.1em] mt-2">
-                                    Upload multiple images (JPG, PNG, WebP)
+                                    Upload multiple images (JPG, PNG, WebP). Use ↑↓ to reorder, hover for palette/remove.
                                 </p>
                             </div>
-                            <div>
+                                <div>
+                                <label className="flex items-center gap-2 cursor-pointer group">
+                                    <input
+                                        type="checkbox"
+                                        name="isFeatured"
+                                        defaultChecked={isEditMode ? editingProduct?.isFeatured : undefined}
+                                        className="w-4 h-4 accent-[#BAFF00] bg-[#0D0D0D] border-2 border-[#2A2A2A] cursor-pointer focus:ring-[#BAFF00]"
+                                    />
+                                    <span className="font-mono text-xs text-[#F5F5F0] tracking-[0.1em] group-hover:text-[#BAFF00] transition-colors">
+                                        Featured in search (show when user opens search, no query)
+                                    </span>
+                                </label>
+                                <p className="font-mono text-[10px] text-[#666] tracking-[0.1em] mt-1 mb-4">
+                                    Good for promoting products — they appear first when customers open search.
+                                </p>
+                                </div>
+                                <div>
                                 <label className="block font-mono text-[10px] text-[#999] tracking-[0.2em] uppercase mb-2">
                                     Sizes
                                 </label>
@@ -549,9 +619,19 @@ export default function DropsPage() {
                                             <p key={idx}>{line}</p>
                                         ))}
                                 </div>
-                                <p className="font-mono text-lg text-[#BAFF00] font-bold tracking-[0.02em]">
-                                    {preview.price ? `₹${Number(preview.price).toLocaleString("en-IN")}` : "₹0"}
-                                </p>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    {hasDiscount(
+                                        preview.cutPrice?.trim() ? Number(preview.cutPrice) : null,
+                                        Number(preview.price) || 0
+                                    ) && (
+                                        <span className="font-mono text-sm text-[#666] line-through tracking-[0.02em]">
+                                            ₹{Number(preview.cutPrice).toLocaleString("en-IN")}
+                                        </span>
+                                    )}
+                                    <p className="font-mono text-lg text-[#BAFF00] font-bold tracking-[0.02em]">
+                                        {preview.price ? `₹${Number(preview.price).toLocaleString("en-IN")}` : "₹0"}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -582,10 +662,16 @@ export default function DropsPage() {
                                     Price
                                 </th>
                                 <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                    Cut Price
+                                </th>
+                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
                                     Sizes
                                 </th>
                                 <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
                                     Status
+                                </th>
+                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                    Featured
                                 </th>
                                 <th className="px-6 py-3 text-right font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
                                     Actions
@@ -596,7 +682,7 @@ export default function DropsPage() {
                             {products.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={6}
+                                        colSpan={8}
                                         className="px-6 py-12 text-center font-mono text-xs text-[#666] tracking-[0.1em]"
                                     >
                                         NO DROPS DEPLOYED // CREATE YOUR FIRST DROP
@@ -617,6 +703,9 @@ export default function DropsPage() {
                                         <td className="px-6 py-4 font-mono text-sm text-[#F5F5F0] font-bold tracking-[0.05em]">
                                             ₹{Number(product.price).toLocaleString("en-IN")}
                                         </td>
+                                        <td className="px-6 py-4 font-mono text-sm text-[#666] tracking-[0.05em]">
+                                            {product.cutPrice ? `₹${Number(product.cutPrice).toLocaleString("en-IN")}` : "—"}
+                                        </td>
                                         <td className="px-6 py-4 font-mono text-[10px] text-[#999] tracking-[0.1em]">
                                             {product.sizes.join(" / ")}
                                         </td>
@@ -627,6 +716,17 @@ export default function DropsPage() {
                                             >
                                                 {product.isActive ? "● LIVE" : "○ ARCHIVED"}
                                             </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <AdminButton
+                                                variant={product.isFeatured ? "secondary" : "ghost"}
+                                                size="sm"
+                                                onClick={() => handleToggleFeatured(product.id)}
+                                                disabled={!product.isActive}
+                                                title={product.isFeatured ? "Remove from featured (search)" : "Feature in search"}
+                                            >
+                                                {product.isFeatured ? "★ Featured" : "☆ Feature"}
+                                            </AdminButton>
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-2 flex-wrap">

@@ -12,11 +12,15 @@ export interface Product {
     slug: string;
     description: string;
     price: number;
+    /** Original price before discount, shown crossed out when present */
+    cutPrice?: number | null;
     images: string[];
     colors: string[];
     sizes: string[];
     sku?: string | null;
     isActive: boolean;
+    /** When true, product is shown in search when empty (good for promotions) */
+    isFeatured?: boolean;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -95,11 +99,13 @@ export async function getProductById(id: string): Promise<Product | null> {
         slug: data.slug || (data.name ? data.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') : ''),
         description: data.description,
         price: Number(data.price),
+        cutPrice: data.cutPrice != null ? Number(data.cutPrice) : null,
         images: data.images || [],
         colors: data.colors || [],
         sizes: data.sizes || [],
         sku: data.sku || null,
         isActive: data.isActive ?? true,
+        isFeatured: (data.isFeatured as boolean) ?? false,
         createdAt: toDate(data.createdAt),
         updatedAt: toDate(data.updatedAt),
     } as Product;
@@ -146,11 +152,13 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
                 slug: candidate,
                 description: data.description,
                 price: Number(data.price),
+                cutPrice: data.cutPrice != null ? Number(data.cutPrice) : null,
                 images: data.images || [],
                 colors: data.colors || [],
                 sizes: data.sizes || [],
                 sku: data.sku || null,
                 isActive: data.isActive ?? true,
+                isFeatured: (data.isFeatured as boolean) ?? false,
                 createdAt: toDate(data.createdAt),
                 updatedAt: toDate(data.updatedAt),
             } as Product;
@@ -167,11 +175,13 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
         slug: data.slug || slug,
         description: data.description,
         price: Number(data.price),
+        cutPrice: data.cutPrice != null ? Number(data.cutPrice) : null,
         images: data.images || [],
         colors: data.colors || [],
         sizes: data.sizes || [],
         sku: data.sku || null,
         isActive: data.isActive ?? true,
+        isFeatured: (data.isFeatured as boolean) ?? false,
         createdAt: toDate(data.createdAt),
         updatedAt: toDate(data.updatedAt),
     } as Product;
@@ -190,11 +200,13 @@ export async function getAllProducts(): Promise<Product[]> {
             slug: (data.slug as string) || (data.name ? (data.name as string).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') : ''),
             description: data.description as string,
             price: Number(data.price),
+            cutPrice: data.cutPrice != null ? Number(data.cutPrice) : null,
             images: (data.images as string[]) || [],
             colors: (data.colors as string[]) || [],
             sizes: (data.sizes as string[]) || [],
             sku: (data.sku as string | null) || null,
             isActive: (data.isActive as boolean) ?? true,
+            isFeatured: (data.isFeatured as boolean) ?? false,
             createdAt: toDate(data.createdAt),
             updatedAt: toDate(data.updatedAt),
         } as Product;
@@ -219,15 +231,23 @@ export async function getActiveProducts(): Promise<Product[]> {
             slug: (data.slug as string) || (data.name ? (data.name as string).toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') : ''),
             description: data.description as string,
             price: Number(data.price),
+            cutPrice: data.cutPrice != null ? Number(data.cutPrice) : null,
             images: (data.images as string[]) || [],
             colors: (data.colors as string[]) || [],
             sizes: (data.sizes as string[]) || [],
             sku: (data.sku as string | null) || null,
             isActive: (data.isActive as boolean) ?? true,
+            isFeatured: (data.isFeatured as boolean) ?? false,
             createdAt: toDate(data.createdAt),
             updatedAt: toDate(data.updatedAt),
         } as Product;
     });
+}
+
+/** Featured products (active + isFeatured). Shown in search when empty for promotions. */
+export async function getFeaturedProducts(): Promise<Product[]> {
+    const products = await getActiveProducts();
+    return products.filter((p) => p.isFeatured);
 }
 
 export async function createProduct(data: Omit<Product, "id" | "createdAt" | "updatedAt" | "slug"> & { slug?: string }): Promise<Product> {
@@ -242,11 +262,13 @@ export async function createProduct(data: Omit<Product, "id" | "createdAt" | "up
         slug: slug,
         description: data.description,
         price: data.price,
+        cutPrice: data.cutPrice ?? null,
         images: data.images,
         colors: data.colors,
         sizes: data.sizes,
         sku: data.sku || null,
         isActive: data.isActive ?? true,
+        isFeatured: data.isFeatured ?? false,
         createdAt: toTimestamp(now),
         updatedAt: toTimestamp(now),
     };

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useFavourites } from "@/context/FavouritesContext";
+import { hasDiscount } from "@/lib/discount";
 import { getImageAlt } from "@/lib/seo-utils";
 
 export function FavouritesClient() {
@@ -122,19 +123,29 @@ export function FavouritesClient() {
                   />
                 )}
               </div>
-              <div className="px-4 py-3 flex items-center justify-between">
+              <div className="px-4 py-3 flex items-center justify-between gap-2">
                 <span
                   className="text-xs font-bold uppercase tracking-[0.1em] text-[var(--vsc-gray-900)] truncate"
                   style={{ fontFamily: "var(--font-space-grotesk)" }}
                 >
                   {item.name}
                 </span>
-                <span
-                  className="text-xs font-bold text-[var(--vsc-gray-900)]"
-                  style={{ fontFamily: "var(--font-space-mono)" }}
-                >
-                  {formatPrice(item.price)}
-                </span>
+                <div className="flex items-center gap-2 shrink-0">
+                  {hasDiscount(item.cutPrice, item.price) && (
+                    <span
+                      className="text-xs text-[var(--vsc-gray-500)] line-through"
+                      style={{ fontFamily: "var(--font-space-mono)" }}
+                    >
+                      {formatPrice(item.cutPrice)}
+                    </span>
+                  )}
+                  <span
+                    className="text-xs font-bold text-[var(--vsc-gray-900)]"
+                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  >
+                    {formatPrice(item.price)}
+                  </span>
+                </div>
               </div>
             </Link>
           );

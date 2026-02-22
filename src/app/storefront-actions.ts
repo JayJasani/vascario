@@ -3,6 +3,7 @@
 import { unstable_cache } from "next/cache";
 import {
     getActiveProducts as getActiveProductsHelper,
+    getFeaturedProducts as getFeaturedProductsHelper,
     getProductById as getProductByIdHelper,
     getProductBySlug as getProductBySlugHelper,
     getStockLevelsByProductId,
@@ -24,6 +25,8 @@ export interface StorefrontProduct {
     slug: string;
     description: string;
     price: number;
+    /** Original price before discount, shown crossed out when present */
+    cutPrice?: number | null;
     images: string[];
     colors: string[];
     sizes: string[];
@@ -71,6 +74,7 @@ export async function getActiveProducts(): Promise<StorefrontProduct[]> {
         slug: p.slug,
         description: p.description,
         price: p.price,
+        cutPrice: p.cutPrice ?? null,
         images: p.images,
         colors: p.colors,
         sizes: p.sizes,
@@ -104,6 +108,7 @@ export async function getProductById(id: string): Promise<(StorefrontProduct & {
         slug: product.slug,
         description: product.description,
         price: product.price,
+        cutPrice: product.cutPrice ?? null,
         images: product.images,
         colors: product.colors,
         sizes: product.sizes,
@@ -140,6 +145,7 @@ export async function getProductBySlug(slug: string): Promise<(StorefrontProduct
         slug: product.slug,
         description: product.description,
         price: product.price,
+        cutPrice: product.cutPrice ?? null,
         images: product.images,
         colors: product.colors,
         sizes: product.sizes,
@@ -147,6 +153,34 @@ export async function getProductBySlug(slug: string): Promise<(StorefrontProduct
         totalStock,
         stockBySize,
     };
+}
+
+/**
+ * Featured products shown in search when query is empty (for promotions).
+ */
+export async function getFeaturedSearchItems(): Promise<SearchItem[]> {
+    try {
+        const featured = unstable_cache(
+            async () => getFeaturedProductsHelper(),
+            ["storefront", "featured-products"],
+            { revalidate: CACHE_REVALIDATE, tags: [CACHE_TAGS.activeProducts] }
+        )();
+
+        const products = await featured;
+
+        return products.map((product) => ({
+            id: product.id,
+            name: product.name,
+            type: "product" as const,
+            url: `/product/${product.slug}`,
+            image: product.images[0],
+            price: product.price,
+            cutPrice: product.cutPrice ?? null,
+        }));
+    } catch (error) {
+        console.error("Error fetching featured products:", error);
+        return [];
+    }
 }
 
 /**
@@ -168,6 +202,7 @@ export async function searchItems(query: string): Promise<SearchItem[]> {
             url: `/product/${product.slug}`,
             image: product.images[0],
             price: product.price,
+            cutPrice: product.cutPrice ?? null,
         }));
 
         // Filter by query

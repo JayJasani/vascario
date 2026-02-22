@@ -187,11 +187,13 @@ export async function getProducts() {
                 name: product.name,
                 description: product.description,
                 price: product.price.toString(),
+                cutPrice: product.cutPrice != null ? product.cutPrice.toString() : null,
                 images: product.images,
                 colors: product.colors,
                 sizes: product.sizes,
                 sku: product.sku,
                 isActive: product.isActive,
+                isFeatured: product.isFeatured ?? false,
                 createdAt: product.createdAt.toISOString(),
                 stock: stock.map((s) => ({
                     id: s.id,
@@ -210,6 +212,8 @@ export async function createProduct(formData: FormData) {
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
     const price = parseFloat(formData.get("price") as string);
+    const cutPriceRaw = formData.get("cutPrice") as string;
+    const cutPrice = cutPriceRaw && cutPriceRaw.trim() ? parseFloat(cutPriceRaw) : null;
     const sku = (formData.get("sku") as string) || null;
     const imagesString = formData.get("images") as string;
     const images = imagesString
@@ -224,15 +228,18 @@ export async function createProduct(formData: FormData) {
         ? (sizesRaw as string[]).map((s) => s.trim()).filter(Boolean)
         : (formData.get("sizes") as string)?.split(",").map((s) => s.trim()).filter(Boolean) ?? [];
 
+    const isFeatured = (formData.get("isFeatured") as string) === "on";
     const product = await createProductHelper({
         name,
         description,
         price,
+        cutPrice,
         sku,
         images,
         colors,
         sizes,
         isActive: true,
+        isFeatured,
     });
 
     // Create stock levels for each size
@@ -288,6 +295,18 @@ export async function toggleProductActive(productId: string) {
     revalidateTag(CACHE_TAGS.product(productId), "max");
 }
 
+export async function toggleProductFeatured(productId: string) {
+    const product = await getProductById(productId);
+    if (!product) return;
+
+    await updateProduct(productId, { isFeatured: !(product.isFeatured ?? false) });
+
+    revalidatePath("/admin/drops");
+    revalidatePath("/admin");
+    revalidateTag(CACHE_TAGS.activeProducts, "max");
+    revalidateTag(CACHE_TAGS.product(productId), "max");
+}
+
 export async function deleteDropAction(productId: string) {
     const product = await getProductById(productId);
     if (!product) return;
@@ -316,6 +335,8 @@ export async function updateProductAction(productId: string, formData: FormData)
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
     const price = parseFloat(formData.get("price") as string);
+    const cutPriceRaw = formData.get("cutPrice") as string;
+    const cutPrice = cutPriceRaw && cutPriceRaw.trim() ? parseFloat(cutPriceRaw) : null;
     const sku = (formData.get("sku") as string) || null;
     const imagesString = formData.get("images") as string;
     const images = imagesString
@@ -329,14 +350,17 @@ export async function updateProductAction(productId: string, formData: FormData)
         ? (sizesRaw as string[]).map((s) => s.trim()).filter(Boolean)
         : (formData.get("sizes") as string)?.split(",").map((s) => s.trim()).filter(Boolean) ?? [];
 
+    const isFeatured = (formData.get("isFeatured") as string) === "on";
     await updateProduct(productId, {
         name,
         description,
         price,
+        cutPrice,
         sku,
         images,
         colors,
         sizes,
+        isFeatured,
     });
 
     // Create stock levels for any new sizes that don't exist yet

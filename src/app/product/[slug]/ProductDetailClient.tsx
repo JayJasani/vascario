@@ -21,6 +21,7 @@ import {
   trackSelectSize,
   trackViewItem,
 } from "@/lib/analytics";
+import { hasDiscount, getDiscountAmount } from "@/lib/discount";
 import { getImageAlt } from "@/lib/seo-utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -37,6 +38,8 @@ export interface ProductDetailData {
   name: string;
   slug: string;
   price: number;
+  /** Original price before discount, shown crossed out when present */
+  cutPrice?: number | null;
   description: string;
   sizes: string[];
   colors: string[];
@@ -472,7 +475,15 @@ export function ProductDetailClient({
               </h1>
 
               {/* Price */}
-              <div className="flex items-baseline gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <div className="flex items-baseline gap-2 sm:gap-3 mb-4 sm:mb-6 flex-wrap">
+                {hasDiscount(product.cutPrice, product.price) && (
+                  <span
+                    className="text-base sm:text-lg text-[var(--vsc-gray-500)] line-through"
+                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  >
+                    {formatPrice(product.cutPrice!)}
+                  </span>
+                )}
                 <span
                   className="text-xl sm:text-2xl text-[var(--vsc-accent)] font-bold"
                   style={{ fontFamily: "var(--font-space-mono)" }}
@@ -485,6 +496,14 @@ export function ProductDetailClient({
                 >
                   {currencyCode}
                 </span>
+                {hasDiscount(product.cutPrice, product.price) && (
+                  <span
+                    className="text-sm sm:text-base text-[var(--vsc-accent)] font-bold"
+                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  >
+                    (Save {formatPrice(getDiscountAmount(product.cutPrice!, product.price))})
+                  </span>
+                )}
               </div>
 
               {/* Divider */}
@@ -798,6 +817,7 @@ export function ProductDetailClient({
                     name: product.name,
                     slug: product.slug,
                     price: product.price,
+                    cutPrice: product.cutPrice ?? null,
                     image: product.images[0] ?? "",
                   });
                   const wishlistItem = {

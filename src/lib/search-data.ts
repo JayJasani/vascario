@@ -7,6 +7,8 @@ export interface SearchItem {
   url: string;
   image?: string;
   price?: number;
+  /** Original price before discount, shown crossed out when present */
+  cutPrice?: number | null;
   tag?: string;
 }
 
@@ -26,6 +28,7 @@ export async function getAllSearchItems(): Promise<SearchItem[]> {
       url: `/product/${product.id}`,
       image: product.images[0],
       price: product.price,
+      cutPrice: product.cutPrice ?? null,
     }));
   } catch (error) {
     console.error("Error fetching search items:", error);

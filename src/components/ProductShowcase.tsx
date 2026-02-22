@@ -8,6 +8,7 @@ interface ShowcaseProduct {
     name: string;
     slug: string;
     price: number;
+    cutPrice?: number | null;
     images: string[];
     tag?: string;
 }
