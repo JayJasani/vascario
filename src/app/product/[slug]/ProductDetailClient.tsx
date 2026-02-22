@@ -4,22 +4,22 @@ import { Footer } from "@/components/Footer";
 import { MarqueeStrip } from "@/components/MarqueeStrip";
 import { Navbar } from "@/components/Navbar";
 import {
-    BreadcrumbStructuredData,
-    ProductStructuredData,
+  BreadcrumbStructuredData,
+  ProductStructuredData,
 } from "@/components/StructuredData";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useFavourites } from "@/context/FavouritesContext";
 import {
-    trackAddToCart,
-    trackAddToWishlist,
-    trackChangeQuantity,
-    trackImageGalleryNavigate,
-    trackRemoveFromWishlist,
-    trackSelectColor,
-    trackSelectSize,
-    trackViewItem,
+  trackAddToCart,
+  trackAddToWishlist,
+  trackChangeQuantity,
+  trackImageGalleryNavigate,
+  trackRemoveFromWishlist,
+  trackSelectColor,
+  trackSelectSize,
+  trackViewItem,
 } from "@/lib/analytics";
 import { getImageAlt } from "@/lib/seo-utils";
 import Image from "next/image";
@@ -322,27 +322,27 @@ export function ProductDetailClient({
                         }}
                       />
                     )}
-                  {/* Prev/Next controls */}
-                  {hasMultipleImages && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={showPrevImage}
-                        className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-full bg-[var(--vsc-black)]/60 border border-[var(--vsc-gray-600)] text-[var(--vsc-white)] flex items-center justify-center hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors text-lg sm:text-xl md:text-2xl"
-                        aria-label="Previous image"
-                      >
-                        ‹
-                      </button>
-                      <button
-                        type="button"
-                        onClick={showNextImage}
-                        className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-full bg-[var(--vsc-black)]/60 border border-[var(--vsc-gray-600)] text-[var(--vsc-white)] flex items-center justify-center hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors text-lg sm:text-xl md:text-2xl"
-                        aria-label="Next image"
-                      >
-                        ›
-                      </button>
-                    </>
-                  )}
+                    {/* Prev/Next controls */}
+                    {hasMultipleImages && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={showPrevImage}
+                          className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-full bg-[var(--vsc-black)]/60 border border-[var(--vsc-gray-600)] text-[var(--vsc-white)] flex items-center justify-center hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors text-lg sm:text-xl md:text-2xl"
+                          aria-label="Previous image"
+                        >
+                          ‹
+                        </button>
+                        <button
+                          type="button"
+                          onClick={showNextImage}
+                          className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-full bg-[var(--vsc-black)]/60 border border-[var(--vsc-gray-600)] text-[var(--vsc-white)] flex items-center justify-center hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors text-lg sm:text-xl md:text-2xl"
+                          aria-label="Next image"
+                        >
+                          ›
+                        </button>
+                      </>
+                    )}
                     {/* Image number indicator */}
                     <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 flex items-center gap-2 z-10 bg-[var(--vsc-black)]/50 px-2 sm:px-3 py-1 sm:py-1.5 backdrop-blur-sm">
                       <div className="w-6 sm:w-8 h-px bg-white" />
@@ -359,50 +359,50 @@ export function ProductDetailClient({
                     </div>
                   </>
                 ) : (
-                <>
-                  {/* Placeholder visual */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <div
-                      className="absolute inset-0 opacity-[0.04]"
-                      style={{
-                        backgroundImage: `
+                  <>
+                    {/* Placeholder visual */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <div
+                        className="absolute inset-0 opacity-[0.04]"
+                        style={{
+                          backgroundImage: `
                           linear-gradient(45deg, var(--vsc-gray-700) 25%, transparent 25%),
                           linear-gradient(-45deg, var(--vsc-gray-700) 25%, transparent 25%),
                           linear-gradient(45deg, transparent 75%, var(--vsc-gray-700) 75%),
                           linear-gradient(-45deg, transparent 75%, var(--vsc-gray-700) 75%)
                         `,
-                        backgroundSize: "30px 30px",
-                        backgroundPosition:
-                          "0 0, 0 15px, 15px -15px, -15px 0px",
-                      }}
-                    />
-                    {/* Product name watermark */}
-                    <span
-                      className="text-[var(--vsc-gray-800)] font-bold z-10 text-center px-4"
-                      style={{
-                        fontFamily: "var(--font-space-grotesk)",
-                        fontSize: "clamp(3rem, 6vw, 6rem)",
-                        lineHeight: 0.9,
-                        letterSpacing: "-0.03em",
-                      }}
-                    >
-                      {product.name.split("—")[0]}
-                    </span>
-                  </div>
-                  {/* Image number indicator */}
-                  <div className="absolute bottom-4 left-4 flex items-center gap-2 z-10">
-                    <div className="w-8 h-px bg-[var(--vsc-accent)]" />
-                    <span
-                      className="text-[10px] text-[var(--vsc-gray-400)] uppercase tracking-[0.2em]"
-                      style={{ fontFamily: "var(--font-space-mono)" }}
-                    >
-                      01 / 01
-                    </span>
-                  </div>
-                </>
-              )}
+                          backgroundSize: "30px 30px",
+                          backgroundPosition:
+                            "0 0, 0 15px, 15px -15px, -15px 0px",
+                        }}
+                      />
+                      {/* Product name watermark */}
+                      <span
+                        className="text-[var(--vsc-gray-800)] font-bold z-10 text-center px-4"
+                        style={{
+                          fontFamily: "var(--font-space-grotesk)",
+                          fontSize: "clamp(3rem, 6vw, 6rem)",
+                          lineHeight: 0.9,
+                          letterSpacing: "-0.03em",
+                        }}
+                      >
+                        {product.name.split("—")[0]}
+                      </span>
+                    </div>
+                    {/* Image number indicator */}
+                    <div className="absolute bottom-4 left-4 flex items-center gap-2 z-10">
+                      <div className="w-8 h-px bg-[var(--vsc-accent)]" />
+                      <span
+                        className="text-[10px] text-[var(--vsc-gray-400)] uppercase tracking-[0.2em]"
+                        style={{ fontFamily: "var(--font-space-mono)" }}
+                      >
+                        01 / 01
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
-              
+
               {/* Zoom preview panel - appears on hover (desktop only) */}
               {isZoomActive && currentImage && (
                 <div className="hidden xl:block absolute left-full top-0 ml-6 w-[500px] aspect-[4/5] max-h-[70vh] sm:max-h-[80vh] md:max-h-[85vh] border border-[var(--vsc-gray-700)] bg-[var(--vsc-gray-900)] overflow-hidden z-30 pointer-events-none shadow-2xl">
@@ -434,11 +434,10 @@ export function ProductDetailClient({
                         method: "thumbnail",
                       });
                     }}
-                    className={`relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 shrink-0 overflow-hidden border-2 transition-colors ${
-                      selectedImageIndex === i
+                    className={`relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 shrink-0 overflow-hidden border-2 transition-colors ${selectedImageIndex === i
                         ? "border-[var(--vsc-accent)]"
                         : "border-[var(--vsc-gray-700)] hover:border-[var(--vsc-gray-600)]"
-                    }`}
+                      }`}
                   >
                     <Image
                       src={image}
@@ -551,11 +550,10 @@ export function ProductDetailClient({
                               color,
                             });
                           }}
-                          className={`w-8 h-8 shrink-0 border-2 transition-all duration-200 ${
-                            selectedColor === color
+                          className={`w-8 h-8 shrink-0 border-2 transition-all duration-200 ${selectedColor === color
                               ? "border-[var(--vsc-accent)] ring-2 ring-[var(--vsc-accent)] ring-offset-2 ring-offset-[var(--vsc-black)]"
                               : "border-[var(--vsc-gray-700)] hover:border-[var(--vsc-gray-500)]"
-                          }`}
+                            }`}
                           style={{ backgroundColor: color }}
                           title={color}
                           aria-label={`Color ${color}`}
@@ -571,11 +569,10 @@ export function ProductDetailClient({
                               color,
                             });
                           }}
-                          className={`px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] border transition-all duration-200 ${
-                            selectedColor === color
+                          className={`px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] border transition-all duration-200 ${selectedColor === color
                               ? "bg-[var(--vsc-accent)] text-[var(--vsc-black)] border-[var(--vsc-accent)]"
                               : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)]"
-                          }`}
+                            }`}
                           style={{ fontFamily: "var(--font-space-mono)" }}
                         >
                           {color}
@@ -615,13 +612,12 @@ export function ProductDetailClient({
                               size,
                             });
                           }}
-                          className={`px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] border-2 transition-all duration-200 ${
-                            !inStock
+                          className={`px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] border-2 transition-all duration-200 ${!inStock
                               ? "opacity-50 cursor-not-allowed border-[var(--vsc-gray-700)] text-[var(--vsc-gray-500)]"
                               : selectedSize === size
-                                ? "bg-[var(--vsc-accent)] text-[var(--vsc-black)] border-transparent"
+                                ? "bg-[var(--vsc-accent)] text-[var(--vsc-white)] border-[var(--vsc-accent)] ring-2 ring-[var(--vsc-accent)] ring-offset-2 ring-offset-[var(--vsc-black)]"
                                 : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)]"
-                          }`}
+                            }`}
                           style={{ fontFamily: "var(--font-space-mono)" }}
                           title={
                             inStock ? `${sizeStock} in stock` : "Out of stock"
@@ -770,11 +766,10 @@ export function ProductDetailClient({
                     ],
                   });
                 }}
-                className={`w-full py-2.5 sm:py-3 text-xs sm:text-sm font-bold uppercase tracking-[0.2em] transition-all duration-200 ${
-                  canAddToCart
+                className={`w-full py-2.5 sm:py-3 text-xs sm:text-sm font-bold uppercase tracking-[0.2em] transition-all duration-200 ${canAddToCart
                     ? "bg-[var(--vsc-accent)] text-black hover:bg-black hover:text-[var(--vsc-accent)] hover:shadow-[0_0_24px_var(--vsc-accent-dim)] cursor-pointer"
                     : "bg-[var(--vsc-gray-700)] text-[var(--vsc-gray-500)] cursor-not-allowed"
-                }`}
+                  }`}
                 style={{
                   fontFamily: "var(--font-space-mono)",
                   border: "2px solid #000",
