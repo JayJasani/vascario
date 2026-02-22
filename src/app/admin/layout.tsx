@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { logoutAction } from "./auth-actions";
+import { AdminClock } from "@/components/admin/AdminClock";
 
 export const metadata: Metadata = {
     title: "VASCARIO // COMMAND CENTER",
@@ -99,7 +99,7 @@ export default async function AdminLayout({
                                     VASCARIO // CMD
                                 </span>
                             </div>
-                            <SystemClock />
+                            <AdminClock />
                         </header>
 
                         {/* Page content */}
@@ -114,23 +114,3 @@ export default async function AdminLayout({
     );
 }
 
-function SystemClock() {
-    return (
-        <div className="font-mono text-[10px] text-[#666] tracking-[0.15em]">
-            <span className="text-[#BAFF00]">●</span>{" "}
-            <span suppressHydrationWarning>
-                {new Date().toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "2-digit",
-                })}
-                {" // "}
-                {new Date().toLocaleTimeString("en-US", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false,
-                })}
-            </span>
-        </div>
-    );
-}
