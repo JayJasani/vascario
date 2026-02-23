@@ -38,7 +38,15 @@ interface UserProfileContextValue {
   getDisplayName: () => string;
 }
 
-const UserProfileContext = createContext<UserProfileContextValue | undefined>(undefined);
+const UserProfileContext = createContext<UserProfileContextValue | null>(null);
+
+const defaultUserProfileValue: UserProfileContextValue = {
+  profile: null,
+  loading: true,
+  error: null,
+  refreshProfile: async () => {},
+  getDisplayName: () => "",
+};
 
 export function UserProfileProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
@@ -221,8 +229,5 @@ export function UserProfileProvider({ children }: { children: ReactNode }) {
 
 export function useUserProfile() {
   const ctx = useContext(UserProfileContext);
-  if (!ctx) {
-    throw new Error("useUserProfile must be used within a UserProfileProvider");
-  }
-  return ctx;
+  return ctx ?? defaultUserProfileValue;
 }

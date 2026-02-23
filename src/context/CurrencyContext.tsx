@@ -25,7 +25,15 @@ interface CurrencyContextValue {
   formatPrice: (amountINR: number, options?: { showCode?: boolean }) => string;
 }
 
-const CurrencyContext = createContext<CurrencyContextValue | undefined>(undefined);
+const CurrencyContext = createContext<CurrencyContextValue | null>(null);
+
+const defaultCurrencyValue: CurrencyContextValue = {
+  currencyCode: "INR",
+  currency: CURRENCIES.INR,
+  setCurrency: () => {},
+  formatPrice: (amountINR: number, options?: { showCode?: boolean }) =>
+    formatPriceInCurrencyUtil(amountINR, "INR", options),
+};
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   // Use "INR" for initial render to avoid hydration mismatch (server has no localStorage)
@@ -68,8 +76,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
 export function useCurrency() {
   const ctx = useContext(CurrencyContext);
-  if (!ctx) throw new Error("useCurrency must be used within CurrencyProvider");
-  return ctx;
+  return ctx ?? defaultCurrencyValue;
 }
 
 export { CURRENCY_CODES };

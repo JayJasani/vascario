@@ -58,9 +58,14 @@ interface FavouritesContextValue {
   clearFavourites: () => void;
 }
 
-const FavouritesContext = createContext<FavouritesContextValue | undefined>(
-  undefined
-);
+const FavouritesContext = createContext<FavouritesContextValue | null>(null);
+
+const defaultFavouritesValue: FavouritesContextValue = {
+  items: [],
+  toggleFavourite: () => {},
+  isFavourite: () => false,
+  clearFavourites: () => {},
+};
 
 export function FavouritesProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
@@ -116,9 +121,6 @@ export function FavouritesProvider({ children }: { children: ReactNode }) {
 
 export function useFavourites() {
   const ctx = useContext(FavouritesContext);
-  if (!ctx) {
-    throw new Error("useFavourites must be used within a FavouritesProvider");
-  }
-  return ctx;
+  return ctx ?? defaultFavouritesValue;
 }
 
