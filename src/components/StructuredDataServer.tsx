@@ -26,6 +26,7 @@ interface ProductStructuredDataProps {
       ratingValue: number
       reviewCount: number
     }
+    reviews?: Array<{ authorName: string; text: string; rating?: number | null }>
   }
 }
 
@@ -133,6 +134,7 @@ interface ItemListStructuredDataProps {
     image?: string
     url: string
     price?: number
+    totalStock?: number
   }>
 }
 

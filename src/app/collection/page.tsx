@@ -18,6 +18,7 @@ export default async function CollectionPage() {
     image: product.images[0],
     url: `/product/${product.slug}`,
     price: product.price,
+    totalStock: product.totalStock,
   }))
 
   return (
