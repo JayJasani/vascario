@@ -642,7 +642,7 @@ export default function DropsPage() {
                                         preview.cutPrice?.trim() ? Number(preview.cutPrice) : null,
                                         Number(preview.price) || 0
                                     ) && (
-                                        <span className="font-mono text-sm text-[#666] line-through tracking-[0.02em]">
+                                        <span className="font-mono text-sm text-[#666] tracking-[0.02em]" style={{ textDecoration: "line-through" }}>
                                             ₹{Number(preview.cutPrice).toLocaleString("en-IN")}
                                         </span>
                                     )}
@@ -722,7 +722,7 @@ export default function DropsPage() {
                                         <td className="px-4 py-2.5 font-mono text-xs tracking-[0.05em]">
                                             <div className="flex flex-col gap-0.5">
                                                 {hasDiscount(product.cutPrice ? Number(product.cutPrice) : null, Number(product.price)) && product.cutPrice && (
-                                                    <span className="text-[#666] line-through">
+                                                    <span className="text-[#666]" style={{ textDecoration: "line-through" }}>
                                                         ₹{Number(product.cutPrice).toLocaleString("en-IN")}
                                                     </span>
                                                 )}

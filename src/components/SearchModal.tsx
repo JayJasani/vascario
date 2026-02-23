@@ -185,8 +185,8 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                         <div className="flex items-center gap-2 shrink-0">
                           {item.price != null && hasDiscount(item.cutPrice, item.price) && (
                             <span
-                              className="text-xs text-[var(--vsc-gray-500)] line-through"
-                              style={{ fontFamily: "var(--font-space-mono)" }}
+                              className="text-xs text-[var(--vsc-gray-500)]"
+                              style={{ fontFamily: "var(--font-space-mono)", textDecoration: "line-through" }}
                             >
                               {formatPrice(item.cutPrice!)}
                             </span>
@@ -259,8 +259,8 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                         <div className="flex items-center gap-2 shrink-0">
                           {item.price != null && hasDiscount(item.cutPrice, item.price) && (
                             <span
-                              className="text-xs text-[var(--vsc-gray-500)] line-through"
-                              style={{ fontFamily: "var(--font-space-mono)" }}
+                              className="text-xs text-[var(--vsc-gray-500)]"
+                              style={{ fontFamily: "var(--font-space-mono)", textDecoration: "line-through" }}
                             >
                               {formatPrice(item.cutPrice!)}
                             </span>

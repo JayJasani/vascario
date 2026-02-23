@@ -143,8 +143,8 @@ export function ProductCard({ product, variant = "default", aspectClass, href, p
         <div className="flex items-center gap-2 flex-wrap">
           {hasDiscount(product.cutPrice, product.price) && (
             <span
-              className="text-xs text-[var(--vsc-gray-500)] line-through transition-colors duration-200"
-              style={{ fontFamily: "var(--font-space-mono)" }}
+              className="text-xs text-[var(--vsc-gray-500)] transition-colors duration-200"
+              style={{ fontFamily: "var(--font-space-mono)", textDecoration: "line-through" }}
             >
               {formatPrice(product.cutPrice!)}
             </span>
