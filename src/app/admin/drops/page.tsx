@@ -150,7 +150,18 @@ export default function DropsPage() {
             const uploadFormData = new FormData();
             Array.from(files).forEach((file) => uploadFormData.append("files", file));
             const response = await fetch("/admin/drops/api/upload", { method: "POST", body: uploadFormData });
-            if (!response.ok) throw new Error("Upload failed");
+            if (!response.ok) {
+                const text = await response.text();
+                let message = "Upload failed";
+                try {
+                    const err = JSON.parse(text);
+                    message = err.error || message;
+                } catch {
+                    if (response.status === 413) message = "Images too large. Try smaller files or fewer images.";
+                    else if (text) message = text;
+                }
+                throw new Error(message);
+            }
             const data = await response.json();
             setFormImages((prev) => [...prev, ...data.urls]);
         } catch (error) {
