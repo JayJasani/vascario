@@ -15,7 +15,6 @@ import { SEO_BASE } from "@/lib/seo-config"
  * - Google-Extended: Enables content in Google AI features (350M+ users)
  * - Googlebot-Image: Optimized image crawling for visual search
  * - Googlebot-Mobile: Mobile-first indexing optimization
- * - Crawl-delay: Prevents server overload from aggressive crawlers
  * - Comprehensive disallow rules for e-commerce best practices
  */
 export default function robots(): MetadataRoute.Robots {
@@ -91,12 +90,10 @@ export default function robots(): MetadataRoute.Robots {
         disallow: commonDisallow,
       },
       // Baiduspider: Chinese search engine (important for international reach)
-      // Note: crawlDelay helps prevent server overload from aggressive crawling
       {
         userAgent: "Baiduspider",
         allow: "/",
         disallow: commonDisallow,
-        crawlDelay: 1,
       },
       // Facebook External Hit: For social media previews
       {
@@ -183,6 +180,5 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
-    host: baseUrl.replace("https://", "").replace("http://", ""), // Canonical host
   }
 }
