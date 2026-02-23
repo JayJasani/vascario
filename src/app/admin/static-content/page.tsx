@@ -121,8 +121,16 @@ export default function StaticContentPage() {
             setUploadProgress((prev) => ({ ...prev, [key]: 100 }));
 
             if (!uploadResponse.ok) {
-                const error = await uploadResponse.json();
-                throw new Error(error.error || "Upload failed");
+                const text = await uploadResponse.text();
+                let message = "Upload failed";
+                try {
+                    const error = JSON.parse(text);
+                    message = error.error || message;
+                } catch {
+                    if (uploadResponse.status === 413) message = "File too large. Try a smaller file or increase server body size limit.";
+                    else if (text) message = text;
+                }
+                throw new Error(message);
             }
 
             const uploadData = await uploadResponse.json();
