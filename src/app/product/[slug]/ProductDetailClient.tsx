@@ -1090,6 +1090,7 @@ export function ProductDetailClient({
                   loop
                   muted
                   autoPlay
+                  preload="auto"
                   className="absolute inset-0 w-full h-full object-cover"
                 />
               ) : (

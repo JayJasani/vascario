@@ -4,33 +4,42 @@ import { useEffect } from "react";
 
 interface ResourcePreloaderProps {
   images?: string[];
+  videos?: string[];
 }
 
 /**
- * Preloads critical images from Firebase Storage (API) for faster loading.
- * Uses link preload for better browser caching. This ensures API-served images
+ * Preloads critical images and videos from Firebase Storage (API) for faster loading.
+ * Uses link preload for better browser caching. This ensures API-served assets
  * are cached and loaded quickly, just like local assets.
  */
-export function ResourcePreloader({ images = [] }: ResourcePreloaderProps) {
+export function ResourcePreloader({ images = [], videos = [] }: ResourcePreloaderProps) {
   useEffect(() => {
     // Preload images from Firebase Storage (API)
     images.forEach((src) => {
-      // Check if link already exists to avoid duplicates
-      const existingLink = document.querySelector(`link[href="${src}"]`);
+      const existingLink = document.querySelector(`link[href="${src}"][as="image"]`);
       if (!existingLink && src) {
         const link = document.createElement("link");
         link.rel = "preload";
         link.as = "image";
         link.href = src;
-        // Add cache hints for Firebase Storage images
         link.setAttribute("fetchpriority", "high");
         document.head.appendChild(link);
       }
     });
 
-    // Note: We don't clean up preload links as they should persist for the page lifecycle
-    // The browser will handle cache management automatically
-  }, [images]);
+    // Preload videos (e.g. hero section) so they start buffering immediately
+    videos.forEach((src) => {
+      const existingLink = document.querySelector(`link[href="${src}"][as="video"]`);
+      if (!existingLink && src) {
+        const link = document.createElement("link");
+        link.rel = "preload";
+        link.as = "video";
+        link.href = src;
+        link.setAttribute("fetchpriority", "high");
+        document.head.appendChild(link);
+      }
+    });
+  }, [images, videos]);
 
   return null;
 }

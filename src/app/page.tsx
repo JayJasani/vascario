@@ -35,11 +35,17 @@ export default async function Home() {
     criticalImages.push(tshirtCloseupUrl)
   }
 
+  // Preload hero video so it starts buffering as soon as possible (local or CDN)
+  const criticalVideos: string[] = []
+  if (onboard1Url) {
+    criticalVideos.push(onboard1Url)
+  }
+
   return (
     <main className="min-h-screen">
       <OrganizationStructuredDataServer />
       <WebsiteStructuredDataServer searchUrl="https://www.vascario.com/collection?search={search_term_string}" />
-      <ResourcePreloader images={criticalImages} />
+      <ResourcePreloader images={criticalImages} videos={criticalVideos} />
       <Navbar />
       <Hero onboard1VideoUrl={onboard1Url} redirectUrl={onboard1Redirect || undefined} />
       <MarqueeStrip />
