@@ -15,6 +15,7 @@ export type { NewsletterSubscription } from "@/models/newsletter";
 export type { StaticContent } from "@/models/static-content";
 export type { Review } from "@/models/review";
 export type { Investment } from "@/models/investment";
+export type { BackInStockNotification } from "@/models/back-in-stock";
 
 // Product
 export {
@@ -91,3 +92,10 @@ export {
     deleteInvestment,
     getTotalInvestment,
 } from "./investment.repository";
+
+// Back-in-stock notifications
+export {
+    createBackInStockNotification,
+    getBackInStockNotificationsByProductId,
+    getAllBackInStockNotifications,
+} from "./back-in-stock.repository";

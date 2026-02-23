@@ -10,6 +10,7 @@ export * from "./static-content";
 export * from "./review";
 export * from "./investment";
 export * from "./user";
+export * from "./back-in-stock";
 
 // View / DTO models
 export * from "./storefront";
