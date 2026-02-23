@@ -14,7 +14,7 @@ function SubmitButton() {
   return (
     <button
       type="submit"
-      className="px-6 py-4 bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.15em] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200 disabled:opacity-60"
+      className="h-full px-4 bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.15em] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200 disabled:opacity-60 shrink-0"
       style={{ fontFamily: "var(--font-space-mono)" }}
       disabled={pending}
     >
@@ -42,12 +42,15 @@ export function NewsletterForm() {
 
   return (
     <div className="space-y-2">
-      <form className="flex" action={formAction}>
+      <form
+        className="flex h-10 border border-[var(--vsc-gray-300)] rounded-sm overflow-hidden focus-within:border-[var(--vsc-gray-900)]"
+        action={formAction}
+      >
         <input
           type="email"
           name="email"
           placeholder="your@email.com"
-          className="flex-1 px-5 py-4 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-xs tracking-[0.15em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]"
+          className="flex-1 min-w-0 h-full px-4 py-2 bg-[var(--vsc-cream)] border-0 text-[var(--vsc-gray-900)] text-xs tracking-[0.15em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:ring-0"
           style={{ fontFamily: "var(--font-space-mono)" }}
           required
         />

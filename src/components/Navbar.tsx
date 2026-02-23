@@ -180,7 +180,7 @@ export function Navbar() {
         </div>
 
         {/* Right side — Currency, Search, Favourites, Cart + User */}
-        <div className="flex items-center gap-1 sm:gap-2 md:gap-4">
+        <div className="flex items-center gap-1 sm:gap-1 md:gap-1">
           {/* Currency selector — hide on very small screens */}
           <div className="relative hidden sm:block" ref={currencyRef}>
             <button
