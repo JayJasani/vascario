@@ -94,7 +94,7 @@ export function CollectionGrid({ products, compactTopPadding }: CollectionGridPr
       </div>
 
       {/* Responsive grid: 1→2→3→4 columns, equal-height cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 px-4 sm:px-6 md:px-12 lg:px-20">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 px-4 sm:px-6 md:px-12 lg:px-20">
         {products.length > 0 ? (
           products.map((product) => (
             <div key={product.id} className="flex flex-col">
