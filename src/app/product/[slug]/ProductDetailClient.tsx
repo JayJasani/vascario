@@ -502,8 +502,8 @@ export function ProductDetailClient({
               <div className="flex items-baseline gap-2 sm:gap-3 mb-4 sm:mb-6 flex-wrap">
                 {hasDiscount(product.cutPrice, product.price) && (
                   <span
-                    className="text-base sm:text-lg text-[var(--vsc-gray-500)] line-through"
-                    style={{ fontFamily: "var(--font-space-mono)" }}
+                    className="text-base sm:text-lg text-[var(--vsc-gray-500)]"
+                    style={{ fontFamily: "var(--font-space-mono)", textDecoration: "line-through" }}
                   >
                     {formatPrice(product.cutPrice!)}
                   </span>
