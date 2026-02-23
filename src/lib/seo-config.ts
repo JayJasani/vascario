@@ -799,6 +799,7 @@ export const SEO_STRUCTURED_DATA = {
       ratingValue: number
       reviewCount: number
     }
+    reviews?: Array<{ authorName: string; text: string; rating?: number | null }>
   }) => ({
     "@context": "https://schema.org/",
     "@type": "Product",
@@ -839,16 +840,48 @@ export const SEO_STRUCTURED_DATA = {
       url: `${SEO_BASE.siteUrl}/product/${product.slug || product.id}`,
       priceCurrency: "INR",
       price: product.price.toString(),
-      availability: product.totalStock > 0 
-        ? "https://schema.org/InStock" 
+      availability: (product.totalStock ?? 0) > 0
+        ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
+      priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
       itemCondition: "https://schema.org/NewCondition",
-      priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 1 year from now
       seller: {
         "@type": "Organization",
         name: SEO_BASE.brandName,
       },
-      // Add available sizes and colors to offer
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "IN",
+        returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+        merchantReturnDays: 7,
+      },
+      shippingDetails: {
+        "@type": "OfferShippingDetails",
+        shippingRate: {
+          "@type": "MonetaryAmount",
+          value: 0,
+          currency: "INR",
+        },
+        deliveryTime: {
+          "@type": "ShippingDeliveryTime",
+          handlingTime: {
+            "@type": "QuantitativeValue",
+            minValue: 2,
+            maxValue: 4,
+            unitCode: "d",
+          },
+          transitTime: {
+            "@type": "QuantitativeValue",
+            minValue: 3,
+            maxValue: 7,
+            unitCode: "d",
+          },
+        },
+        shippingDestination: {
+          "@type": "DefinedRegion",
+          addressCountry: "IN",
+        },
+      },
       ...(product.sizes && product.sizes.length > 0 && {
         eligibleQuantity: {
           "@type": "QuantitativeValue",
@@ -856,15 +889,27 @@ export const SEO_STRUCTURED_DATA = {
         },
       }),
     },
-    ...(product.aggregateRating && {
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: product.aggregateRating.ratingValue.toString(),
-        reviewCount: product.aggregateRating.reviewCount.toString(),
-        bestRating: "5",
-        worstRating: "1",
-      },
-    }),
+    aggregateRating: product.aggregateRating
+      ? {
+          "@type": "AggregateRating",
+          ratingValue: product.aggregateRating.ratingValue.toString(),
+          reviewCount: product.aggregateRating.reviewCount.toString(),
+          bestRating: "5",
+          worstRating: "1",
+        }
+      : {
+          "@type": "AggregateRating",
+          ratingValue: "0",
+          reviewCount: "0",
+          bestRating: "5",
+          worstRating: "1",
+        },
+    review: (product.reviews ?? []).map((r) => ({
+      "@type": "Review",
+      author: { "@type": "Person", name: r.authorName },
+      reviewBody: r.text,
+      ...(r.rating != null && { reviewRating: { "@type": "Rating", ratingValue: r.rating.toString(), bestRating: "5", worstRating: "1" } }),
+    })),
   }),
 
   breadcrumb: (items: Array<{ name: string; url: string }>) => ({
@@ -912,6 +957,7 @@ export const SEO_STRUCTURED_DATA = {
     image?: string
     url: string
     price?: number
+    totalStock?: number
   }>) => ({
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -924,11 +970,24 @@ export const SEO_STRUCTURED_DATA = {
         description: item.description,
         image: item.image ? (item.image.startsWith("http") ? item.image : `${SEO_BASE.siteUrl}${item.image}`) : undefined,
         url: item.url.startsWith("http") ? item.url : `${SEO_BASE.siteUrl}${item.url}`,
-        ...(item.price && {
+        ...(item.price != null && {
           offers: {
             "@type": "Offer",
             price: item.price.toString(),
             priceCurrency: "INR",
+            availability: (item.totalStock ?? 0) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+            hasMerchantReturnPolicy: {
+              "@type": "MerchantReturnPolicy",
+              applicableCountry: "IN",
+              returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+              merchantReturnDays: 7,
+            },
+            shippingDetails: {
+              "@type": "OfferShippingDetails",
+              shippingRate: { "@type": "MonetaryAmount", value: 0, currency: "INR" },
+              shippingDestination: { "@type": "DefinedRegion", addressCountry: "IN" },
+            },
           },
         }),
       },
