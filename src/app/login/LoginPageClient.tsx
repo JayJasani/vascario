@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { EyeIcon, ViewOffIcon } from "@hugeicons/core-free-icons";
 import { Navbar } from "@/components/Navbar";
@@ -9,11 +9,32 @@ import { Footer } from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { trackLogin, trackSignUp } from "@/lib/analytics";
 
+/** Ensure redirect is a same-origin path so client nav works. Strips origin if full URL. */
+function normalizeRedirect(redirect: string | null): string {
+  if (!redirect || typeof redirect !== "string") return "/";
+  const s = redirect.trim();
+  if (!s) return "/";
+  if (s.startsWith("/")) {
+    try {
+      const u = new URL(s, "http://localhost");
+      return u.pathname + u.search + u.hash;
+    } catch {
+      return s;
+    }
+  }
+  try {
+    const u = new URL(s);
+    if (typeof window !== "undefined" && u.origin !== window.location.origin) return "/";
+    return u.pathname + u.search + u.hash;
+  } catch {
+    return "/";
+  }
+}
+
 function LoginForm() {
   const { user, loading, login, register } = useAuth();
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/";
+  const redirectTo = normalizeRedirect(searchParams.get("redirect"));
 
   const [mode, setMode] = useState<"login" | "register">("login");
   const [firstName, setFirstName] = useState("");
@@ -24,11 +45,12 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
+  // Redirect if already logged in (e.g. landed on /login while authenticated)
   useEffect(() => {
     if (!loading && user) {
-      router.replace(redirectTo);
+      window.location.replace(redirectTo);
     }
-  }, [loading, user, router, redirectTo]);
+  }, [loading, user, redirectTo]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -42,7 +64,8 @@ function LoginForm() {
         await register(email, password, { firstName, lastName });
         trackSignUp({ method: "email" });
       }
-      router.replace(redirectTo);
+      // Full-page navigation so redirect always runs and avoids dev "rendering into next view"
+      window.location.replace(redirectTo);
     } catch (err: any) {
       console.error("Auth error", err);
       setError(err?.message ?? "Authentication failed. Please try again.");

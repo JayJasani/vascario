@@ -375,7 +375,7 @@ export default function CartPageClient() {
                                     {/* CTA */}
                                     <Link
                                         href="/checkout"
-                                        className="block w-full text-center px-4 sm:px-6 py-3 sm:py-4 md:px-10 md:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-xs sm:text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
+                                        className="block w-full text-center px-4 sm:px-6 py-3 sm:py-4 md:px-10 md:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
                                         style={{ fontFamily: "var(--font-space-mono)" }}
                                     >
                                         PROCEED TO CHECKOUT →

@@ -74,7 +74,18 @@ interface CartContextType {
   cartCount: number
 }
 
-const CartContext = createContext<CartContextType | undefined>(undefined)
+const CartContext = createContext<CartContextType | null>(null)
+
+/** Default no-op cart when rendered outside CartProvider (e.g. SSR/streaming edge case). */
+const defaultCartValue: CartContextType = {
+  items: [],
+  addItem: () => {},
+  removeItem: () => {},
+  updateQuantity: () => {},
+  clearCart: () => {},
+  cartTotal: 0,
+  cartCount: 0,
+}
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
@@ -133,6 +144,5 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
 export function useCart() {
   const context = useContext(CartContext)
-  if (!context) throw new Error("useCart must be used within a CartProvider")
-  return context
+  return context ?? defaultCartValue
 }

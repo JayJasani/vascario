@@ -21,13 +21,17 @@ import {
   trackSelectSize,
   trackViewItem,
 } from "@/lib/analytics";
+import {
+  subscribeBackInStock,
+  type BackInStockState,
+} from "@/app/back-in-stock-actions";
 import { getColorDisplayName, parseColorEntry } from "@/lib/hex-to-color-name";
 import { hasDiscount, getDiscountAmount } from "@/lib/discount";
 import { getImageAlt } from "@/lib/seo-utils";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef, type ReactNode } from "react";
+import { useEffect, useState, useRef, useActionState, type ReactNode } from "react";
 
 export interface StockBySize {
   size: string;
@@ -119,6 +123,10 @@ export function ProductDetailClient({
   const [productDetailsOpen, setProductDetailsOpen] = useState(false);
   const [additionalInfoOpen, setAdditionalInfoOpen] = useState(false);
   const imageContainerRef = useRef<HTMLDivElement>(null);
+  const [backInStockState, backInStockAction] = useActionState<
+    BackInStockState,
+    FormData
+  >(subscribeBackInStock, null);
   const { addItem } = useCart();
   const { user, loading } = useAuth();
   const { formatPrice, currencyCode } = useCurrency();
@@ -855,6 +863,64 @@ export function ProductDetailClient({
                       : `Max ${stockForSelectedSize} available`}
               </button>
 
+              {/* Notify me when available — shown when product is out of stock */}
+              {product.totalStock === 0 && (
+                <div className="mt-4 p-4 border border-[var(--vsc-gray-700)]">
+                  <p
+                    className="text-[10px] text-[var(--vsc-gray-500)] uppercase tracking-[0.2em] mb-2"
+                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  >
+                    Notify me when available
+                  </p>
+                  {backInStockState?.success ? (
+                    <p
+                      className="text-xs text-[var(--vsc-accent)] uppercase tracking-[0.15em]"
+                      style={{ fontFamily: "var(--font-space-mono)" }}
+                    >
+                      We&apos;ll email you when this is back in stock.
+                    </p>
+                  ) : backInStockState?.alreadySubscribed ? (
+                    <p
+                      className="text-xs text-[var(--vsc-gray-500)] uppercase tracking-[0.15em]"
+                      style={{ fontFamily: "var(--font-space-mono)" }}
+                    >
+                      You&apos;re already on the list for this product.
+                    </p>
+                  ) : (
+                    <form action={backInStockAction} className="flex flex-col sm:flex-row gap-2">
+                      <input type="hidden" name="productId" value={product.id} />
+                      <input type="hidden" name="productSlug" value={product.slug} />
+                      {product.sizes.length > 0 && selectedSize ? (
+                        <input type="hidden" name="size" value={selectedSize} />
+                      ) : null}
+                      <input
+                        type="email"
+                        name="email"
+                        placeholder="your@email.com"
+                        required
+                        className="flex-1 min-w-0 px-3 py-2 border border-[var(--vsc-gray-700)] bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)] text-xs tracking-[0.15em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-accent)]"
+                        style={{ fontFamily: "var(--font-space-mono)" }}
+                      />
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] text-xs font-bold uppercase tracking-[0.15em] hover:bg-[var(--vsc-gray-800)] transition-colors duration-200 shrink-0"
+                        style={{ fontFamily: "var(--font-space-mono)" }}
+                      >
+                        Notify me
+                      </button>
+                    </form>
+                  )}
+                  {backInStockState?.error && (
+                    <p
+                      className="mt-2 text-[10px] text-red-500 uppercase tracking-[0.15em]"
+                      style={{ fontFamily: "var(--font-space-mono)" }}
+                    >
+                      {backInStockState.error}
+                    </p>
+                  )}
+                </div>
+              )}
+
               {/* Favourite toggle */}
               <button
                 type="button"
@@ -1024,6 +1090,7 @@ export function ProductDetailClient({
                   loop
                   muted
                   autoPlay
+                  preload="auto"
                   className="absolute inset-0 w-full h-full object-cover"
                 />
               ) : (

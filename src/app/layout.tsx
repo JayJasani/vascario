@@ -3,14 +3,10 @@ import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { Suspense } from "react";
 import { SmoothScroller } from "@/components/SmoothScroller";
 import { AppLoadGate } from "@/components/AppLoadGate";
+import { AppProviders } from "@/components/AppProviders";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { GoogleTagManagerHead, GoogleTagManagerNoScript } from "@/components/GoogleTagManager";
 import { GtmPageView } from "@/components/GtmPageView";
-import { AuthProvider } from "@/context/AuthContext";
-import { CartProvider } from "@/context/CartContext";
-import { CurrencyProvider } from "@/context/CurrencyContext";
-import { FavouritesProvider } from "@/context/FavouritesContext";
-import { UserProfileProvider } from "@/context/UserProfileContext";
 import { getHomeMetadata } from "@/lib/seo-config";
 import "./globals.css";
 
@@ -60,21 +56,13 @@ export default function RootLayout({
         <AppLoadGate />
         <GoogleTagManagerNoScript />
         <SmoothScroller>
-          <AuthProvider>
-            <UserProfileProvider>
-              <CurrencyProvider>
-                <CartProvider>
-                  <FavouritesProvider>
-                    <Suspense fallback={null}>
-                      <GtmPageView />
-                    </Suspense>
-                    <ScrollToTop />
-                    {children}
-                  </FavouritesProvider>
-                </CartProvider>
-              </CurrencyProvider>
-            </UserProfileProvider>
-          </AuthProvider>
+          <AppProviders>
+            <Suspense fallback={null}>
+              <GtmPageView />
+            </Suspense>
+            <ScrollToTop />
+            {children}
+          </AppProviders>
         </SmoothScroller>
       </body>
     </html>

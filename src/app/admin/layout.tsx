@@ -19,6 +19,7 @@ const navItems = [
     { label: "INVESTMENT", href: "/admin/investment", icon: "◆" },
     { label: "CONTACT", href: "/admin/contact", icon: "✉" },
     { label: "NEWSLETTER", href: "/admin/newsletter", icon: "◉" },
+    { label: "BACK IN STOCK", href: "/admin/back-in-stock", icon: "◇" },
 ];
 
 export default async function AdminLayout({

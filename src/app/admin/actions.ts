@@ -9,6 +9,7 @@ import * as InventoryController from "@/controllers/admin/InventoryController";
 import * as StaticContentController from "@/controllers/admin/StaticContentController";
 import * as ReviewController from "@/controllers/admin/ReviewController";
 import * as InvestmentController from "@/controllers/admin/InvestmentController";
+import * as BackInStockController from "@/controllers/admin/BackInStockController";
 import type { OrderStatus } from "@/models/order";
 
 // ─── DASHBOARD ─────────────────────────────────────────────────────────────────
@@ -41,6 +42,12 @@ export async function getAdminContactSubmissions() {
 
 export async function getAdminNewsletterSubscriptions() {
     return NewsletterController.getAdminNewsletterSubscriptions();
+}
+
+// ─── BACK IN STOCK NOTIFICATIONS ───────────────────────────────────────────────
+
+export async function getAdminBackInStockNotifications() {
+    return BackInStockController.getAdminBackInStockNotifications();
 }
 
 // ─── PRODUCTS / DROPS ──────────────────────────────────────────────────────────
