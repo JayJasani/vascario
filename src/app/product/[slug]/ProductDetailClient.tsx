@@ -122,6 +122,7 @@ export function ProductDetailClient({
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [productDetailsOpen, setProductDetailsOpen] = useState(false);
   const [additionalInfoOpen, setAdditionalInfoOpen] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const [backInStockState, backInStockAction] = useActionState<
     BackInStockState,
@@ -788,8 +789,12 @@ export function ProductDetailClient({
               <button
                 type="button"
                 suppressHydrationWarning
-                disabled={!canAddToCart}
-                onClick={() => {
+                disabled={!canAddToCart || isAddingToCart}
+                onClick={async () => {
+                  if (isAddingToCart) return;
+                  const start = Date.now();
+                  setIsAddingToCart(true);
+
                   if (!user) {
                     // Store cart intent before redirecting
                     const intentKey = `vascario:cart-intent:${product.id}`;
@@ -808,26 +813,40 @@ export function ProductDetailClient({
                       }
                     }
                     router.push(`/login?redirect=/product/${product.slug}`);
+                    const elapsed = Date.now() - start;
+                    const remaining = 1000 - elapsed;
+                    if (remaining > 0) {
+                      setTimeout(() => setIsAddingToCart(false), remaining);
+                    } else {
+                      setIsAddingToCart(false);
+                    }
                     return;
                   }
                   // Require size selection if sizes are available
                   if (product.sizes.length > 0 && !selectedSize) {
                     alert("Please select a size before adding to cart.");
+                    setIsAddingToCart(false);
                     return;
                   }
                   // Require color selection if colors are available
                   if (product.colors.length > 0 && !selectedColor) {
                     alert("Please select a color before adding to cart.");
+                    setIsAddingToCart(false);
                     return;
                   }
-                  if (!canAddToCart) return;
+                  if (!canAddToCart) {
+                    setIsAddingToCart(false);
+                    return;
+                  }
+
+                  const sizeForCart = selectedSize || "OS";
 
                   addItem({
                     id: product.id,
                     name: product.name,
                     price: product.price,
                     image: product.images[0] ?? "",
-                    size: selectedSize || "OS",
+                    size: sizeForCart,
                     quantity,
                   });
                   trackAddToCart({
@@ -839,11 +858,41 @@ export function ProductDetailClient({
                         item_name: product.name,
                         price: product.price,
                         quantity,
-                        item_variant: selectedSize || "OS",
+                        item_variant: sizeForCart,
                         item_category: selectedColor || undefined,
                       },
                     ],
                   });
+
+                  try {
+                    // Persist cart item to server for logged-in users
+                    try {
+                      await fetch("/api/cart", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                          productId: product.id,
+                          name: product.name,
+                          price: product.price,
+                          image: product.images[0] ?? "",
+                          size: sizeForCart,
+                          quantity,
+                        }),
+                      });
+                    } catch (err) {
+                      console.error("Failed to sync cart to server", err);
+                    }
+                  } finally {
+                    const elapsed = Date.now() - start;
+                    const remaining = 1000 - elapsed;
+                    if (remaining > 0) {
+                      setTimeout(() => setIsAddingToCart(false), remaining);
+                    } else {
+                      setIsAddingToCart(false);
+                    }
+                  }
                 }}
                 className={`w-full py-2.5 sm:py-3 text-xs sm:text-sm font-bold uppercase tracking-[0.2em] transition-all duration-200 ${canAddToCart
                   ? "bg-[var(--vsc-accent)] text-black hover:bg-black hover:text-[var(--vsc-accent)] hover:shadow-[0_0_24px_var(--vsc-accent-dim)] cursor-pointer"
@@ -854,13 +903,15 @@ export function ProductDetailClient({
                   border: "2px solid #000",
                 }}
               >
-                {canAddToCart
-                  ? `Add to Cart — ${formatPrice(product.price * quantity)}`
-                  : !hasRequiredSelections
-                    ? "Select a size"
-                    : stockForSelectedSize === 0
-                      ? "Out of stock"
-                      : `Max ${stockForSelectedSize} available`}
+                {isAddingToCart && canAddToCart
+                  ? "Adding to cart..."
+                  : canAddToCart
+                    ? `Add to Cart — ${formatPrice(product.price * quantity)}`
+                    : !hasRequiredSelections
+                      ? "Select a size"
+                      : stockForSelectedSize === 0
+                        ? "Out of stock"
+                        : `Max ${stockForSelectedSize} available`}
               </button>
 
               {/* Notify me when available — shown when product is out of stock */}
