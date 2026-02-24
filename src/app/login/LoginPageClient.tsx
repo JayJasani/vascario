@@ -1,13 +1,15 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { EyeIcon, ViewOffIcon } from "@hugeicons/core-free-icons";
+import { signInWithCustomToken } from "firebase/auth";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { trackLogin, trackSignUp } from "@/lib/analytics";
+import { auth } from "@/lib/firebase-client";
 
 /** Ensure redirect is a same-origin path so client nav works. Strips origin if full URL. */
 function normalizeRedirect(redirect: string | null): string {
@@ -35,6 +37,7 @@ function LoginForm() {
   const { user, loading, login, register } = useAuth();
   const searchParams = useSearchParams();
   const redirectTo = normalizeRedirect(searchParams.get("redirect"));
+  const googleCustomToken = searchParams.get("googleCustomToken");
 
   const [mode, setMode] = useState<"login" | "register">("login");
   const [firstName, setFirstName] = useState("");
@@ -52,7 +55,41 @@ function LoginForm() {
     }
   }, [loading, user, redirectTo]);
 
-  async function handleSubmit(e: React.FormEvent) {
+  // Handle Firebase custom token coming from Google OAuth callback
+  useEffect(() => {
+    if (!googleCustomToken || loading || user) return;
+
+    const token = googleCustomToken;
+    let cancelled = false;
+
+    async function runGoogleLogin(customToken: string) {
+      setError(null);
+      setPending(true);
+      try {
+        await signInWithCustomToken(auth, customToken);
+        trackLogin({ method: "google" });
+        window.location.replace(redirectTo);
+      } catch (err: any) {
+        if (cancelled) return;
+        console.error("Google auth error", err);
+        setError(
+          err?.message ?? "Google sign-in failed. Please try again.",
+        );
+      } finally {
+        if (!cancelled) {
+          setPending(false);
+        }
+      }
+    }
+
+    void runGoogleLogin(token);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [googleCustomToken, loading, user, redirectTo]);
+
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setPending(true);
@@ -199,6 +236,45 @@ function LoginForm() {
                   : mode === "login"
                     ? "Sign in"
                     : "Create account"}
+              </button>
+
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => {
+                  const url = `/api/auth/google?redirect=${encodeURIComponent(
+                    redirectTo,
+                  )}`;
+                  window.location.href = url;
+                }}
+                className="w-full px-6 py-3 sm:py-3.5 bg-[var(--vsc-white)] text-[var(--vsc-gray-900)] text-xs font-bold uppercase tracking-[0.2em] border-2 border-[var(--vsc-gray-900)] hover:bg-[var(--vsc-gray-900)] hover:text-[var(--vsc-cream)] transition-all duration-200 disabled:opacity-60 flex items-center justify-center gap-3"
+              >
+                <span className="inline-flex h-5 w-5 items-center justify-center rounded-sm bg-white">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 48 48"
+                    className="h-4 w-4"
+                  >
+                    <path
+                      fill="#EA4335"
+                      d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.13 13.02 17.56 9.5 24 9.5z"
+                    />
+                    <path
+                      fill="#4285F4"
+                      d="M46.98 24.55c0-1.57-.14-3.08-.39-4.55H24v9.11h12.94c-.56 2.93-2.2 5.41-4.69 7.08l7.62 5.9C44.74 38.82 46.98 32.21 46.98 24.55z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M10.54 28.59A14.5 14.5 0 0 1 9.9 24c0-1.58.27-3.11.64-4.59l-7.98-6.19C.93 16.09 0 19.41 0 23c0 3.56.93 6.88 2.56 9.78l7.98-6.19z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M24 47c6.48 0 11.93-2.13 15.9-5.8l-7.62-5.9C30.4 36.98 27.5 38 24 38c-6.44 0-11.87-3.52-14.46-8.91l-7.98 6.19C6.51 42.62 14.62 47 24 47z"
+                    />
+                    <path fill="none" d="M0 0h48v48H0z" />
+                  </svg>
+                </span>
+                <span>Continue with Google</span>
               </button>
 
               <button
