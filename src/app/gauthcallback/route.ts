@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuth } from "firebase-admin/auth";
+import "@/lib/firebase";
 
 export async function GET(request: NextRequest) {
   const url = request.nextUrl;
