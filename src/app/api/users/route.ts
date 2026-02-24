@@ -17,7 +17,11 @@ async function verifyUser(request: NextRequest) {
   if (!token) return null;
   const adminAuth = getAuth();
   const decoded = await adminAuth.verifyIdToken(token);
-  return { uid: decoded.uid, email: decoded.email ?? "" };
+  return {
+    uid: decoded.uid,
+    email: decoded.email ?? "",
+    phoneNumber: decoded.phone_number ?? undefined,
+  };
 }
 
 // parseAddress function moved to addresses route
@@ -46,6 +50,7 @@ export async function GET(request: NextRequest) {
       return Response.json({
         uid: user.uid,
         email: user.email,
+        phoneNumber: user.phoneNumber,
         displayName: user.email.split("@")[0] ?? "",
         firstName: "",
         lastName: "",
@@ -55,6 +60,7 @@ export async function GET(request: NextRequest) {
     return Response.json({
       uid: data.uid,
       email: data.email ?? user.email,
+      phoneNumber: (data as any).phoneNumber ?? user.phoneNumber,
       displayName: data.displayName ?? "",
       firstName: data.firstName ?? "",
       lastName: data.lastName ?? "",
@@ -85,6 +91,7 @@ export async function POST(request: NextRequest) {
       {
         uid: user.uid,
         email: emailStr,
+        phoneNumber: user.phoneNumber,
         displayName,
         firstName,
         lastName,

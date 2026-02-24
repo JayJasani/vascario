@@ -12,6 +12,7 @@ export interface UserAddress {
 export interface UserProfile {
     uid: string;
     email: string;
+    phoneNumber?: string;
     displayName?: string;
     firstName?: string;
     lastName?: string;

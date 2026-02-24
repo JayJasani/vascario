@@ -30,6 +30,7 @@ function convertAddressData(data: any): Omit<UserAddress, "id"> {
 export interface UserProfile {
   uid: string;
   email: string;
+  phoneNumber?: string;
   displayName: string;
   firstName: string;
   lastName: string;
@@ -43,14 +44,18 @@ async function getUserIdToken(): Promise<string | null> {
   return token || null;
 }
 
-async function verifyUserToken(): Promise<{ uid: string; email: string } | null> {
+async function verifyUserToken(): Promise<{ uid: string; email: string; phoneNumber?: string } | null> {
   const token = await getUserIdToken();
   if (!token) return null;
   
   try {
     const adminAuth = getAuth();
     const decoded = await adminAuth.verifyIdToken(token);
-    return { uid: decoded.uid, email: decoded.email ?? "" };
+    return {
+      uid: decoded.uid,
+      email: decoded.email ?? "",
+      phoneNumber: decoded.phone_number ?? undefined,
+    };
   } catch (error) {
     console.error("Token verification error:", error);
     return null;
@@ -80,6 +85,7 @@ export async function getUserProfile(): Promise<UserProfile | null> {
       return {
         uid: user.uid,
         email: user.email,
+        phoneNumber: user.phoneNumber,
         displayName: user.email.split("@")[0] ?? "",
         firstName: "",
         lastName: "",
@@ -96,6 +102,7 @@ export async function getUserProfile(): Promise<UserProfile | null> {
     return {
       uid: userData.uid || user.uid,
       email: userData.email ?? user.email,
+      phoneNumber: userData.phoneNumber ?? user.phoneNumber,
       displayName: userData.displayName ?? "",
       firstName: userData.firstName ?? "",
       lastName: userData.lastName ?? "",
@@ -125,6 +132,7 @@ export async function createUserProfile(updates: {
       {
         uid: user.uid,
         email: emailStr,
+        phoneNumber: user.phoneNumber,
         displayName,
         firstName: updates.firstName?.trim() ?? "",
         lastName: updates.lastName?.trim() ?? "",
@@ -165,7 +173,7 @@ export async function updateUserProfile(updates: {
       await ref.update(updateData);
     } else {
       await ref.set(
-        { uid: user.uid, email: user.email, ...updateData },
+        { uid: user.uid, email: user.email, phoneNumber: user.phoneNumber, ...updateData },
         { merge: true }
       );
     }
@@ -173,5 +181,49 @@ export async function updateUserProfile(updates: {
   } catch (error) {
     console.error("Failed to update user profile:", error);
     return { success: false, error: "Failed to update profile" };
+  }
+}
+
+/**
+ * Ensure a basic user record exists in the users collection for the
+ * currently authenticated user, including their mobile number when available.
+ * Safe to call multiple times.
+ */
+export async function ensureUserRecord(): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await verifyUserToken();
+    if (!user) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const ref = db.collection(COLLECTIONS.USERS).doc(user.uid);
+    const doc = await ref.get();
+    const existing = doc.data() ?? {};
+
+    const updateData: Record<string, unknown> = {};
+
+    if (!doc.exists) {
+      updateData.uid = user.uid;
+      updateData.email = user.email;
+      updateData.displayName = user.email ? user.email.split("@")[0] ?? "" : "";
+      updateData.createdAt = FieldValue.serverTimestamp();
+    }
+
+    // Backfill email/phoneNumber if missing on an existing record
+    if (!existing.email && user.email) {
+      updateData.email = user.email;
+    }
+    if (!existing.phoneNumber && user.phoneNumber) {
+      updateData.phoneNumber = user.phoneNumber;
+    }
+
+    if (Object.keys(updateData).length > 0) {
+      await ref.set(updateData, { merge: true });
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to ensure user record:", error);
+    return { success: false, error: "Failed to ensure user record" };
   }
 }
