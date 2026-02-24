@@ -1,15 +1,42 @@
 "use client";
 
-import { Suspense, useEffect, useState, type FormEvent } from "react";
+import {
+  Suspense,
+  useEffect,
+  useState,
+  useRef,
+  type FormEvent,
+} from "react";
 import { useSearchParams } from "next/navigation";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { EyeIcon, ViewOffIcon } from "@hugeicons/core-free-icons";
-import { signInWithCustomToken } from "firebase/auth";
+import {
+  signInWithCustomToken,
+  signInWithPhoneNumber,
+  RecaptchaVerifier,
+  type ConfirmationResult,
+} from "firebase/auth";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
-import { trackLogin, trackSignUp } from "@/lib/analytics";
+import { trackLogin } from "@/lib/analytics";
 import { auth } from "@/lib/firebase-client";
+import { OtpInput } from "@/components/OtpInput";
+
+type CountryOption = {
+  iso2: string;
+  name: string;
+  dial: string;
+  flag: string;
+};
+
+const OTP_LENGTH = 6;
+
+const COUNTRY_OPTIONS: CountryOption[] = [
+  { iso2: "IN", name: "India", dial: "+91", flag: "🇮🇳" },
+  { iso2: "US", name: "United States", dial: "+1", flag: "🇺🇸" },
+  { iso2: "GB", name: "United Kingdom", dial: "+44", flag: "🇬🇧" },
+  { iso2: "AU", name: "Australia", dial: "+61", flag: "🇦🇺" },
+  { iso2: "AE", name: "United Arab Emirates", dial: "+971", flag: "🇦🇪" },
+];
 
 /** Ensure redirect is a same-origin path so client nav works. Strips origin if full URL. */
 function normalizeRedirect(redirect: string | null): string {
@@ -34,19 +61,22 @@ function normalizeRedirect(redirect: string | null): string {
 }
 
 function LoginForm() {
-  const { user, loading, login, register } = useAuth();
+  const { user, loading } = useAuth();
   const searchParams = useSearchParams();
   const redirectTo = normalizeRedirect(searchParams.get("redirect"));
   const googleCustomToken = searchParams.get("googleCustomToken");
 
-  const [mode, setMode] = useState<"login" | "register">("login");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [countryIso2, setCountryIso2] = useState<CountryOption["iso2"]>("IN");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState<"enterPhone" | "enterOtp">("enterPhone");
+  const [confirmationResult, setConfirmationResult] =
+    useState<ConfirmationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
+  const selectedCountry =
+    COUNTRY_OPTIONS.find((c) => c.iso2 === countryIso2) ?? COUNTRY_OPTIONS[0]!;
 
   // Redirect if already logged in (e.g. landed on /login while authenticated)
   useEffect(() => {
@@ -89,23 +119,82 @@ function LoginForm() {
     };
   }, [googleCustomToken, loading, user, redirectTo]);
 
-  async function handleSubmit(e: FormEvent) {
+  async function ensureRecaptcha() {
+    if (typeof window === "undefined") return;
+    if (!recaptchaVerifierRef.current) {
+      recaptchaVerifierRef.current = new RecaptchaVerifier(
+        auth,
+        "recaptcha-container",
+        {
+          size: "invisible",
+        },
+      );
+    }
+  }
+
+  async function handleSendOtp(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setPending(true);
     try {
-      if (mode === "login") {
-        await login(email, password);
-        trackLogin({ method: "email" });
-      } else {
-        await register(email, password, { firstName, lastName });
-        trackSignUp({ method: "email" });
+      if (!phoneNumber.trim()) {
+        throw new Error("Please enter your phone number.");
       }
-      // Full-page navigation so redirect always runs and avoids dev "rendering into next view"
-      window.location.replace(redirectTo);
+      const fullPhone = `${selectedCountry.dial}${phoneNumber
+        .trim()
+        .replace(/\s+/g, "")}`;
+      await ensureRecaptcha();
+      if (!recaptchaVerifierRef.current) {
+        throw new Error("Failed to initialize verification. Please try again.");
+      }
+      const confirmation = await signInWithPhoneNumber(
+        auth,
+        fullPhone,
+        recaptchaVerifierRef.current,
+      );
+      setConfirmationResult(confirmation);
+      setStep("enterOtp");
     } catch (err: any) {
-      console.error("Auth error", err);
-      setError(err?.message ?? "Authentication failed. Please try again.");
+      console.error("Send OTP error", err);
+      setError(
+        err?.message ??
+          "Failed to send verification code. Please check the phone number.",
+      );
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function handleVerifyOtp(e: FormEvent) {
+    e.preventDefault();
+    if (!confirmationResult) {
+      setError("Please request a verification code first.");
+      return;
+    }
+    if (otp.trim().length !== OTP_LENGTH) {
+      setError(`Please enter the full ${OTP_LENGTH}-digit code.`);
+      return;
+    }
+    setError(null);
+    setPending(true);
+    try {
+      const result = await confirmationResult.confirm(otp.trim());
+      trackLogin({ method: "phone" });
+
+      // If this is a phone-only account without email/display name,
+      // send the user to profile so they can complete their details.
+      const firebaseUser = result.user ?? auth.currentUser;
+      const shouldCompleteProfile =
+        !!firebaseUser &&
+        (!firebaseUser.email || !firebaseUser.displayName);
+
+      const target = shouldCompleteProfile ? "/profile" : redirectTo;
+      window.location.replace(target);
+    } catch (err: any) {
+      console.error("Verify OTP error", err);
+      setError(
+        err?.message ?? "Invalid verification code. Please try again.",
+      );
     } finally {
       setPending(false);
     }
@@ -129,7 +218,7 @@ function LoginForm() {
               className="text-2xl sm:text-3xl md:text-4xl text-[var(--vsc-gray-900)] leading-tight"
               style={{ fontFamily: "var(--font-space-grotesk)" }}
             >
-              {mode === "login" ? "Sign in to continue" : "Create your account"}
+              Sign in to continue
             </h1>
             <p
               className="text-xs sm:text-sm text-[var(--vsc-gray-500)] uppercase tracking-[0.2em] max-w-sm"
@@ -142,81 +231,54 @@ function LoginForm() {
           {/* Right — form card */}
           <div className="border-2 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] px-4 sm:px-6 py-5 sm:py-7 md:px-8 md:py-8 shadow-sm">
             <form
-              onSubmit={handleSubmit}
+              onSubmit={step === "enterPhone" ? handleSendOtp : handleVerifyOtp}
               className="space-y-5 sm:space-y-6"
               style={{ fontFamily: "var(--font-space-mono)" }}
             >
-              {mode === "register" && (
-                <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-[0.25em] text-[var(--vsc-gray-600)]">
-                        First name
-                      </label>
-                      <input
-                        type="text"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        className="w-full px-5 py-3.5 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-sm tracking-[0.1em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]"
-                        placeholder="First name"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase tracking-[0.25em] text-[var(--vsc-gray-600)]">
-                        Last name
-                      </label>
-                      <input
-                        type="text"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        className="w-full px-5 py-3.5 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-sm tracking-[0.1em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]"
-                        placeholder="Last name"
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-[0.25em] text-[var(--vsc-gray-600)]">
-                  Email
+                  Phone number
                 </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-5 py-3.5 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-sm tracking-[0.1em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]"
-                  placeholder="you@example.com"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-[0.25em] text-[var(--vsc-gray-600)]">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pr-14 px-5 py-3.5 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-sm tracking-[0.1em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]"
-                    placeholder="••••••••"
-                    required
-                    minLength={6}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] focus:outline-none focus:text-[var(--vsc-gray-900)]"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                <div className="flex gap-3">
+                  <select
+                    value={countryIso2}
+                    onChange={(e) => setCountryIso2(e.target.value)}
+                    className="px-3 py-3.5 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-xs tracking-[0.12em] focus:outline-none focus:border-[var(--vsc-gray-900)]"
+                    disabled={pending || step === "enterOtp"}
                   >
-                    <HugeiconsIcon
-                      icon={showPassword ? ViewOffIcon : EyeIcon}
-                      size={24}
-                    />
-                  </button>
+                    {COUNTRY_OPTIONS.map((c) => (
+                      <option key={c.iso2} value={c.iso2}>
+                        {c.flag} {c.dial}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className="flex-1 px-5 py-3.5 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-sm tracking-[0.1em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]"
+                    placeholder="98765 43210"
+                    disabled={pending || step === "enterOtp"}
+                    required
+                  />
                 </div>
               </div>
+
+              {step === "enterOtp" && (
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-[0.25em] text-[var(--vsc-gray-600)]">
+                    Verification code
+                  </label>
+                  <OtpInput
+                    length={OTP_LENGTH}
+                    value={otp}
+                    onChange={setOtp}
+                    disabled={pending}
+                  />
+                </div>
+              )}
+
+              <div id="recaptcha-container" />
 
               {error && (
                 <p className="text-[10px] text-red-500 uppercase tracking-[0.2em]">
@@ -230,12 +292,12 @@ function LoginForm() {
                 className="w-full px-6 py-3 sm:py-3.5 bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 disabled:opacity-60"
               >
                 {pending
-                  ? mode === "login"
-                    ? "Signing in..."
-                    : "Creating account..."
-                  : mode === "login"
-                    ? "Sign in"
-                    : "Create account"}
+                  ? step === "enterPhone"
+                    ? "Sending code..."
+                    : "Verifying..."
+                  : step === "enterPhone"
+                    ? "Send code"
+                    : "Verify & sign in"}
               </button>
 
               <button
@@ -275,18 +337,6 @@ function LoginForm() {
                   </svg>
                 </span>
                 <span>Continue with Google</span>
-              </button>
-
-              <button
-                type="button"
-                className="w-full text-[10px] text-[var(--vsc-gray-500)] uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)]"
-                onClick={() =>
-                  setMode((m) => (m === "login" ? "register" : "login"))
-                }
-              >
-                {mode === "login"
-                  ? "New here? Create an account"
-                  : "Already have an account? Sign in"}
               </button>
             </form>
           </div>
