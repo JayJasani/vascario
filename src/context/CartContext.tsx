@@ -22,6 +22,7 @@ type CartAction =
   | { type: "UPDATE_QUANTITY"; payload: { id: string; size: string; quantity: number } }
   | { type: "CLEAR_CART" }
   | { type: "HYDRATE"; payload: CartItem[] }
+  | { type: "UPDATE_PRICES"; payload: { id: string; size: string; price: number }[] }
 
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
@@ -59,6 +60,23 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return { items: [] }
     case "HYDRATE":
       return { items: action.payload }
+    case "UPDATE_PRICES":
+      if (!action.payload.length) return state
+      return {
+        items: state.items.map((item) => {
+          const match = action.payload.find(
+            (u) => u.id === item.id && u.size === item.size
+          )
+          if (!match) return item
+          if (typeof match.price !== "number" || !Number.isFinite(match.price)) {
+            return item
+          }
+          if (match.price === item.price) {
+            return item
+          }
+          return { ...item, price: match.price }
+        }),
+      }
     default:
       return state
   }
@@ -70,6 +88,7 @@ interface CartContextType {
   removeItem: (id: string, size: string) => void
   updateQuantity: (id: string, size: string, quantity: number) => void
   clearCart: () => void
+  refreshPrices: (updates: { id: string; size: string; price: number }[]) => void
   cartTotal: number
   cartCount: number
 }
@@ -83,6 +102,7 @@ const defaultCartValue: CartContextType = {
   removeItem: () => {},
   updateQuantity: () => {},
   clearCart: () => {},
+  refreshPrices: () => {},
   cartTotal: 0,
   cartCount: 0,
 }
@@ -129,13 +149,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const updateQuantity = (id: string, size: string, quantity: number) =>
     dispatch({ type: "UPDATE_QUANTITY", payload: { id, size, quantity } })
   const clearCart = () => dispatch({ type: "CLEAR_CART" })
+  const refreshPrices = (updates: { id: string; size: string; price: number }[]) =>
+    dispatch({ type: "UPDATE_PRICES", payload: updates })
 
   const cartTotal = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const cartCount = state.items.reduce((sum, item) => sum + item.quantity, 0)
 
   return (
     <CartContext.Provider
-      value={{ items: state.items, addItem, removeItem, updateQuantity, clearCart, cartTotal, cartCount }}
+      value={{ items: state.items, addItem, removeItem, updateQuantity, clearCart, refreshPrices, cartTotal, cartCount }}
     >
       {children}
     </CartContext.Provider>

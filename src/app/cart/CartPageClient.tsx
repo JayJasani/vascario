@@ -17,14 +17,75 @@ import {
 export default function CartPageClient() {
     const { user } = useAuth()
     const { formatPrice } = useCurrency()
-    const { items, updateQuantity, removeItem, cartTotal, cartCount } = useCart()
+    const { items, updateQuantity, removeItem, cartTotal, cartCount, refreshPrices } = useCart()
     const [mounted, setMounted] = useState(false)
 
+    const [repricing, setRepricing] = useState(false)
+
     const viewCartFired = useRef(false)
+    const lastRepricedKeyRef = useRef<string | null>(null)
 
     useEffect(() => {
         setMounted(true)
     }, [])
+
+    // Refresh prices from server so cart always reflects latest product prices
+    useEffect(() => {
+        if (!mounted) return
+        if (!user) return
+        if (!items.length) return
+
+        const key = items
+            .map((item) => `${item.id}:${item.size}`)
+            .sort()
+            .join("|")
+
+        if (lastRepricedKeyRef.current === key) return
+        lastRepricedKeyRef.current = key
+
+        const controller = new AbortController()
+
+        ; (async () => {
+            try {
+                setRepricing(true)
+                const uniqueIds = Array.from(new Set(items.map((item) => item.id)))
+                const res = await fetch("/api/products/pricing", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ ids: uniqueIds }),
+                    signal: controller.signal,
+                })
+                if (!res.ok) {
+                    return
+                }
+                const data = (await res.json()) as {
+                    prices?: Record<string, { price: number }>
+                }
+                if (!data?.prices) return
+
+                const updates: { id: string; size: string; price: number }[] = []
+                for (const item of items) {
+                    const p = data.prices[item.id]
+                    if (!p) continue
+                    if (typeof p.price !== "number" || !Number.isFinite(p.price)) continue
+                    if (p.price === item.price) continue
+                    updates.push({ id: item.id, size: item.size, price: p.price })
+                }
+                if (updates.length) {
+                    refreshPrices(updates)
+                }
+            } catch (err) {
+                if ((err as any)?.name === "AbortError") return
+                console.error("Failed to refresh cart prices", err)
+            } finally {
+                if (!controller.signal.aborted) {
+                    setRepricing(false)
+                }
+            }
+        })()
+
+        return () => controller.abort()
+    }, [mounted, user, items, refreshPrices])
 
     useEffect(() => {
         if (mounted && items.length > 0 && !viewCartFired.current) {
@@ -54,7 +115,7 @@ export default function CartPageClient() {
             <Navbar />
 
             <div className="pt-24 sm:pt-28 md:pt-36 pb-12 sm:pb-20 px-4 sm:px-6 md:px-12 lg:px-20">
-                {/* ===== KINETIC TITLE ===== */}
+                        {/* ===== KINETIC TITLE ===== */}
                 <div className="relative mb-8 md:mb-8">
                     <h1
                         className="text-[var(--vsc-gray-900)] select-none relative z-10"
@@ -72,12 +133,22 @@ export default function CartPageClient() {
                         <span className="text-[var(--vsc-accent)]">BAG</span>
                     </h1>
                     {/* Item counter */}
-                    <span
-                        className="block mt-4 text-xs text-[var(--vsc-gray-400)] uppercase tracking-[0.3em]"
-                        style={{ fontFamily: "var(--font-space-mono)" }}
-                    >
-                        [ {cartCount} {cartCount === 1 ? "ITEM" : "ITEMS"} ]
-                    </span>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-4">
+                        <span
+                            className="text-xs text-[var(--vsc-gray-400)] uppercase tracking-[0.3em]"
+                            style={{ fontFamily: "var(--font-space-mono)" }}
+                        >
+                            [ {cartCount} {cartCount === 1 ? "ITEM" : "ITEMS"} ]
+                        </span>
+                        {repricing && (
+                            <span
+                                className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.25em]"
+                                style={{ fontFamily: "var(--font-space-mono)" }}
+                            >
+                                Updating prices…
+                            </span>
+                        )}
+                    </div>
                 </div>
 
                 {!user ? (
@@ -155,19 +226,7 @@ export default function CartPageClient() {
                                                     loading="lazy"
                                                 />
                                             )}
-                                            <div
-                                                className="absolute inset-0 opacity-10 z-10"
-                                                style={{
-                                                    backgroundImage: `
-                            linear-gradient(45deg, var(--vsc-gray-700) 25%, transparent 25%),
-                            linear-gradient(-45deg, var(--vsc-gray-700) 25%, transparent 25%),
-                            linear-gradient(45deg, transparent 75%, var(--vsc-gray-700) 75%),
-                            linear-gradient(-45deg, transparent 75%, var(--vsc-gray-700) 75%)
-                          `,
-                                                    backgroundSize: "20px 20px",
-                                                    backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
-                                                }}
-                                            />
+                                           
                                             <span
                                                 className="text-[var(--vsc-gray-600)] text-xs uppercase tracking-[0.3em] z-20 px-4 text-center"
                                                 style={{ fontFamily: "var(--font-space-mono)" }}

@@ -35,17 +35,71 @@ const stepVariants = {
 export default function CheckoutPageClient() {
     const { user } = useAuth()
     const { formatPrice } = useCurrency()
-    const { items, cartTotal, clearCart } = useCart()
+    const { items, cartTotal, clearCart, refreshPrices } = useCart()
     const [step, setStep] = useState(1)
     const [direction, setDirection] = useState(1)
     const [mounted, setMounted] = useState(false)
     const router = useRouter()
 
     const beginCheckoutFired = useRef(false)
+    const lastRepricedKeyRef = useRef<string | null>(null)
 
     useEffect(() => {
         setMounted(true)
     }, [])
+
+    // Ensure we use up-to-date product prices during checkout
+    useEffect(() => {
+        if (!mounted) return
+        if (!user) return
+        if (!items.length) return
+
+        const key = items
+            .map((item) => `${item.id}:${item.size}`)
+            .sort()
+            .join("|")
+
+        if (lastRepricedKeyRef.current === key) return
+        lastRepricedKeyRef.current = key
+
+        const controller = new AbortController()
+
+        ; (async () => {
+            try {
+                const uniqueIds = Array.from(new Set(items.map((item) => item.id)))
+                const res = await fetch("/api/products/pricing", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ ids: uniqueIds }),
+                    signal: controller.signal,
+                })
+                if (!res.ok) {
+                    return
+                }
+                const data = (await res.json()) as {
+                    prices?: Record<string, { price: number }>
+                }
+                if (!data?.prices) return
+
+                const updates: { id: string; size: string; price: number }[] = []
+                for (const item of items) {
+                    const p = data.prices[item.id]
+                    if (!p) continue
+                    if (typeof p.price !== "number" || !Number.isFinite(p.price)) continue
+                    if (p.price === item.price) continue
+                    updates.push({ id: item.id, size: item.size, price: p.price })
+                }
+                if (updates.length) {
+                    refreshPrices(updates)
+                }
+            } catch (err) {
+                if ((err as any)?.name === "AbortError") return
+                console.error("Failed to refresh checkout prices", err)
+            }
+        })()
+
+        return () => controller.abort()
+    }, [mounted, user, items, refreshPrices])
 
     const buildAnalyticsItems = (): AnalyticsItem[] =>
         items.map((item, i) => ({
