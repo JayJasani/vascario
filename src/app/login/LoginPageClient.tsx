@@ -97,6 +97,25 @@ function LoginForm() {
       setPending(true);
       try {
         await signInWithCustomToken(auth, customToken);
+
+        try {
+          const firebaseUser = auth.currentUser;
+          if (firebaseUser) {
+            const idToken = await firebaseUser.getIdToken();
+            await fetch("/api/users/ensure", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${idToken}`,
+              },
+            });
+          }
+        } catch (ensureErr) {
+          console.error(
+            "Failed to ensure user record after Google login:",
+            ensureErr,
+          );
+        }
+
         trackLogin({ method: "google" });
         window.location.replace(redirectTo);
       } catch (err: any) {
