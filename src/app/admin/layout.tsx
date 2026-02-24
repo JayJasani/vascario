@@ -13,6 +13,7 @@ const navItems = [
     { label: "DASHBOARD", href: "/admin", icon: "◈" },
     { label: "DROPS", href: "/admin/drops", icon: "▣" },
     { label: "ORDERS", href: "/admin/orders", icon: "⬡" },
+    { label: "USERS", href: "/admin/users", icon: "◎" },
     { label: "INVENTORY", href: "/admin/inventory", icon: "▦" },
     { label: "STATIC CONTENT", href: "/admin/static-content", icon: "▤" },
     { label: "REVIEWS", href: "/admin/reviews", icon: "★" },

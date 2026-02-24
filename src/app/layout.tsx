@@ -50,9 +50,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${spaceGrotesk.variable} ${spaceMono.variable}`}>
-        <div id="app-initial-loading" aria-hidden="true">
-          <span className="app-load-text">VASCARIO</span>
-        </div>
+        <div id="app-initial-loading" aria-hidden="true" />
         <AppLoadGate />
         <GoogleTagManagerNoScript />
         <SmoothScroller>

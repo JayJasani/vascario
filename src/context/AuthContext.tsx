@@ -57,6 +57,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ token }),
           });
+
+          // Ensure there is a corresponding user record (with mobile number when available)
+          try {
+            const { ensureUserRecord } = await import("@/app/user-actions");
+            await ensureUserRecord();
+          } catch (err) {
+            console.error("Failed to ensure user record:", err);
+          }
         } catch (error) {
           console.error("Failed to sync token:", error);
         }
