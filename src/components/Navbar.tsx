@@ -13,7 +13,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { CURRENCIES } from "@/lib/currency";
 
@@ -46,6 +46,15 @@ export function Navbar() {
   const [mounted, setMounted] = useState(false);
   const currencyRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const cartIconRef = useRef<HTMLAnchorElement | null>(null);
+  const [cartAnimation, setCartAnimation] = useState<{
+    id: number;
+    fromX: number;
+    fromY: number;
+    dx: number;
+    dy: number;
+    image?: string;
+  } | null>(null);
 
   useEffect(() => setMounted(true), []);
   const { cartCount } = useCart();
@@ -89,6 +98,50 @@ export function Navbar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleAddToCartAnimation = (
+      event: Event,
+    ) => {
+      const customEvent = event as CustomEvent<{
+        from: DOMRect;
+        image?: string;
+      }>;
+
+      if (!cartIconRef.current || !customEvent.detail?.from) return;
+
+      const cartRect = cartIconRef.current.getBoundingClientRect();
+      const fromRect = customEvent.detail.from;
+
+      const fromX = fromRect.left + fromRect.width / 2;
+      const fromY = fromRect.top + fromRect.height / 2;
+      const toX = cartRect.left + cartRect.width / 2;
+      const toY = cartRect.top + cartRect.height / 2;
+
+      setCartAnimation({
+        id: Date.now(),
+        fromX,
+        fromY,
+        dx: toX - fromX,
+        dy: toY - fromY,
+        image: customEvent.detail.image,
+      });
+    };
+
+    window.addEventListener(
+      "vascario:add-to-cart",
+      handleAddToCartAnimation as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "vascario:add-to-cart",
+        handleAddToCartAnimation as EventListener,
+      );
+    };
+  }, []);
 
   useEffect(() => {
     if (mobileMenuOpen) {
@@ -266,6 +319,7 @@ export function Navbar() {
             onPointerDown={() => router.prefetch("/cart")}
             className="relative p-2 sm:p-3 text-[var(--vsc-gray-500)] hover:text-[var(--vsc-gray-900)] transition-colors duration-200 border border-transparent"
             aria-label="View bag"
+            ref={cartIconRef}
           >
             <ShoppingBagIcon className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.5} />
             {cartCount > 0 && (
@@ -466,6 +520,37 @@ export function Navbar() {
       />
 
       <SearchPanel open={searchOpen} onClose={() => setSearchOpen(false)} />
+
+      {mounted &&
+        cartAnimation &&
+        createPortal(
+          <div className="pointer-events-none fixed inset-0 z-[65]">
+            <div
+              className="absolute w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border border-[var(--vsc-gray-900)] bg-[var(--vsc-white)] shadow-lg vascario-cart-fly"
+              style={
+                {
+                  left: cartAnimation.fromX,
+                  top: cartAnimation.fromY,
+                  transform: "translate(-50%, -50%)",
+                  "--cart-dx": `${cartAnimation.dx}px`,
+                  "--cart-dy": `${cartAnimation.dy}px`,
+                } as CSSProperties
+              }
+              onAnimationEnd={() => setCartAnimation(null)}
+            >
+              {cartAnimation.image ? (
+                <img
+                  src={cartAnimation.image}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <ShoppingBagIcon className="w-5 h-5 sm:w-6 sm:h-6 m-2 text-[var(--vsc-gray-900)]" />
+              )}
+            </div>
+          </div>,
+          document.body,
+        )}
     </nav>
   );
 }

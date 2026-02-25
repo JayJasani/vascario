@@ -123,6 +123,7 @@ export function ProductDetailClient({
   const [productDetailsOpen, setProductDetailsOpen] = useState(false);
   const [additionalInfoOpen, setAdditionalInfoOpen] = useState(false);
   const imageContainerRef = useRef<HTMLDivElement>(null);
+  const addToCartButtonRef = useRef<HTMLButtonElement | null>(null);
   const [backInStockState, backInStockAction] = useActionState<
     BackInStockState,
     FormData
@@ -789,6 +790,7 @@ export function ProductDetailClient({
                 type="button"
                 suppressHydrationWarning
                 disabled={!canAddToCart}
+                ref={addToCartButtonRef}
                 onClick={() => {
                   if (!user) {
                     // Store cart intent before redirecting
@@ -846,6 +848,20 @@ export function ProductDetailClient({
                       },
                     ],
                   });
+                  if (typeof window !== "undefined") {
+                    const rect =
+                      addToCartButtonRef.current?.getBoundingClientRect();
+                    if (rect) {
+                      window.dispatchEvent(
+                        new CustomEvent("vascario:add-to-cart", {
+                          detail: {
+                            from: rect,
+                            image: product.images[0] ?? "",
+                          },
+                        }),
+                      );
+                    }
+                  }
                 }}
                 className={`w-full py-2.5 sm:py-3 text-xs sm:text-sm font-bold uppercase tracking-[0.2em] transition-all duration-200 ${canAddToCart
                   ? "bg-[var(--vsc-accent)] text-black hover:bg-black hover:text-[var(--vsc-accent)] hover:shadow-[0_0_24px_var(--vsc-accent-dim)] cursor-pointer"
