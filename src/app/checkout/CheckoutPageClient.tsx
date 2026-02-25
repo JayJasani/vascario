@@ -779,6 +779,8 @@ function StepReview({
   onPlace: () => void;
   isPlacingOrder: boolean;
 }) {
+  const { formatPrice } = useCurrency();
+
   return (
     <div className="space-y-10">
       <div className="flex items-center gap-4 mb-8">
@@ -858,7 +860,7 @@ function StepReview({
                 className="text-xs font-bold text-[var(--vsc-white)]"
                 style={{ fontFamily: "var(--font-space-mono)" }}
               >
-                ${(item.price * item.quantity).toFixed(0)}
+                {formatPrice(item.price * item.quantity)}
               </span>
             </div>
           ))}
@@ -876,7 +878,7 @@ function StepReview({
             className="text-xl font-bold text-[var(--vsc-accent)]"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
-            ${cartTotal.toFixed(0)}
+            {formatPrice(cartTotal)}
           </span>
         </div>
       </div>
