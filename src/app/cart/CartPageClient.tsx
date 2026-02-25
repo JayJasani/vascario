@@ -1,6 +1,6 @@
 "use client"
 
-import { useCart } from "@/context/CartContext"
+import { useCart, type CartItem } from "@/context/CartContext"
 import { useCurrency } from "@/context/CurrencyContext"
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
@@ -14,25 +14,108 @@ import {
     trackChangeQuantity,
 } from "@/lib/analytics"
 
-export default function CartPageClient() {
+interface CartPageClientProps {
+    initialItems?: CartItem[]
+}
+
+export default function CartPageClient({ initialItems }: CartPageClientProps = {}) {
     const { user } = useAuth()
     const { formatPrice } = useCurrency()
-    const { items, updateQuantity, removeItem, cartTotal, cartCount } = useCart()
+    const { items, updateQuantity, removeItem, cartTotal, cartCount, refreshPrices } = useCart()
     const [mounted, setMounted] = useState(false)
 
+    const [repricing, setRepricing] = useState(false)
+
     const viewCartFired = useRef(false)
+    const lastRepricedKeyRef = useRef<string | null>(null)
+
+    const effectiveItems = items.length ? items : initialItems ?? []
+    const effectiveCartTotal =
+        items.length
+            ? cartTotal
+            : effectiveItems.reduce(
+                (sum: number, item: CartItem) => sum + item.price * item.quantity,
+                0,
+            )
+    const effectiveCartCount =
+        items.length
+            ? cartCount
+            : effectiveItems.reduce(
+                (sum: number, item: CartItem) => sum + item.quantity,
+                0,
+            )
 
     useEffect(() => {
         setMounted(true)
     }, [])
 
+    // Refresh prices from server so cart always reflects latest product prices
     useEffect(() => {
-        if (mounted && items.length > 0 && !viewCartFired.current) {
+        if (!mounted) return
+        if (!user) return
+        if (!effectiveItems.length) return
+
+        const key = effectiveItems
+            .map((item: CartItem) => `${item.id}:${item.size}`)
+            .sort()
+            .join("|")
+
+        if (lastRepricedKeyRef.current === key) return
+        lastRepricedKeyRef.current = key
+
+        const controller = new AbortController()
+
+        ; (async () => {
+            try {
+                setRepricing(true)
+                const uniqueIds = Array.from(
+                    new Set(effectiveItems.map((item: CartItem) => item.id)),
+                )
+                const res = await fetch("/api/products/pricing", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ ids: uniqueIds }),
+                    signal: controller.signal,
+                })
+                if (!res.ok) {
+                    return
+                }
+                const data = (await res.json()) as {
+                    prices?: Record<string, { price: number }>
+                }
+                if (!data?.prices) return
+
+                const updates: { id: string; size: string; price: number }[] = []
+                for (const item of effectiveItems as CartItem[]) {
+                    const p = data.prices[item.id]
+                    if (!p) continue
+                    if (typeof p.price !== "number" || !Number.isFinite(p.price)) continue
+                    if (p.price === item.price) continue
+                    updates.push({ id: item.id, size: item.size, price: p.price })
+                }
+                if (updates.length) {
+                    refreshPrices(updates)
+                }
+            } catch (err) {
+                if ((err as any)?.name === "AbortError") return
+                console.error("Failed to refresh cart prices", err)
+            } finally {
+                if (!controller.signal.aborted) {
+                    setRepricing(false)
+                }
+            }
+        })()
+
+        return () => controller.abort()
+    }, [mounted, user, effectiveItems, refreshPrices])
+
+    useEffect(() => {
+        if (mounted && effectiveItems.length > 0 && !viewCartFired.current) {
             viewCartFired.current = true
             trackViewCart({
                 currency: "INR",
-                value: cartTotal,
-                items: items.map((item, i) => ({
+                value: effectiveCartTotal,
+                items: effectiveItems.map((item, i) => ({
                     item_id: item.id,
                     item_name: item.name,
                     price: item.price,
@@ -44,8 +127,8 @@ export default function CartPageClient() {
         }
     }, [mounted, items, cartTotal])
 
-    const shipping = cartTotal > 0 ? 0 : 0
-    const total = cartTotal + shipping
+    const shipping = effectiveCartTotal > 0 ? 0 : 0
+    const total = effectiveCartTotal + shipping
 
     if (!mounted) return null
 
@@ -54,7 +137,7 @@ export default function CartPageClient() {
             <Navbar />
 
             <div className="pt-24 sm:pt-28 md:pt-36 pb-12 sm:pb-20 px-4 sm:px-6 md:px-12 lg:px-20">
-                {/* ===== KINETIC TITLE ===== */}
+                        {/* ===== KINETIC TITLE ===== */}
                 <div className="relative mb-8 md:mb-8">
                     <h1
                         className="text-[var(--vsc-gray-900)] select-none relative z-10"
@@ -72,12 +155,22 @@ export default function CartPageClient() {
                         <span className="text-[var(--vsc-accent)]">BAG</span>
                     </h1>
                     {/* Item counter */}
-                    <span
-                        className="block mt-4 text-xs text-[var(--vsc-gray-400)] uppercase tracking-[0.3em]"
-                        style={{ fontFamily: "var(--font-space-mono)" }}
-                    >
-                        [ {cartCount} {cartCount === 1 ? "ITEM" : "ITEMS"} ]
-                    </span>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-4">
+                        <span
+                            className="text-xs text-[var(--vsc-gray-400)] uppercase tracking-[0.3em]"
+                            style={{ fontFamily: "var(--font-space-mono)" }}
+                        >
+                            [ {effectiveCartCount} {effectiveCartCount === 1 ? "ITEM" : "ITEMS"} ]
+                        </span>
+                        {repricing && (
+                            <span
+                                className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.25em]"
+                                style={{ fontFamily: "var(--font-space-mono)" }}
+                            >
+                                Updating prices…
+                            </span>
+                        )}
+                    </div>
                 </div>
 
                 {!user ? (
@@ -96,7 +189,7 @@ export default function CartPageClient() {
                             SIGN IN →
                         </Link>
                     </div>
-                ) : items.length === 0 ? (
+                ) : effectiveItems.length === 0 ? (
                     /* ===== EMPTY STATE ===== */
                     <div className="flex flex-col items-center justify-center py-20 sm:py-32 gap-6 sm:gap-8">
                         <p
@@ -118,7 +211,7 @@ export default function CartPageClient() {
                         {/* ===== BENTO GRID — CART ITEMS ===== */}
                         <div className="lg:col-span-2">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
-                                {items.map((item, index) => (
+                                {effectiveItems.map((item, index) => (
                                     <div
                                         key={`${item.id}-${item.size}-${index}`}
                                         className={`relative border-2 sm:border-3 md:border-4 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] overflow-hidden group ${index === 0 ? "md:col-span-2" : ""
@@ -155,19 +248,7 @@ export default function CartPageClient() {
                                                     loading="lazy"
                                                 />
                                             )}
-                                            <div
-                                                className="absolute inset-0 opacity-10 z-10"
-                                                style={{
-                                                    backgroundImage: `
-                            linear-gradient(45deg, var(--vsc-gray-700) 25%, transparent 25%),
-                            linear-gradient(-45deg, var(--vsc-gray-700) 25%, transparent 25%),
-                            linear-gradient(45deg, transparent 75%, var(--vsc-gray-700) 75%),
-                            linear-gradient(-45deg, transparent 75%, var(--vsc-gray-700) 75%)
-                          `,
-                                                    backgroundSize: "20px 20px",
-                                                    backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
-                                                }}
-                                            />
+                                           
                                             <span
                                                 className="text-[var(--vsc-gray-600)] text-xs uppercase tracking-[0.3em] z-20 px-4 text-center"
                                                 style={{ fontFamily: "var(--font-space-mono)" }}
@@ -280,7 +361,7 @@ export default function CartPageClient() {
 
                                 <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                                     {/* Line items */}
-                                    {items.map((item) => (
+                                    {effectiveItems.map((item) => (
                                         <div
                                             key={`${item.id}-${item.size}`}
                                             className="flex justify-between items-start pb-4 border-b border-dashed border-[var(--vsc-gray-700)]"
