@@ -34,7 +34,10 @@ function verifyWebhookSignature(
   return digest === signature;
 }
 
-async function createOrUpdateOrderFromPayment(event: any) {
+async function createOrUpdateOrderFromPayment(
+  event: any,
+  status: "PAID" | "FAILED",
+) {
   const payment = event?.payload?.payment?.entity;
   if (!payment) {
     logger.warn("Webhook payload missing payment entity");
@@ -91,7 +94,7 @@ async function createOrUpdateOrderFromPayment(event: any) {
   if (targetDoc) {
     await targetDoc.set(
       {
-        status: "PAID",
+        status,
         totalAmount: amount,
         paymentId,
         currency,
@@ -105,7 +108,7 @@ async function createOrUpdateOrderFromPayment(event: any) {
       userId,
       customerEmail,
       customerName,
-      status: "PAID",
+      status,
       totalAmount: amount,
       shippingAddress,
       paymentId,
@@ -145,7 +148,9 @@ export const vascarioPaymentCallback = onRequest(async (req, res) => {
     });
 
     if (event.event === "payment.captured") {
-      await createOrUpdateOrderFromPayment(event);
+      await createOrUpdateOrderFromPayment(event, "PAID");
+    } else if (event.event === "payment.failed") {
+      await createOrUpdateOrderFromPayment(event, "FAILED");
     }
 
     if (logRef) {

@@ -286,9 +286,24 @@ export default function CheckoutPageClient() {
           const refQuery = orderRefId ? `&ref=${encodeURIComponent(orderRefId)}` : "";
           router.push(`/order-success?order=${transactionId}${refQuery}`);
         },
-        onFailure: () => {
-          // eslint-disable-next-line no-alert
-          alert("Payment was cancelled.");
+        onFailure: async () => {
+          try {
+            await fetch("/api/razorpay/mark-order-cancelled", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                razorpayOrderId: orderData.orderId,
+              }),
+            });
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.error("Failed to mark order as cancelled", err);
+          } finally {
+            // eslint-disable-next-line no-alert
+            alert("Payment was cancelled.");
+          }
         },
       });
     } catch (error) {

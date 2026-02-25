@@ -7,10 +7,22 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
+import type { OrderStatus } from "@/models/order";
+import { StatusBadge } from "@/components/admin/StatusBadge";
+
+const userStatusStyles: Record<OrderStatus, string> = {
+  PENDING: "bg-[#FFD600] text-black border-[#FFD600]",
+  PAID: "bg-[#BAFF00] text-black border-[#BAFF00]",
+  FAILED: "bg-[#FF9900] text-black border-[#FF9900]",
+  IN_PRODUCTION: "bg-[#00BFFF] text-black border-[#00BFFF]",
+  SHIPPED: "bg-[#00E5FF] text-black border-[#00E5FF]",
+  DELIVERED: "bg-[#F5F5F0] text-black border-[#F5F5F0]",
+  CANCELLED: "bg-[#FF3333] text-white border-[#FF3333]",
+};
 
 type UserOrderSummary = {
   id: string;
-  status: string;
+  status: OrderStatus;
   totalAmount: number;
   paymentId: string | null;
   razorpayOrderId: string | null;
@@ -168,12 +180,10 @@ export default function OrdersPageClient() {
                       </span>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span
-                        className="text-xs font-bold uppercase px-2 py-1 border border-[var(--vsc-gray-400)]"
-                        style={{ fontFamily: "var(--font-space-mono)" }}
-                      >
-                        {order.status}
-                      </span>
+                      <StatusBadge
+                        status={order.status}
+                        className={userStatusStyles[order.status]}
+                      />
                       <span
                         className="text-sm font-bold text-[var(--vsc-accent)]"
                         style={{ fontFamily: "var(--font-space-mono)" }}

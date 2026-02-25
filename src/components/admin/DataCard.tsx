@@ -12,7 +12,7 @@ interface DataCardProps {
     orderId: string;
     customerName: string;
     customerEmail: string;
-    status: "PENDING" | "PAID" | "IN_PRODUCTION" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+    status: "PENDING" | "PAID" | "FAILED" | "IN_PRODUCTION" | "SHIPPED" | "DELIVERED" | "CANCELLED";
     totalAmount: string;
     items: OrderCardItem[];
     createdAt: string;

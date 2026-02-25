@@ -7,7 +7,14 @@ import { AdminLoadingBlock } from "@/components/admin/AdminLoadingBlock";
 import { updateOrderStatus, addTrackingInfo } from "../actions";
 import useSWR from "swr";
 
-type OrderStatus = "PENDING" | "PAID" | "IN_PRODUCTION" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+type OrderStatus =
+    | "PENDING"
+    | "PAID"
+    | "FAILED"
+    | "IN_PRODUCTION"
+    | "SHIPPED"
+    | "DELIVERED"
+    | "CANCELLED";
 
 interface OrderItem {
     productName: string;
@@ -33,9 +40,11 @@ const TABS: { label: string; value: OrderStatus | "ALL" }[] = [
     { label: "ALL", value: "ALL" },
     { label: "PENDING", value: "PENDING" },
     { label: "PAID", value: "PAID" },
+    { label: "FAILED", value: "FAILED" },
     { label: "IN PROD", value: "IN_PRODUCTION" },
     { label: "SHIPPED", value: "SHIPPED" },
     { label: "DELIVERED", value: "DELIVERED" },
+    { label: "CANCELLED", value: "CANCELLED" },
 ];
 
 async function fetchOrders(): Promise<Order[]> {

@@ -194,12 +194,22 @@ export async function countOrders(statusFilter?: OrderStatus): Promise<number> {
 }
 
 export async function aggregateOrderTotal(): Promise<number> {
-    const snapshot = await db.collection(COLLECTIONS.ORDERS).get();
+    // Only count revenue from non-cancelled, non-failed, non-pending orders
+    const revenueStatuses: OrderStatus[] = ["PAID", "IN_PRODUCTION", "SHIPPED", "DELIVERED"];
+
+    const snapshot = await db
+        .collection(COLLECTIONS.ORDERS)
+        .where("status", "in", revenueStatuses)
+        .get();
+
     let total = 0;
     snapshot.docs.forEach((doc: DocumentSnapshot) => {
         const data = doc.data();
-        if (data && data.totalAmount) total += Number(data.totalAmount);
+        if (data && data.totalAmount) {
+            total += Number(data.totalAmount);
+        }
     });
+
     return total;
 }
 
