@@ -132,3 +132,65 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function GET() {
+  try {
+    const user = await verifyUserFromCookies();
+    if (!user) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const cartSnap = await db
+      .collection(COLLECTIONS.USERS)
+      .doc(user.uid)
+      .collection("cartItems")
+      .get();
+
+    const items = cartSnap.docs
+      .map((doc) => {
+        const data = doc.data() as {
+          productId?: string;
+          name?: string;
+          price?: number;
+          image?: string;
+          size?: string;
+          quantity?: number;
+        };
+
+        if (
+          !data.productId ||
+          typeof data.productId !== "string" ||
+          !data.size ||
+          typeof data.size !== "string" ||
+          typeof data.price !== "number" ||
+          !Number.isFinite(data.price) ||
+          typeof data.quantity !== "number" ||
+          !Number.isFinite(data.quantity) ||
+          data.quantity <= 0
+        ) {
+          return null;
+        }
+
+        return {
+          productId: data.productId,
+          name: typeof data.name === "string" ? data.name : "Unknown item",
+          price: data.price,
+          image: typeof data.image === "string" ? data.image : "",
+          size: data.size,
+          quantity: data.quantity,
+        };
+      })
+      .filter((item) => item !== null);
+
+    return Response.json(
+      {
+        ok: true,
+        items,
+      },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error("Cart API GET error:", error);
+    return Response.json({ error: "Failed to load cart" }, { status: 500 });
+  }
+}
+

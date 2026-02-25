@@ -143,6 +143,81 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [state.items, storageKey])
 
+  // Hydrate from server (Firestore) so cart is shared across browsers
+  useEffect(() => {
+    if (!user) {
+      // When logged out, ensure in-memory cart is cleared
+      dispatch({ type: "HYDRATE", payload: [] })
+      return
+    }
+    // If we already have items (from localStorage or a previous server sync), skip loading again
+    if (state.items.length > 0) {
+      return
+    }
+    let cancelled = false
+
+    const loadFromServer = async () => {
+      try {
+        const res = await fetch("/api/cart", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        if (!res.ok) return
+
+        const data = (await res.json()) as {
+          items?: {
+            productId: string
+            name: string
+            price: number
+            image: string
+            size: string
+            quantity: number
+          }[]
+        }
+        if (!data.items || cancelled) return
+
+        const serverItems: CartItem[] = data.items
+          .map((item) => {
+            if (
+              !item.productId ||
+              typeof item.productId !== "string" ||
+              !item.size ||
+              typeof item.size !== "string" ||
+              typeof item.price !== "number" ||
+              !Number.isFinite(item.price) ||
+              typeof item.quantity !== "number" ||
+              !Number.isFinite(item.quantity) ||
+              item.quantity <= 0
+            ) {
+              return null
+            }
+            return {
+              id: item.productId,
+              name: item.name,
+              price: item.price,
+              image: item.image,
+              size: item.size,
+              quantity: item.quantity,
+            } as CartItem
+          })
+          .filter((item): item is CartItem => item !== null)
+
+        if (cancelled) return
+        dispatch({ type: "HYDRATE", payload: serverItems })
+      } catch (err) {
+        console.error("Failed to load cart from server", err)
+      }
+    }
+
+    loadFromServer()
+
+    return () => {
+      cancelled = true
+    }
+  }, [user, state.items.length])
+
   const addItem = (item: CartItem) => dispatch({ type: "ADD_ITEM", payload: item })
   const removeItem = (id: string, size: string) =>
     dispatch({ type: "REMOVE_ITEM", payload: { id, size } })
