@@ -211,9 +211,13 @@ function LoginForm() {
       window.location.replace(target);
     } catch (err: any) {
       console.error("Verify OTP error", err);
-      setError(
-        err?.message ?? "Invalid verification code. Please try again.",
-      );
+      if (err?.code === "auth/invalid-verification-code") {
+        setError("Invalid OTP");
+      } else {
+        setError(
+          err?.message ?? "Invalid verification code. Please try again.",
+        );
+      }
     } finally {
       setPending(false);
     }

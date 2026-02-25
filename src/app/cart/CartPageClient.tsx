@@ -1,6 +1,6 @@
 "use client"
 
-import { useCart } from "@/context/CartContext"
+import { useCart, type CartItem } from "@/context/CartContext"
 import { useCurrency } from "@/context/CurrencyContext"
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
@@ -14,7 +14,11 @@ import {
     trackChangeQuantity,
 } from "@/lib/analytics"
 
-export default function CartPageClient() {
+interface CartPageClientProps {
+    initialItems?: CartItem[]
+}
+
+export default function CartPageClient({ initialItems }: CartPageClientProps = {}) {
     const { user } = useAuth()
     const { formatPrice } = useCurrency()
     const { items, updateQuantity, removeItem, cartTotal, cartCount, refreshPrices } = useCart()
@@ -25,6 +29,22 @@ export default function CartPageClient() {
     const viewCartFired = useRef(false)
     const lastRepricedKeyRef = useRef<string | null>(null)
 
+    const effectiveItems = items.length ? items : initialItems ?? []
+    const effectiveCartTotal =
+        items.length
+            ? cartTotal
+            : effectiveItems.reduce(
+                (sum: number, item: CartItem) => sum + item.price * item.quantity,
+                0,
+            )
+    const effectiveCartCount =
+        items.length
+            ? cartCount
+            : effectiveItems.reduce(
+                (sum: number, item: CartItem) => sum + item.quantity,
+                0,
+            )
+
     useEffect(() => {
         setMounted(true)
     }, [])
@@ -33,10 +53,10 @@ export default function CartPageClient() {
     useEffect(() => {
         if (!mounted) return
         if (!user) return
-        if (!items.length) return
+        if (!effectiveItems.length) return
 
-        const key = items
-            .map((item) => `${item.id}:${item.size}`)
+        const key = effectiveItems
+            .map((item: CartItem) => `${item.id}:${item.size}`)
             .sort()
             .join("|")
 
@@ -48,7 +68,9 @@ export default function CartPageClient() {
         ; (async () => {
             try {
                 setRepricing(true)
-                const uniqueIds = Array.from(new Set(items.map((item) => item.id)))
+                const uniqueIds = Array.from(
+                    new Set(effectiveItems.map((item: CartItem) => item.id)),
+                )
                 const res = await fetch("/api/products/pricing", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -64,7 +86,7 @@ export default function CartPageClient() {
                 if (!data?.prices) return
 
                 const updates: { id: string; size: string; price: number }[] = []
-                for (const item of items) {
+                for (const item of effectiveItems as CartItem[]) {
                     const p = data.prices[item.id]
                     if (!p) continue
                     if (typeof p.price !== "number" || !Number.isFinite(p.price)) continue
@@ -85,15 +107,15 @@ export default function CartPageClient() {
         })()
 
         return () => controller.abort()
-    }, [mounted, user, items, refreshPrices])
+    }, [mounted, user, effectiveItems, refreshPrices])
 
     useEffect(() => {
-        if (mounted && items.length > 0 && !viewCartFired.current) {
+        if (mounted && effectiveItems.length > 0 && !viewCartFired.current) {
             viewCartFired.current = true
             trackViewCart({
                 currency: "INR",
-                value: cartTotal,
-                items: items.map((item, i) => ({
+                value: effectiveCartTotal,
+                items: effectiveItems.map((item, i) => ({
                     item_id: item.id,
                     item_name: item.name,
                     price: item.price,
@@ -105,8 +127,8 @@ export default function CartPageClient() {
         }
     }, [mounted, items, cartTotal])
 
-    const shipping = cartTotal > 0 ? 0 : 0
-    const total = cartTotal + shipping
+    const shipping = effectiveCartTotal > 0 ? 0 : 0
+    const total = effectiveCartTotal + shipping
 
     if (!mounted) return null
 
@@ -138,7 +160,7 @@ export default function CartPageClient() {
                             className="text-xs text-[var(--vsc-gray-400)] uppercase tracking-[0.3em]"
                             style={{ fontFamily: "var(--font-space-mono)" }}
                         >
-                            [ {cartCount} {cartCount === 1 ? "ITEM" : "ITEMS"} ]
+                            [ {effectiveCartCount} {effectiveCartCount === 1 ? "ITEM" : "ITEMS"} ]
                         </span>
                         {repricing && (
                             <span
@@ -167,7 +189,7 @@ export default function CartPageClient() {
                             SIGN IN →
                         </Link>
                     </div>
-                ) : items.length === 0 ? (
+                ) : effectiveItems.length === 0 ? (
                     /* ===== EMPTY STATE ===== */
                     <div className="flex flex-col items-center justify-center py-20 sm:py-32 gap-6 sm:gap-8">
                         <p
@@ -189,7 +211,7 @@ export default function CartPageClient() {
                         {/* ===== BENTO GRID — CART ITEMS ===== */}
                         <div className="lg:col-span-2">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
-                                {items.map((item, index) => (
+                                {effectiveItems.map((item, index) => (
                                     <div
                                         key={`${item.id}-${item.size}-${index}`}
                                         className={`relative border-2 sm:border-3 md:border-4 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] overflow-hidden group ${index === 0 ? "md:col-span-2" : ""
@@ -339,7 +361,7 @@ export default function CartPageClient() {
 
                                 <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                                     {/* Line items */}
-                                    {items.map((item) => (
+                                    {effectiveItems.map((item) => (
                                         <div
                                             key={`${item.id}-${item.size}`}
                                             className="flex justify-between items-start pb-4 border-b border-dashed border-[var(--vsc-gray-700)]"
