@@ -3,6 +3,7 @@ import type { Product } from "./product";
 export type OrderStatus =
     | "PENDING"
     | "PAID"
+    | "FAILED"
     | "IN_PRODUCTION"
     | "SHIPPED"
     | "DELIVERED"

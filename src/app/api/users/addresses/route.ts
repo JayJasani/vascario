@@ -26,15 +26,30 @@ function parseAddress(raw: unknown): Omit<UserAddress, "id"> | null {
   const postalCode = typeof o.postalCode === "string" ? o.postalCode.trim() : "";
   const country = typeof o.country === "string" ? o.country.trim() : "";
   if (!line1 || !city || !postalCode || !country) return null;
+  const isDefault =
+    typeof o.isDefault === "boolean" ? o.isDefault : undefined;
   return {
     label: typeof o.label === "string" ? o.label.trim() || undefined : undefined,
+    fullName:
+      typeof o.fullName === "string" ? o.fullName.trim() || undefined : undefined,
     line1,
     line2: typeof o.line2 === "string" ? o.line2.trim() || undefined : undefined,
     city,
     state: typeof o.state === "string" ? o.state.trim() || undefined : undefined,
     postalCode,
     country,
+    ...(isDefault !== undefined ? { isDefault } : {}),
   };
+}
+
+function toFirestoreAddressData(address: Omit<UserAddress, "id">) {
+  const clean: Record<string, unknown> = {};
+  Object.entries(address).forEach(([key, value]) => {
+    if (value !== undefined) {
+      clean[key] = value;
+    }
+  });
+  return clean;
 }
 
 // GET - Fetch all addresses for the authenticated user
@@ -80,18 +95,25 @@ export async function POST(request: NextRequest) {
     if (!addressData) {
       return Response.json({ error: "Invalid address data" }, { status: 400 });
     }
+    const cleanAddressData = toFirestoreAddressData(addressData);
     const addressesRef = db
       .collection(COLLECTIONS.USERS)
       .doc(user.uid)
       .collection("addresses");
+
+    // If this is the user's first address, automatically mark it as default
+    const existingSnapshot = await addressesRef.limit(1).get();
+    const isFirstAddress = existingSnapshot.empty;
+
     const docRef = await addressesRef.add({
-      ...addressData,
+      ...cleanAddressData,
+      isDefault: isFirstAddress,
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     });
     return Response.json({
       id: docRef.id,
-      ...addressData,
+      ...cleanAddressData,
     });
   } catch (error) {
     console.error("Addresses API POST error:", error);

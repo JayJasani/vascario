@@ -548,6 +548,13 @@ export const SEO_PAGES = {
     keywords: [],
   },
 
+  orders: {
+    title: "My Orders | Order History — Vascario",
+    description:
+      "View your past Vascario orders, payment status, and total amounts for your premium embroidered streetwear purchases.",
+    keywords: [],
+  },
+
   login: {
     title: "Login or Create Account | Vascario Premium Streetwear",
     description:

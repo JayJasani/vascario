@@ -122,8 +122,8 @@ export function ProductDetailClient({
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [productDetailsOpen, setProductDetailsOpen] = useState(false);
   const [additionalInfoOpen, setAdditionalInfoOpen] = useState(false);
-  const [isAddingToCart, setIsAddingToCart] = useState(false);
   const imageContainerRef = useRef<HTMLDivElement>(null);
+  const addToCartButtonRef = useRef<HTMLButtonElement | null>(null);
   const [backInStockState, backInStockAction] = useActionState<
     BackInStockState,
     FormData
@@ -789,12 +789,9 @@ export function ProductDetailClient({
               <button
                 type="button"
                 suppressHydrationWarning
-                disabled={!canAddToCart || isAddingToCart}
-                onClick={async () => {
-                  if (isAddingToCart) return;
-                  const start = Date.now();
-                  setIsAddingToCart(true);
-
+                disabled={!canAddToCart}
+                ref={addToCartButtonRef}
+                onClick={() => {
                   if (!user) {
                     // Store cart intent before redirecting
                     const intentKey = `vascario:cart-intent:${product.id}`;
@@ -813,41 +810,29 @@ export function ProductDetailClient({
                       }
                     }
                     router.push(`/login?redirect=/product/${product.slug}`);
-                    const elapsed = Date.now() - start;
-                    const remaining = 1000 - elapsed;
-                    if (remaining > 0) {
-                      setTimeout(() => setIsAddingToCart(false), remaining);
-                    } else {
-                      setIsAddingToCart(false);
-                    }
                     return;
                   }
                   // Require size selection if sizes are available
                   if (product.sizes.length > 0 && !selectedSize) {
                     alert("Please select a size before adding to cart.");
-                    setIsAddingToCart(false);
                     return;
                   }
                   // Require color selection if colors are available
                   if (product.colors.length > 0 && !selectedColor) {
                     alert("Please select a color before adding to cart.");
-                    setIsAddingToCart(false);
                     return;
                   }
-                  if (!canAddToCart) {
-                    setIsAddingToCart(false);
-                    return;
-                  }
-
-                  const sizeForCart = selectedSize || "OS";
+                  if (!canAddToCart) return;
 
                   addItem({
                     id: product.id,
                     name: product.name,
                     price: product.price,
                     image: product.images[0] ?? "",
-                    size: sizeForCart,
+                    size: selectedSize || "OS",
                     quantity,
+                    slug: product.slug,
+                    color: selectedColor || undefined,
                   });
                   trackAddToCart({
                     currency: "INR",
@@ -858,39 +843,23 @@ export function ProductDetailClient({
                         item_name: product.name,
                         price: product.price,
                         quantity,
-                        item_variant: sizeForCart,
+                        item_variant: selectedSize || "OS",
                         item_category: selectedColor || undefined,
                       },
                     ],
                   });
-
-                  try {
-                    // Persist cart item to server for logged-in users
-                    try {
-                      await fetch("/api/cart", {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                          productId: product.id,
-                          name: product.name,
-                          price: product.price,
-                          image: product.images[0] ?? "",
-                          size: sizeForCart,
-                          quantity,
+                  if (typeof window !== "undefined") {
+                    const rect =
+                      addToCartButtonRef.current?.getBoundingClientRect();
+                    if (rect) {
+                      window.dispatchEvent(
+                        new CustomEvent("vascario:add-to-cart", {
+                          detail: {
+                            from: rect,
+                            image: product.images[0] ?? "",
+                          },
                         }),
-                      });
-                    } catch (err) {
-                      console.error("Failed to sync cart to server", err);
-                    }
-                  } finally {
-                    const elapsed = Date.now() - start;
-                    const remaining = 1000 - elapsed;
-                    if (remaining > 0) {
-                      setTimeout(() => setIsAddingToCart(false), remaining);
-                    } else {
-                      setIsAddingToCart(false);
+                      );
                     }
                   }
                 }}
@@ -903,15 +872,13 @@ export function ProductDetailClient({
                   border: "2px solid #000",
                 }}
               >
-                {isAddingToCart && canAddToCart
-                  ? "Adding to cart..."
-                  : canAddToCart
-                    ? `Add to Cart — ${formatPrice(product.price * quantity)}`
-                    : !hasRequiredSelections
-                      ? "Select a size"
-                      : stockForSelectedSize === 0
-                        ? "Out of stock"
-                        : `Max ${stockForSelectedSize} available`}
+                {canAddToCart
+                  ? `Add to Cart — ${formatPrice(product.price * quantity)}`
+                  : !hasRequiredSelections
+                    ? "Select a size"
+                    : stockForSelectedSize === 0
+                      ? "Out of stock"
+                      : `Max ${stockForSelectedSize} available`}
               </button>
 
               {/* Notify me when available — shown when product is out of stock */}

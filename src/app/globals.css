@@ -351,6 +351,26 @@
   }
 }
 
+/* Add-to-cart fly-to-bag animation */
+@keyframes vascario-cart-fly {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.8);
+  }
+  10% {
+    opacity: 1;
+    transform: translate3d(0, -12px, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--cart-dx), var(--cart-dy), 0) scale(0.4);
+  }
+}
+
+.vascario-cart-fly {
+  animation: vascario-cart-fly 0.7s var(--ease-out-expo) forwards;
+}
+
 /* --------------------------------------------------------------------------
    UTILITY CLASSES
    -------------------------------------------------------------------------- */

@@ -8,12 +8,38 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
+type LastOrderItem = {
+  id: string;
+  name: string;
+  size: string;
+  quantity: number;
+  price: number;
+  color: string | null;
+};
+
+type LastOrderSnapshot = {
+  id: string;
+  total: number;
+  items: LastOrderItem[];
+  shipping: {
+    fullName: string;
+    email: string;
+    address: string;
+    city: string;
+    zip: string;
+    country: string;
+  };
+  createdAt: string;
+};
+
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const { formatPrice } = useCurrency();
   const orderId = searchParams.get("order") || "0000";
+  const orderRef = searchParams.get("ref");
   const [flickered, setFlickered] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [lastOrder, setLastOrder] = useState<LastOrderSnapshot | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -21,6 +47,22 @@ function OrderSuccessContent() {
     const timer = setTimeout(() => setFlickered(true), 1500);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (!orderRef) return;
+    if (typeof window === "undefined") return;
+
+    try {
+      const key = `vascario:lastOrder:${orderRef}`;
+      const raw = window.sessionStorage.getItem(key);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as LastOrderSnapshot;
+      setLastOrder(parsed);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to load last order snapshot", err);
+    }
+  }, [orderRef]);
 
   if (!mounted) return null;
 
@@ -189,24 +231,9 @@ function OrderSuccessContent() {
                 >
                   ITEMS
                 </h4>
-                {/* Demo items since cart was cleared */}
-                {[
-                  {
-                    name: "SIGNATURE TEE — ONYX",
-                    size: "L",
-                    qty: 1,
-                    price: 85,
-                  },
-                  {
-                    name: "HEAVYWEIGHT — CHARCOAL",
-                    size: "M",
-                    qty: 2,
-                    price: 95,
-                  },
-                  { name: "GOLD EDITION", size: "XL", qty: 1, price: 120 },
-                ].map((item, i) => (
+                {(lastOrder?.items ?? []).map((item, i) => (
                   <div
-                    key={i}
+                    key={`${item.id}-${item.size}-${i}`}
                     className="flex justify-between items-start pb-3 border-b border-dotted border-[var(--vsc-gray-200)]"
                   >
                     <div>
@@ -220,17 +247,25 @@ function OrderSuccessContent() {
                         className="text-[10px] text-[var(--vsc-gray-600)] uppercase"
                         style={{ fontFamily: "var(--font-space-mono)" }}
                       >
-                        SIZE: {item.size} — QTY: {item.qty}
+                        SIZE: {item.size} — QTY: {item.quantity}
                       </span>
                     </div>
                     <span
                       className="text-xs font-bold text-[var(--vsc-black)]"
                       style={{ fontFamily: "var(--font-space-mono)" }}
                     >
-                      {formatPrice(item.price * item.qty)}
+                      {formatPrice(item.price * item.quantity)}
                     </span>
                   </div>
                 ))}
+                {!lastOrder && (
+                  <p
+                    className="text-[10px] text-[var(--vsc-gray-500)] uppercase tracking-[0.2em]"
+                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  >
+                    ORDER DETAILS UNAVAILABLE — PLEASE CHECK YOUR EMAIL
+                  </p>
+                )}
               </div>
 
               {/* Totals */}
@@ -246,7 +281,7 @@ function OrderSuccessContent() {
                     className="text-xs font-bold text-[var(--vsc-black)]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                   >
-                    {formatPrice(395)}
+                    {formatPrice(lastOrder?.total ?? 0)}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -274,7 +309,7 @@ function OrderSuccessContent() {
                     className="text-xl font-bold text-[var(--vsc-black)]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                   >
-                    {formatPrice(395)}
+                    {formatPrice(lastOrder?.total ?? 0)}
                   </span>
                 </div>
               </div>

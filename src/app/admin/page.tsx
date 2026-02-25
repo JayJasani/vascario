@@ -146,7 +146,7 @@ export default async function AdminDashboard() {
                                     </td>
                                 </tr>
                             ) : (
-                                stats.recentOrders.map((order: { id: string; customerName: string; customerEmail: string; status: "PENDING" | "PAID" | "IN_PRODUCTION" | "SHIPPED" | "DELIVERED" | "CANCELLED"; totalAmount: string; items: { productName: string; size: string }[] }) => (
+                                stats.recentOrders.map((order: { id: string; customerName: string; customerEmail: string; status: "PENDING" | "PAID" | "FAILED" | "IN_PRODUCTION" | "SHIPPED" | "DELIVERED" | "CANCELLED"; totalAmount: string; items: { productName: string; size: string }[] }) => (
                                     <tr
                                         key={order.id}
                                         className="border-b border-[#1A1A1A] hover:bg-[#0D0D0D] transition-colors"

@@ -5,6 +5,7 @@ import { getPageMetadata } from "@/lib/seo-config"
 import CartPageClient from "./CartPageClient"
 import type { CartItem } from "@/context/CartContext"
 
+export const dynamic = "force-dynamic"
 export const metadata = getPageMetadata("cart")
 
 async function getInitialCartItems(): Promise<CartItem[]> {

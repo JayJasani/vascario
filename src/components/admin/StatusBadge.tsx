@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 type Status =
     | "PENDING"
     | "PAID"
+    | "FAILED"
     | "IN_PRODUCTION"
     | "SHIPPED"
     | "DELIVERED"
@@ -18,6 +19,11 @@ const statusConfig: Record<Status, { bg: string; text: string; label: string }> 
         bg: "bg-[#BAFF00]/15",
         text: "text-[#BAFF00]",
         label: "PAID",
+    },
+    FAILED: {
+        bg: "bg-[#FF9900]/15",
+        text: "text-[#FF9900]",
+        label: "FAILED",
     },
     IN_PRODUCTION: {
         bg: "bg-[#00BFFF]/15",
