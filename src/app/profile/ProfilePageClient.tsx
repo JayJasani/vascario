@@ -12,16 +12,20 @@ const inputClass =
   "w-full px-5 py-3.5 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-sm tracking-[0.1em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]";
 const labelClass = "text-[10px] uppercase tracking-[0.25em] text-[var(--vsc-gray-600)]";
 
+const ADDRESS_LABEL_OPTIONS = ["Home", "Work", "Friend"] as const;
+
 function newAddress(): UserAddress {
   return {
     id: crypto.randomUUID(),
     label: "",
+    fullName: "",
     line1: "",
     line2: "",
     city: "",
     state: "",
     postalCode: "",
     country: "",
+    isDefault: false,
   };
 }
 
@@ -210,6 +214,46 @@ export default function ProfilePageClient() {
       setSuccess(true);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to update address.");
+    } finally {
+      setSavePending(false);
+    }
+  };
+
+  const setDefaultAddress = async (id: string) => {
+    if (!user) return;
+    setError(null);
+    setSuccess(false);
+    setSavePending(true);
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch("/api/users/addresses/set-default", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ addressId: id }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error ?? "Failed to set default address");
+      }
+
+      // Optimistically update local state
+      setAddresses((prev) =>
+        prev.map((a) => ({
+          ...a,
+          isDefault: a.id === id,
+        })),
+      );
+
+      // Refresh profile to sync addresses
+      await refreshProfile();
+      setSuccess(true);
+    } catch (e: unknown) {
+      setError(
+        e instanceof Error ? e.message : "Failed to set default address.",
+      );
     } finally {
       setSavePending(false);
     }
@@ -416,14 +460,49 @@ export default function ProfilePageClient() {
             {newAddressForm && (
               <div className="mb-6 sm:mb-8 p-4 sm:p-5 border border-[var(--vsc-gray-200)] bg-[var(--vsc-cream)]/50 space-y-3 sm:space-y-4">
                 <div className="space-y-2">
-                  <label className={labelClass}>Label (optional)</label>
+                  <label className={labelClass}>Full name (optional)</label>
                   <input
                     type="text"
-                    value={newAddressForm.label ?? ""}
-                    onChange={(e) => setNewAddressForm((a) => (a ? { ...a, label: e.target.value } : null))}
+                    value={newAddressForm.fullName ?? ""}
+                    onChange={(e) =>
+                      setNewAddressForm((a) =>
+                        a ? { ...a, fullName: e.target.value } : null,
+                      )
+                    }
                     className={inputClass}
-                    placeholder="Home, Office..."
+                    placeholder="Person receiving this order"
                   />
+                </div>
+                <div className="space-y-2">
+                  <label className={labelClass}>Label</label>
+                  <div className="flex flex-wrap gap-2">
+                    {ADDRESS_LABEL_OPTIONS.map((option) => {
+                      const isActive =
+                        (newAddressForm.label ?? "").toLowerCase() ===
+                        option.toLowerCase();
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          onClick={() =>
+                            setNewAddressForm((a) =>
+                              a ? { ...a, label: option } : null,
+                            )
+                          }
+                          className={`px-3 py-1 text-[10px] uppercase tracking-[0.2em] border rounded-full ${
+                            isActive
+                              ? "border-[var(--vsc-gray-900)] bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)]"
+                              : "border-[var(--vsc-gray-300)] text-[var(--vsc-gray-700)] hover:border-[var(--vsc-gray-900)]"
+                          }`}
+                          style={{ fontFamily: "var(--font-space-mono)" }}
+                        >
+                          <span className={isActive ? "font-bold" : ""}>
+                            {option}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <label className={labelClass}>Address line 1 *</label>
@@ -521,11 +600,42 @@ export default function ProfilePageClient() {
                     <>
                       <input
                         type="text"
-                        value={addr.label ?? ""}
-                        onChange={(e) => updateAddress(addr.id, { label: e.target.value })}
+                        value={addr.fullName ?? ""}
+                        onChange={(e) =>
+                          updateAddress(addr.id, { fullName: e.target.value })
+                        }
                         className={inputClass}
-                        placeholder="Label"
+                        placeholder="Full name"
                       />
+                      <div className="space-y-1">
+                        <label className={labelClass}>Label</label>
+                        <div className="flex flex-wrap gap-2">
+                          {ADDRESS_LABEL_OPTIONS.map((option) => {
+                            const isActive =
+                              (addr.label ?? "").toLowerCase() ===
+                              option.toLowerCase();
+                            return (
+                              <button
+                                key={option}
+                                type="button"
+                                onClick={() =>
+                                  updateAddress(addr.id, { label: option })
+                                }
+                                className={`px-3 py-1 text-[10px] uppercase tracking-[0.2em] border rounded-full ${
+                                  isActive
+                                    ? "border-[var(--vsc-gray-900)] bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)]"
+                                    : "border-[var(--vsc-gray-300)] text-[var(--vsc-gray-700)] hover:border-[var(--vsc-gray-900)]"
+                                }`}
+                                style={{ fontFamily: "var(--font-space-mono)" }}
+                              >
+                                <span className={isActive ? "font-bold" : ""}>
+                                  {option}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
                       <input
                         type="text"
                         value={addr.line1}
@@ -603,9 +713,34 @@ export default function ProfilePageClient() {
                   ) : (
                     <>
                       <div className="flex justify-between items-start">
-                        <p className="text-xs font-medium text-[var(--vsc-gray-900)]" style={{ fontFamily: "var(--font-space-mono)" }}>
-                          {addr.label || "Address"}
-                        </p>
+                        <div className="flex flex-col gap-1">
+                          {addr.fullName && (
+                            <p
+                              className="text-xs font-medium text-[var(--vsc-gray-900)]"
+                              style={{ fontFamily: "var(--font-space-mono)" }}
+                            >
+                              {addr.fullName}
+                            </p>
+                          )}
+                          <p
+                            className="text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.2em]"
+                            style={{ fontFamily: "var(--font-space-mono)" }}
+                          >
+                            {addr.label || "Address"}
+                          </p>
+                          {addr.isDefault && (
+                            <span
+                              className="px-2 py-0.5 rounded-full bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] text-[9px] uppercase tracking-[0.2em]"
+                              style={{
+                                fontFamily: "var(--font-space-mono)",
+                                display: "inline-flex",
+                                width: "fit-content",
+                              }}
+                            >
+                              Default
+                            </span>
+                          )}
+                        </div>
                         <div className="flex gap-2">
                           <button
                             type="button"
@@ -634,6 +769,17 @@ export default function ProfilePageClient() {
                         <br />
                         {addr.country}
                       </p>
+                      {!addr.isDefault && (
+                        <button
+                          type="button"
+                          onClick={() => setDefaultAddress(addr.id)}
+                          disabled={savePending}
+                          className="mt-1 text-[10px] uppercase tracking-[0.2em] text-[var(--vsc-gray-600)] hover:text-[var(--vsc-accent)] disabled:opacity-60"
+                          style={{ fontFamily: "var(--font-space-mono)" }}
+                        >
+                          Set as default
+                        </button>
+                      )}
                     </>
                   )}
                 </li>

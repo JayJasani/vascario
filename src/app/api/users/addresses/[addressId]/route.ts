@@ -28,6 +28,8 @@ function parseAddress(raw: unknown): Omit<UserAddress, "id"> | null {
   if (!line1 || !city || !postalCode || !country) return null;
   return {
     label: typeof o.label === "string" ? o.label.trim() || undefined : undefined,
+    fullName:
+      typeof o.fullName === "string" ? o.fullName.trim() || undefined : undefined,
     line1,
     line2: typeof o.line2 === "string" ? o.line2.trim() || undefined : undefined,
     city,
@@ -35,6 +37,16 @@ function parseAddress(raw: unknown): Omit<UserAddress, "id"> | null {
     postalCode,
     country,
   };
+}
+
+function toFirestoreAddressData(address: Omit<UserAddress, "id">) {
+  const clean: Record<string, unknown> = {};
+  Object.entries(address).forEach(([key, value]) => {
+    if (value !== undefined) {
+      clean[key] = value;
+    }
+  });
+  return clean;
 }
 
 // PATCH - Update an existing address
@@ -53,6 +65,7 @@ export async function PATCH(
     if (!addressData) {
       return Response.json({ error: "Invalid address data" }, { status: 400 });
     }
+    const cleanAddressData = toFirestoreAddressData(addressData);
     const addressRef = db
       .collection(COLLECTIONS.USERS)
       .doc(user.uid)
@@ -64,12 +77,12 @@ export async function PATCH(
       return Response.json({ error: "Address not found" }, { status: 404 });
     }
     await addressRef.update({
-      ...addressData,
+      ...cleanAddressData,
       updatedAt: FieldValue.serverTimestamp(),
     });
     return Response.json({
       id: addressId,
-      ...addressData,
+      ...cleanAddressData,
     });
   } catch (error) {
     console.error("Addresses API PATCH error:", error);

@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useUserProfile, type UserProfile as UserProfileType } from "@/context/UserProfileContext";
 import {
     trackAddShippingInfo,
     trackBeginCheckout,
@@ -34,6 +35,7 @@ const stepVariants = {
 
 export default function CheckoutPageClient() {
   const { user } = useAuth();
+  const { profile, loading: profileLoading } = useUserProfile();
   const { formatPrice } = useCurrency();
   const { items, cartTotal, clearCart } = useCart();
   const [step, setStep] = useState(1);
@@ -79,7 +81,61 @@ export default function CheckoutPageClient() {
     country: "",
   });
 
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+
+  // Prefill name/email from profile when available
+  useEffect(() => {
+    if (!user || !profile) return;
+
+    setShipping((prev) => {
+      const hasName = prev.fullName.trim().length > 0;
+      const hasEmail = prev.email.trim().length > 0;
+
+      if (hasName && hasEmail) return prev;
+
+      const profileName =
+        profile.displayName ||
+        [profile.firstName, profile.lastName].filter(Boolean).join(" ").trim();
+
+      return {
+        ...prev,
+        fullName:
+          hasName ||
+          !(
+            profileName ||
+            user.displayName ||
+            user.email
+          )
+            ? prev.fullName
+            : profileName || user.displayName || user.email || "",
+        email: hasEmail || !user.email ? prev.email : user.email ?? prev.email,
+      };
+    });
+  }, [profile, user]);
+
+  // Prefill address from default saved address when first available
+  useEffect(() => {
+    if (!profile || !profile.addresses || profile.addresses.length === 0) return;
+    if (selectedAddressId) return;
+
+    const defaultAddress =
+      profile.addresses.find((a) => a.isDefault) ?? profile.addresses[0];
+    if (!defaultAddress) return;
+
+    setSelectedAddressId(defaultAddress.id);
+    setShipping((prev) => ({
+      ...prev,
+      fullName: defaultAddress.fullName || prev.fullName,
+      address:
+        defaultAddress.line1 +
+        (defaultAddress.line2 ? `, ${defaultAddress.line2}` : ""),
+      city: defaultAddress.city,
+      zip: defaultAddress.postalCode,
+      country: defaultAddress.country,
+    }));
+  }, [profile, selectedAddressId]);
 
   const goNext = () => {
     if (step === 1) {
@@ -380,6 +436,9 @@ export default function CheckoutPageClient() {
                   <StepShipping
                     shipping={shipping}
                     setShipping={setShipping}
+                    savedAddresses={profile?.addresses}
+                    selectedAddressId={selectedAddressId}
+                    setSelectedAddressId={setSelectedAddressId}
                     onNext={goNext}
                   />
                 </motion.div>
@@ -511,6 +570,9 @@ function InputField({
 function StepShipping({
   shipping,
   setShipping,
+  savedAddresses,
+  selectedAddressId,
+  setSelectedAddressId,
   onNext,
 }: {
   shipping: {
@@ -522,6 +584,9 @@ function StepShipping({
     country: string;
   };
   setShipping: React.Dispatch<React.SetStateAction<typeof shipping>>;
+  savedAddresses?: UserProfileType["addresses"];
+  selectedAddressId: string | null;
+  setSelectedAddressId: (id: string | null) => void;
   onNext: () => void;
 }) {
   const update = (key: keyof typeof shipping) => (v: string) =>
@@ -544,6 +609,78 @@ function StepShipping({
           SHIPPING
         </span>
       </div>
+
+      {savedAddresses && savedAddresses.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span
+              className="text-[10px] text-[var(--vsc-gray-500)] uppercase tracking-[0.25em]"
+              style={{ fontFamily: "var(--font-space-mono)" }}
+            >
+              Saved addresses
+            </span>
+          </div>
+          <div className="space-y-2">
+            {savedAddresses.map((addr) => {
+              const isSelected = selectedAddressId === addr.id;
+              return (
+                <label
+                  key={addr.id}
+                  className="flex items-start gap-3 cursor-pointer"
+                  style={{ fontFamily: "var(--font-space-mono)" }}
+                >
+                  <input
+                    type="radio"
+                    name="saved-address"
+                    className="mt-1"
+                    checked={isSelected}
+                    onChange={() => {
+                      setSelectedAddressId(addr.id);
+                      setShipping((prev) => ({
+                        ...prev,
+                        fullName: addr.fullName || prev.fullName,
+                        address:
+                          addr.line1 +
+                          (addr.line2 ? `, ${addr.line2}` : ""),
+                        city: addr.city,
+                        zip: addr.postalCode,
+                        country: addr.country,
+                      }));
+                    }}
+                  />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-[var(--vsc-gray-900)] uppercase tracking-[0.15em]">
+                        {addr.fullName || addr.label || "Address"}
+                      </span>
+                      {addr.isDefault && (
+                        <span
+                          className="px-2 py-0.5 rounded-full bg-[var(--vsc-gray-900)] text-[var(--vsc-cream)] text-[9px] uppercase tracking-[0.2em]"
+                          style={{
+                            display: "inline-flex",
+                            width: "fit-content",
+                          }}
+                        >
+                          Default
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-[var(--vsc-gray-500)] uppercase tracking-[0.1em] leading-relaxed">
+                      {addr.line1}
+                      {addr.line2 ? `, ${addr.line2}` : ""}
+                      <br />
+                      {addr.city}
+                      {addr.state ? `, ${addr.state}` : ""} {addr.postalCode}
+                      <br />
+                      {addr.country}
+                    </p>
+                  </div>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         <InputField
