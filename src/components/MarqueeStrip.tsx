@@ -9,7 +9,7 @@ export function MarqueeStrip() {
                 {[...Array(4)].map((_, i) => (
                     <span
                         key={i}
-                        className="text-[var(--vsc-black)] text-xs md:text-sm font-bold uppercase tracking-[0.2em] whitespace-nowrap px-4"
+                        className="text-[var(--vsc-white)] text-xs md:text-sm font-bold uppercase tracking-[0.2em] whitespace-nowrap px-4"
                         style={{ fontFamily: "var(--font-space-mono)" }}
                     >
                         {text}

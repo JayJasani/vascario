@@ -35,4 +35,11 @@ export const COLLECTIONS = {
     DESIGNS: "designs",
     STOCK_LEVELS: "stockLevels",
     AUDIT_LOGS: "auditLogs",
+    CONTACT_SUBMISSIONS: "contactSubmissions",
+    NEWSLETTER_SUBSCRIPTIONS: "newsletterSubscriptions",
+    USERS: "users",
+    STATIC_CONTENT: "staticContent",
+    REVIEWS: "reviews",
+    INVESTMENTS: "investments",
+    BACK_IN_STOCK_NOTIFICATIONS: "backInStockNotifications",
 } as const;

@@ -8,14 +8,21 @@ export function SmoothScroller({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         const lenis = new Lenis({
-            duration: 1.2,
+            duration: 0.1,
             easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
             orientation: "vertical",
             gestureOrientation: "vertical",
             smoothWheel: true,
+            // Prevent scroll position restoration
+            syncTouch: false,
         })
 
         lenisRef.current = lenis
+        
+        // Expose Lenis instance globally for ScrollToTop component
+        if (typeof window !== "undefined") {
+            (window as any).lenis = lenis
+        }
 
         function raf(time: number) {
             lenis.raf(time)
@@ -25,6 +32,9 @@ export function SmoothScroller({ children }: { children: React.ReactNode }) {
         requestAnimationFrame(raf)
 
         return () => {
+            if (typeof window !== "undefined") {
+                delete (window as any).lenis
+            }
             lenis.destroy()
         }
     }, [])

@@ -25,8 +25,8 @@ const AdminButton = forwardRef<HTMLButtonElement, AdminButtonProps>(
             <button
                 ref={ref}
                 className={cn(
-                    "font-mono font-bold tracking-[0.2em] uppercase border-2 transition-all cursor-pointer",
-                    size === "default" ? "px-8 py-4 text-xs" : "px-4 py-2 text-[10px]",
+                    "font-mono font-bold tracking-[0.15em] uppercase border-2 transition-all cursor-pointer",
+                    size === "default" ? "px-5 py-2.5 text-[10px]" : "px-3 py-1.5 text-[9px]",
                     variantStyles[variant],
                     "disabled:opacity-50 disabled:cursor-not-allowed",
                     className

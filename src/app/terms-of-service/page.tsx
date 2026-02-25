@@ -1,15 +1,14 @@
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
+import { getPageMetadata, SEO_BASE } from "@/lib/seo-config"
 
-export const metadata = {
-  title: "Terms of Service — VASCARIO",
-  description:
-    "Read Vascario's terms of service to understand the conditions that govern use of this site and our services.",
-}
+export const metadata = getPageMetadata("terms", {
+  url: `${SEO_BASE.siteUrl}/terms-of-service`,
+})
 
 export default function TermsOfServicePage() {
   return (
-    <main className="min-h-screen bg-[var(--vsc-black)] text-[var(--vsc-gray-200)]">
+    <main className="min-h-screen bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)]">
       <Navbar />
 
       <section className="pt-32 pb-24 px-6 md:px-12 lg:px-40 max-w-5xl mx-auto">
@@ -21,7 +20,7 @@ export default function TermsOfServicePage() {
             Legal
           </p>
           <h1
-            className="text-3xl md:text-4xl lg:text-5xl text-[var(--vsc-white)] leading-tight mb-4"
+          className="text-3xl md:text-4xl lg:text-5xl text-[var(--vsc-gray-900)] leading-tight mb-4"
             style={{ fontFamily: "var(--font-space-grotesk)" }}
           >
             Terms of Service
@@ -39,12 +38,12 @@ export default function TermsOfServicePage() {
           style={{ fontFamily: "var(--font-space-mono)" }}
         >
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Overview
             </h2>
             <p className="mb-3">
-              This website is operated by Hamshi Wonders. Throughout the site, the terms &quot;we&quot;,
-              &quot;us&quot; and &quot;our&quot; refer to Hamshi Wonders. Hamshi Wonders offers this website,
+              This website is operated by VASCARIO. Throughout the site, the terms &quot;we&quot;,
+              &quot;us&quot; and &quot;our&quot; refer to VASCARIO. VASCARIO offers this website,
               including all information, tools and services available from this site to you, the user,
               conditioned upon your acceptance of all terms, conditions, policies and notices stated here.
             </p>
@@ -62,7 +61,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Online Store Terms
             </h2>
             <p className="mb-3">
@@ -82,7 +81,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               General Conditions
             </h2>
             <p className="mb-3">
@@ -99,7 +98,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Products, Pricing & Availability
             </h2>
             <p className="mb-3">
@@ -116,7 +115,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Billing & Account Information
             </h2>
             <p className="mb-3">
@@ -132,7 +131,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Third-Party Tools & Links
             </h2>
             <p className="mb-3">
@@ -149,7 +148,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               User Content & Conduct
             </h2>
             <p className="mb-3">
@@ -167,7 +166,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Prohibited Uses
             </h2>
             <p className="mb-3">
@@ -185,7 +184,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Disclaimers & Limitation of Liability
             </h2>
             <p className="mb-3">
@@ -194,7 +193,7 @@ export default function TermsOfServicePage() {
               that your use of, or inability to use, the Service is at your sole risk.
             </p>
             <p>
-              To the fullest extent permitted by law, Hamshi Wonders and its affiliates shall not be liable for
+              To the fullest extent permitted by law, VASCARIO and its affiliates shall not be liable for
               any indirect, incidental, punitive, special, or consequential damages, including lost profits,
               lost revenue, lost savings, loss of data, or replacement costs, arising from your use of the
               Service or any products purchased using the Service.
@@ -202,11 +201,11 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Indemnification
             </h2>
             <p>
-              You agree to indemnify, defend and hold harmless Hamshi Wonders and our parent, subsidiaries,
+              You agree to indemnify, defend and hold harmless VASCARIO and our parent, subsidiaries,
               affiliates, partners, officers, directors, agents, contractors, licensors, service providers,
               subcontractors, suppliers, interns and employees from any claim or demand, including reasonable
               attorneys&apos; fees, made by any third-party due to or arising out of your breach of these Terms
@@ -215,7 +214,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Governing Law & Changes
             </h2>
             <p className="mb-3">
@@ -231,7 +230,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-base md:text-lg text-[var(--vsc-white)] mb-3 uppercase tracking-[0.18em]">
+            <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
               Contact Information
             </h2>
             <p>

@@ -1,9 +1,14 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { HexColorPicker } from "react-colorful";
+import { Palette, ChevronUp, ChevronDown, Pencil, Archive, ArchiveRestore, Trash2, Star } from "lucide-react";
+import { parseColorEntry, serializeColor } from "@/lib/hex-to-color-name";
+import { hasDiscount } from "@/lib/discount";
 import { AdminButton } from "@/components/admin/AdminButton";
 import { AdminInput, AdminTextarea } from "@/components/admin/AdminInput";
-import { createProduct, toggleProductActive } from "../actions";
+import { AdminLoadingBlock } from "@/components/admin/AdminLoadingBlock";
+import { createProduct, toggleProductActive, toggleProductFeatured, updateProductAction, deleteDropAction } from "../actions";
 import useSWR from "swr";
 import Image from "next/image";
 
@@ -12,12 +17,65 @@ interface Product {
     name: string;
     description: string;
     price: string;
+    cutPrice: string | null;
     images: string[];
     colors: string[];
     sizes: string[];
     sku: string | null;
     isActive: boolean;
+    isFeatured?: boolean;
     createdAt: string;
+}
+
+const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
+
+function rgbToHex(r: number, g: number, b: number): string {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+async function extractPaletteFromImage(imageUrl: string, count = 6): Promise<string[]> {
+    return new Promise((resolve, reject) => {
+        const img = new window.Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+            try {
+                const canvas = document.createElement("canvas");
+                const scale = Math.min(1, 150 / img.width, 150 / img.height);
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
+                const ctx = canvas.getContext("2d");
+                if (!ctx) {
+                    reject(new Error("Canvas not supported"));
+                    return;
+                }
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                const colorCount: Record<string, number> = {};
+                const step = 5;
+                for (let i = 0; i < data.length; i += 4 * step) {
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+                    const a = data[i + 3];
+                    if (a < 128 || (r > 245 && g > 245 && b > 245)) continue;
+                    const bucket = `${Math.round(r / 32) * 32},${Math.round(g / 32) * 32},${Math.round(b / 32) * 32}`;
+                    colorCount[bucket] = (colorCount[bucket] || 0) + 1;
+                }
+                const sorted = Object.entries(colorCount)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, count)
+                    .map(([key]) => {
+                        const [r, g, b] = key.split(",").map(Number);
+                        return rgbToHex(r, g, b);
+                    });
+                resolve(sorted.length > 0 ? sorted : ["#000000"]);
+            } catch (e) {
+                reject(e);
+            }
+        };
+        img.onerror = () => reject(new Error("Failed to load image"));
+        img.src = imageUrl;
+    });
 }
 
 async function fetchProducts(): Promise<Product[]> {
@@ -27,40 +85,85 @@ async function fetchProducts(): Promise<Product[]> {
 
 export default function DropsPage() {
     const { data: products, mutate } = useSWR("admin-products", fetchProducts, {
-        fallbackData: [],
         refreshInterval: 10000,
     });
     const [showForm, setShowForm] = useState(false);
-    const [preview, setPreview] = useState({
-        name: "",
-        price: "",
-        description: "",
-    });
-    const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+    const [preview, setPreview] = useState({ name: "", price: "", cutPrice: "", description: "" });
+    const [formImages, setFormImages] = useState<string[]>([]);
+    const [formColors, setFormColors] = useState<{ hex: string; name: string }[]>([{ hex: "#000000", name: "" }]);
+    const [editingColor, setEditingColor] = useState<{ index: number; originalHex: string } | null>(null);
+    const [pickerPlacement, setPickerPlacement] = useState<"top" | "bottom">("bottom");
     const [uploading, setUploading] = useState(false);
+    const [extractingPalette, setExtractingPalette] = useState(false);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const colorPickerRef = useRef<HTMLDivElement>(null);
+
+    const isFormOpen = showForm || !!editingProduct;
+
+    useLayoutEffect(() => {
+        if (!editingColor) return;
+        function updatePlacement() {
+            const el = colorPickerRef.current;
+            if (!el) return;
+            const rect = el.getBoundingClientRect();
+            const pickerHeight = 280;
+            const spaceBelow = typeof window !== "undefined" ? window.innerHeight - rect.bottom : pickerHeight;
+            setPickerPlacement(spaceBelow < pickerHeight ? "top" : "bottom");
+        }
+        updatePlacement();
+        document.addEventListener("scroll", updatePlacement, true);
+        window.addEventListener("resize", updatePlacement);
+        return () => {
+            document.removeEventListener("scroll", updatePlacement, true);
+            window.removeEventListener("resize", updatePlacement);
+        };
+    }, [editingColor]);
+
+    useEffect(() => {
+        const ec = editingColor;
+        if (!ec) return;
+        const { index, originalHex } = ec;
+        function handleOutside(e: MouseEvent | TouchEvent) {
+            const target = e.target as Node;
+            if (colorPickerRef.current && !colorPickerRef.current.contains(target)) {
+                setFormColors((prev) =>
+                    prev.map((c, i) => (i === index ? { ...c, hex: originalHex } : c))
+                );
+                setEditingColor(null);
+            }
+        }
+        document.addEventListener("mousedown", handleOutside);
+        document.addEventListener("touchstart", handleOutside, { passive: true });
+        return () => {
+            document.removeEventListener("mousedown", handleOutside);
+            document.removeEventListener("touchstart", handleOutside);
+        };
+    }, [editingColor]);
+    const isEditMode = !!editingProduct;
 
     async function handleFileUpload(files: FileList | null) {
         if (!files || files.length === 0) return;
-
         setUploading(true);
         try {
             const uploadFormData = new FormData();
-            Array.from(files).forEach((file) => {
-                uploadFormData.append("files", file);
-            });
-
-            const response = await fetch("/admin/drops/api/upload", {
-                method: "POST",
-                body: uploadFormData,
-            });
-
+            Array.from(files).forEach((file) => uploadFormData.append("files", file));
+            const response = await fetch("/admin/drops/api/upload", { method: "POST", body: uploadFormData });
             if (!response.ok) {
-                throw new Error("Upload failed");
+                const text = await response.text();
+                let message = "Upload failed";
+                try {
+                    const err = JSON.parse(text);
+                    message = err.error || message;
+                } catch {
+                    if (response.status === 413) message = "Images too large. Try smaller files or fewer images.";
+                    else if (text) message = text;
+                }
+                throw new Error(message);
             }
-
             const data = await response.json();
-            setUploadedImages((prev) => [...prev, ...data.urls]);
+            setFormImages((prev) => [...prev, ...data.urls]);
         } catch (error) {
             console.error("Upload error:", error);
             alert("Failed to upload images. Please try again.");
@@ -70,22 +173,52 @@ export default function DropsPage() {
     }
 
     function removeImage(index: number) {
-        setUploadedImages((prev) => prev.filter((_, i) => i !== index));
+        setFormImages((prev) => prev.filter((_, i) => i !== index));
+    }
+
+    function reorderImage(index: number, direction: "up" | "down") {
+        setFormImages((prev) => {
+            const next = [...prev];
+            const target = direction === "up" ? index - 1 : index + 1;
+            if (target < 0 || target >= next.length) return prev;
+            [next[index], next[target]] = [next[target], next[index]];
+            return next;
+        });
+    }
+
+    async function handleExtractPalette(imageIndex = 0) {
+        if (formImages.length === 0 || !formImages[imageIndex]) return;
+        setExtractingPalette(true);
+        try {
+            const palette = await extractPaletteFromImage(formImages[imageIndex]);
+            setFormColors(palette.map((hex) => ({ hex, name: "" })));
+        } catch (e) {
+            console.error("Palette extraction failed:", e);
+            alert("Could not extract palette. Ensure the image is accessible (CORS).");
+        } finally {
+            setExtractingPalette(false);
+        }
+    }
+
+    function closeForm() {
+        setShowForm(false);
+        setEditingProduct(null);
+        setPreview({ name: "", price: "", cutPrice: "", description: "" });
+        setFormImages([]);
+        setFormColors([{ hex: "#000000", name: "" }]);
+        setEditingColor(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
     }
 
     async function handleSubmit(formData: FormData) {
-        // Add uploaded image URLs to form data
-        if (uploadedImages.length > 0) {
-            formData.set("images", uploadedImages.join(","));
+        formData.set("images", formImages.join(","));
+        formData.set("colors", formColors.map((c) => serializeColor(c.hex, c.name)).join(","));
+        if (isEditMode && editingProduct) {
+            await updateProductAction(editingProduct.id, formData);
+        } else {
+            await createProduct(formData);
         }
-
-        await createProduct(formData);
-        setShowForm(false);
-        setPreview({ name: "", price: "", description: "" });
-        setUploadedImages([]);
-        if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-        }
+        closeForm();
         mutate();
     }
 
@@ -94,52 +227,93 @@ export default function DropsPage() {
         mutate();
     }
 
+    async function handleToggleFeatured(id: string) {
+        await toggleProductFeatured(id);
+        mutate();
+    }
+
+    async function handleDelete(product: Product) {
+        if (!confirm(`Delete drop "${product.name}"? This will remove the product and all its stock levels. This cannot be undone.`)) return;
+        setDeletingId(product.id);
+        try {
+            await deleteDropAction(product.id);
+            if (editingProduct?.id === product.id) {
+                setEditingProduct(null);
+                closeForm();
+            }
+            mutate();
+        } finally {
+            setDeletingId(null);
+        }
+    }
+
+    function openEdit(product: Product) {
+        setEditingProduct(product);
+        setShowForm(true);
+        setFormImages(product.images ?? []);
+        setFormColors(
+            product.colors?.length
+                ? product.colors.map((c) => {
+                    const raw = c.startsWith("#") ? c : `#${c}`;
+                    const parts = raw.split("::", 2);
+                    const hex = parts[0]?.trim() ?? raw;
+                    const name = parts[1]?.trim() ?? "";
+                    return { hex, name };
+                  })
+                : [{ hex: "#000000", name: "" }]
+        );
+        setPreview({ name: product.name, price: product.price, cutPrice: product.cutPrice ?? "", description: product.description });
+        if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+
     return (
-        <div className="space-y-10">
+        <div className="space-y-6">
             {/* ── PAGE HEADER ── */}
             <div className="flex items-end justify-between">
                 <div>
                     <h2
-                        className="text-2xl font-bold tracking-[-0.03em] uppercase"
+                        className="text-xl font-bold tracking-[-0.03em] uppercase"
                         style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
                     >
                         Drop Manager
                     </h2>
-                    <p className="font-mono text-xs text-[#666] tracking-[0.15em] uppercase mt-1">
-            // Product Uploads &amp; Management
+                    <p className="font-mono text-[10px] text-[#666] tracking-[0.15em] uppercase mt-0.5">
+                        Product Uploads &amp; Management
                     </p>
                 </div>
                 <AdminButton
-                    variant={showForm ? "secondary" : "primary"}
+                    variant={isFormOpen ? "secondary" : "primary"}
                     onClick={() => {
-                        if (showForm) {
-                            setUploadedImages([]);
-                            setPreview({ name: "", price: "", description: "" });
-                            if (fileInputRef.current) {
-                                fileInputRef.current.value = "";
-                            }
+                        if (isFormOpen) {
+                            closeForm();
+                        } else {
+                            setShowForm(true);
+                            setEditingProduct(null);
+                            setPreview({ name: "", price: "", cutPrice: "", description: "" });
+                            setFormImages([]);
+                            setFormColors([{ hex: "#000000", name: "" }]);
                         }
-                        setShowForm(!showForm);
                     }}
                 >
-                    {showForm ? "✕ Cancel" : "+ New Drop"}
+                    {isFormOpen ? "✕ Cancel" : "+ New Drop"}
                 </AdminButton>
             </div>
 
-            {/* ── CREATE FORM + LIVE PREVIEW ── */}
-            {showForm && (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
+            {/* ── FORM + LIVE PREVIEW ── */}
+            {isFormOpen && (
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     {/* Form */}
-                    <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-8">
-                        <span className="font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase block mb-6">
-                            Create New Drop
+                    <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-5">
+                        <span className="font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase block mb-4">
+                            {isEditMode ? `Edit Drop // ${editingProduct?.name}` : "Create New Drop"}
                         </span>
-                        <form action={handleSubmit} className="space-y-6">
+                        <form key={editingProduct?.id ?? "create"} action={handleSubmit} className="space-y-4">
                             <AdminInput
                                 label="Drop Name"
                                 name="name"
                                 placeholder="PHANTOM THREAD V2"
                                 required
+                                defaultValue={isEditMode ? editingProduct?.name : undefined}
                                 onChange={(e) =>
                                     setPreview((p) => ({ ...p, name: e.target.value }))
                                 }
@@ -147,22 +321,35 @@ export default function DropsPage() {
                             <AdminTextarea
                                 label="Description"
                                 name="description"
-                                placeholder="Heavy 300GSM cotton with precision-stitched embroidery..."
+                                placeholder="Heavy 240GSM cotton with precision-stitched embroidery..."
                                 required
+                                defaultValue={isEditMode ? editingProduct?.description : undefined}
                                 onChange={(e) =>
                                     setPreview((p) => ({ ...p, description: e.target.value }))
                                 }
                             />
-                            <div className="grid grid-cols-2 gap-6">
+                            <div className="grid grid-cols-2 gap-4">
                                 <AdminInput
                                     label="Price"
                                     name="price"
                                     type="number"
                                     placeholder="2499"
                                     required
-                                    hint="INR"
+                                    hint="INR (selling price)"
+                                    defaultValue={isEditMode ? editingProduct?.price : undefined}
                                     onChange={(e) =>
                                         setPreview((p) => ({ ...p, price: e.target.value }))
+                                    }
+                                />
+                                <AdminInput
+                                    label="Cut Price"
+                                    name="cutPrice"
+                                    type="number"
+                                    placeholder="2999"
+                                    hint="Optional (original price, shown crossed out)"
+                                    defaultValue={isEditMode ? (editingProduct?.cutPrice ?? "") : undefined}
+                                    onChange={(e) =>
+                                        setPreview((p) => ({ ...p, cutPrice: e.target.value }))
                                     }
                                 />
                                 <AdminInput
@@ -170,11 +357,12 @@ export default function DropsPage() {
                                     name="sku"
                                     placeholder="VSC-PT-002"
                                     hint="Optional"
+                                    defaultValue={isEditMode ? (editingProduct?.sku ?? "") : undefined}
                                 />
                             </div>
                             {/* Image Upload */}
                             <div>
-                                <label className="block font-mono text-[10px] text-[#999] tracking-[0.2em] uppercase mb-2">
+                                <label className="block font-mono text-[9px] text-[#999] tracking-[0.15em] uppercase mb-1.5">
                                     Product Images
                                 </label>
                                 <input
@@ -188,15 +376,15 @@ export default function DropsPage() {
                                 />
                                 <label
                                     htmlFor="image-upload"
-                                    className={`block w-full px-4 py-3 border-2 border-[#2A2A2A] bg-[#0D0D0D] cursor-pointer hover:border-[#BAFF00] transition-colors ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    className={`block w-full px-3 py-2 border-2 border-[#2A2A2A] bg-[#0D0D0D] cursor-pointer hover:border-[#BAFF00] transition-colors flex items-center justify-center ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}
                                 >
-                                    <span className="font-mono text-xs text-[#F5F5F0] tracking-[0.1em]">
-                                        {uploading ? "Uploading..." : uploadedImages.length > 0 ? `✓ ${uploadedImages.length} image(s) uploaded` : "+ Upload Images"}
+                                    <span className="font-mono text-[10px] text-[#F5F5F0] tracking-[0.1em]">
+                                        {uploading ? "Uploading..." : formImages.length > 0 ? `✓ ${formImages.length} image(s) uploaded` : "+ Upload Images"}
                                     </span>
                                 </label>
-                                {uploadedImages.length > 0 && (
-                                    <div className="mt-4 grid grid-cols-3 gap-3">
-                                        {uploadedImages.map((url, index) => (
+                                {formImages.length > 0 && (
+                                    <div className="mt-3 grid grid-cols-3 gap-2">
+                                        {formImages.map((url, index) => (
                                             <div key={index} className="relative group aspect-square">
                                                 <Image
                                                     src={url}
@@ -204,6 +392,40 @@ export default function DropsPage() {
                                                     fill
                                                     className="object-cover border-2 border-[#2A2A2A]"
                                                 />
+                                                <div className="absolute bottom-0 left-0 right-0 px-2 py-1.5 flex items-center justify-between gap-2 bg-[#0D0D0D]/95 border-t-2 border-[#2A2A2A]">
+                                                    <div className="flex items-center gap-1">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => reorderImage(index, "up")}
+                                                            disabled={index === 0}
+                                                            className="w-8 h-7 bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center hover:border-[#BAFF00] hover:bg-[#252525] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[#2A2A2A] disabled:hover:bg-[#1A1A1A]"
+                                                            title="Move up"
+                                                        >
+                                                            <ChevronUp className="w-4 h-4 text-[#BAFF00]" />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => reorderImage(index, "down")}
+                                                            disabled={index === formImages.length - 1}
+                                                            className="w-8 h-7 bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center hover:border-[#BAFF00] hover:bg-[#252525] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[#2A2A2A] disabled:hover:bg-[#1A1A1A]"
+                                                            title="Move down"
+                                                        >
+                                                            <ChevronDown className="w-4 h-4 text-[#BAFF00]" />
+                                                        </button>
+                                                    </div>
+                                                    <span className="font-mono text-xs text-[#999] font-medium">
+                                                        #{index + 1}
+                                                    </span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleExtractPalette(index)}
+                                                    disabled={extractingPalette}
+                                                    className="absolute top-1 left-1 w-8 h-8 bg-[#0D0D0D]/90 border-2 border-[#2A2A2A] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:border-[#BAFF00] disabled:opacity-50"
+                                                    title="Generate palette from this image"
+                                                >
+                                                    <Palette className="w-4 h-4 text-[#BAFF00]" />
+                                                </button>
                                                 <button
                                                     type="button"
                                                     onClick={() => removeImage(index)}
@@ -216,42 +438,187 @@ export default function DropsPage() {
                                     </div>
                                 )}
                                 <p className="font-mono text-[10px] text-[#666] tracking-[0.1em] mt-2">
-                                    Upload multiple images (JPG, PNG, WebP)
+                                    Upload multiple images (JPG, PNG, WebP). Use ↑↓ to reorder, hover for palette/remove.
                                 </p>
                             </div>
-                            <div className="grid grid-cols-2 gap-6">
-                                <AdminInput
-                                    label="Colors"
-                                    name="colors"
-                                    placeholder="#000000, #333333"
-                                    hint="Hex codes"
-                                />
-                                <AdminInput
-                                    label="Sizes"
-                                    name="sizes"
-                                    placeholder="S, M, L, XL"
-                                    required
-                                />
+                                <div>
+                                <label className="flex items-center gap-2 cursor-pointer group">
+                                    <input
+                                        type="checkbox"
+                                        name="isFeatured"
+                                        defaultChecked={isEditMode ? editingProduct?.isFeatured : undefined}
+                                        className="w-4 h-4 accent-[#BAFF00] bg-[#0D0D0D] border-2 border-[#2A2A2A] cursor-pointer focus:ring-[#BAFF00]"
+                                    />
+                                    <span className="font-mono text-xs text-[#F5F5F0] tracking-[0.1em] group-hover:text-[#BAFF00] transition-colors">
+                                        Featured in search (show when user opens search, no query)
+                                    </span>
+                                </label>
+                                <p className="font-mono text-[10px] text-[#666] tracking-[0.1em] mt-1 mb-4">
+                                    Good for promoting products — they appear first when customers open search.
+                                </p>
+                                </div>
+                                <div>
+                                <label className="block font-mono text-[10px] text-[#999] tracking-[0.2em] uppercase mb-2">
+                                    Sizes
+                                </label>
+                                <div className="flex flex-wrap gap-4 pt-2">
+                                    {SIZE_OPTIONS.map((size) => {
+                                        const selected = isEditMode && editingProduct?.sizes?.includes(size);
+                                        return (
+                                            <label
+                                                key={size}
+                                                className="flex items-center gap-2 cursor-pointer group"
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    name="sizes"
+                                                    value={size}
+                                                    defaultChecked={isEditMode ? selected : undefined}
+                                                    className="w-4 h-4 accent-[#BAFF00] bg-[#0D0D0D] border-2 border-[#2A2A2A] cursor-pointer focus:ring-[#BAFF00]"
+                                                />
+                                                <span className="font-mono text-xs text-[#F5F5F0] tracking-[0.1em] group-hover:text-[#BAFF00] transition-colors">
+                                                    {size}
+                                                </span>
+                                            </label>
+                                        );
+                                    })}
+                                </div>
+                                <p className="font-mono text-[10px] text-[#666] tracking-[0.1em] mt-2">
+                                    Select one or more sizes
+                                </p>
+                            </div>
+                            <div ref={colorPickerRef} className="relative">
+                                <label className="block font-mono text-[10px] text-[#999] tracking-[0.2em] uppercase mb-2">
+                                    Colors
+                                </label>
+                                <div className="flex flex-wrap items-center gap-4 pt-2">
+                                    {formColors.map((entry, index) => (
+                                        <div
+                                            key={`${entry.hex}-${index}`}
+                                            className="flex items-center gap-2 p-2 border-2 border-[#2A2A2A] bg-[#0D0D0D]"
+                                        >
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditingColor({ index, originalHex: entry.hex })}
+                                                className={`w-10 h-10 shrink-0 cursor-pointer border-2 rounded-sm transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#BAFF00] ${editingColor?.index === index
+                                                        ? "border-[#BAFF00] ring-2 ring-[#BAFF00]"
+                                                        : "border-[#2A2A2A]"
+                                                    }`}
+                                                style={{ backgroundColor: entry.hex }}
+                                                title="Tap to open picker, then drag to select color"
+                                            />
+                                            <input
+                                                type="text"
+                                                value={entry.name}
+                                                onChange={(e) =>
+                                                    setFormColors((prev) =>
+                                                        prev.map((c, i) => (i === index ? { ...c, name: e.target.value } : c))
+                                                    )
+                                                }
+                                                placeholder="Color name"
+                                                className="font-mono text-[10px] text-[#F5F5F0] tracking-[0.1em] w-24 sm:w-28 bg-transparent border border-[#2A2A2A] px-2 py-1.5 focus:border-[#BAFF00] focus:outline-none placeholder:text-[#555]"
+                                            />
+                                            <span className="font-mono text-[10px] text-[#666] tracking-[0.1em] min-w-[4rem]">
+                                                {entry.hex.toUpperCase()}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setFormColors((prev) =>
+                                                        prev.length > 1 ? prev.filter((_, i) => i !== index) : prev
+                                                    )
+                                                }
+                                                className="font-mono text-xs text-[#666] hover:text-[#FF3333] transition-colors cursor-pointer"
+                                                title="Remove color"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormColors((prev) => [...prev, { hex: "#000000", name: "" }])}
+                                        className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-[#2A2A2A] font-mono text-[10px] text-[#666] tracking-[0.1em] uppercase hover:border-[#BAFF00] hover:text-[#BAFF00] transition-colors"
+                                    >
+                                        + Add color
+                                    </button>
+                                </div>
+                                {editingColor !== null && (
+                                    <div
+                                        role="dialog"
+                                        aria-label="Pick color"
+                                        className={`absolute left-0 z-50 border-2 border-[#2A2A2A] bg-[#0D0D0D] p-4 shadow-lg min-w-[220px] ${pickerPlacement === "top"
+                                                ? "bottom-full mb-2"
+                                                : "top-full mt-2"
+                                            }`}
+                                    >
+                                        <span className="font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase block mb-3">
+                                            Pick Color
+                                        </span>
+                                        <div className="[&_.react-colorful]:h-36 [&_.react-colorful]:w-full">
+                                            <HexColorPicker
+                                                color={formColors[editingColor.index]?.hex ?? "#000000"}
+                                                onChange={(newHex) =>
+                                                    setFormColors((prev) =>
+                                                        prev.map((c, i) =>
+                                                            i === editingColor.index ? { ...c, hex: newHex } : c
+                                                        )
+                                                    )
+                                                }
+                                            />
+                                        </div>
+                                        <div className="flex gap-2 mt-3">
+                                            <AdminButton
+                                                type="button"
+                                                variant="primary"
+                                                size="sm"
+                                                className="flex-1"
+                                                onClick={() => setEditingColor(null)}
+                                            >
+                                                Done
+                                            </AdminButton>
+                                            <AdminButton
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                className="flex-1"
+                                                onClick={() => {
+                                                    setFormColors((prev) =>
+                                                        prev.map((c, i) =>
+                                                            i === editingColor.index ? { ...c, hex: editingColor.originalHex } : c
+                                                        )
+                                                    );
+                                                    setEditingColor(null);
+                                                }}
+                                            >
+                                                Cancel
+                                            </AdminButton>
+                                        </div>
+                                    </div>
+                                )}
+                                <p className="font-mono text-[10px] text-[#666] tracking-[0.1em] mt-2">
+                                    Tap swatch → drag on picker to select. Enter a color name (e.g. Black, Navy Blue) to show on the product page instead of hex.
+                                </p>
                             </div>
                             <div className="pt-4">
                                 <AdminButton type="submit" variant="primary">
-                                    Deploy Drop
+                                    {isEditMode ? "Save Changes" : "Deploy Drop"}
                                 </AdminButton>
                             </div>
                         </form>
                     </div>
 
                     {/* Live Preview */}
-                    <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-8">
-                        <span className="font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase block mb-6">
+                    <div className="border-2 border-[#2A2A2A] bg-[#0D0D0D] p-5">
+                        <span className="font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase block mb-4">
                             Live Preview // Storefront Card
                         </span>
-                        <div className="border-2 border-[#2A2A2A] bg-black p-6 max-w-sm">
+                        <div className="border-2 border-[#2A2A2A] bg-black p-4 max-w-sm">
                             {/* Product image preview */}
-                            <div className="aspect-[3/4] bg-[#1A1A1A] border border-[#2A2A2A] overflow-hidden mb-6 relative">
-                                {uploadedImages.length > 0 ? (
+                            <div className="aspect-[3/4] bg-[#1A1A1A] border border-[#2A2A2A] overflow-hidden mb-4 relative">
+                                {formImages.length > 0 ? (
                                     <Image
-                                        src={uploadedImages[0]}
+                                        src={formImages[0]}
                                         alt="Preview"
                                         fill
                                         className="object-cover"
@@ -273,12 +640,27 @@ export default function DropsPage() {
                                 >
                                     {preview.name || "DROP NAME"}
                                 </h3>
-                                <p className="font-mono text-[10px] text-[#666] tracking-[0.05em] line-clamp-2">
-                                    {preview.description || "Product description will appear here..."}
-                                </p>
-                                <p className="font-mono text-lg text-[#BAFF00] font-bold tracking-[0.02em]">
-                                    {preview.price ? `₹${Number(preview.price).toLocaleString("en-IN")}` : "₹0"}
-                                </p>
+                                <div className="font-mono text-[10px] text-[#666] tracking-[0.05em] space-y-1 line-clamp-3">
+                                    {(preview.description || "Product description will appear here...")
+                                        .split(/\r?\n/)
+                                        .filter(Boolean)
+                                        .map((line, idx) => (
+                                            <p key={idx}>{line}</p>
+                                        ))}
+                                </div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    {hasDiscount(
+                                        preview.cutPrice?.trim() ? Number(preview.cutPrice) : null,
+                                        Number(preview.price) || 0
+                                    ) && (
+                                        <span className="font-mono text-sm text-[#666] tracking-[0.02em]" style={{ textDecoration: "line-through" }}>
+                                            ₹{Number(preview.cutPrice).toLocaleString("en-IN")}
+                                        </span>
+                                    )}
+                                    <p className="font-mono text-lg text-[#BAFF00] font-bold tracking-[0.02em]">
+                                        {preview.price ? `₹${Number(preview.price).toLocaleString("en-IN")}` : "₹0"}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -286,42 +668,42 @@ export default function DropsPage() {
             )}
 
             {/* ── PRODUCT LIST ── */}
+            {products === undefined ? (
+                <AdminLoadingBlock />
+            ) : (
             <div className="border-2 border-[#2A2A2A]">
-                <div className="px-6 py-4 border-b-2 border-[#2A2A2A] bg-[#0D0D0D]">
-                    <span className="font-mono text-xs text-[#F5F5F0] tracking-[0.15em] uppercase font-bold">
-                        All Drops ({products?.length ?? 0})
+                <div className="px-4 py-3 border-b-2 border-[#2A2A2A] bg-[#0D0D0D]">
+                    <span className="font-mono text-[10px] text-[#F5F5F0] tracking-[0.15em] uppercase font-bold">
+                        All Drops ({products.length})
                     </span>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-[#2A2A2A]">
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     SKU
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Name
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Price
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-left font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Sizes
                                 </th>
-                                <th className="px-6 py-3 text-left font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
-                                    Status
-                                </th>
-                                <th className="px-6 py-3 text-right font-mono text-[10px] text-[#666] tracking-[0.2em] uppercase font-bold">
+                                <th className="px-4 py-2 text-right font-mono text-[9px] text-[#666] tracking-[0.15em] uppercase font-bold">
                                     Actions
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
-                            {(!products || products.length === 0) ? (
+                            {products.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={6}
-                                        className="px-6 py-12 text-center font-mono text-xs text-[#666] tracking-[0.1em]"
+                                        colSpan={5}
+                                        className="px-4 py-8 text-center font-mono text-[10px] text-[#666] tracking-[0.1em]"
                                     >
                                         NO DROPS DEPLOYED // CREATE YOUR FIRST DROP
                                     </td>
@@ -332,34 +714,80 @@ export default function DropsPage() {
                                         key={product.id}
                                         className="border-b border-[#1A1A1A] hover:bg-[#0D0D0D] transition-colors"
                                     >
-                                        <td className="px-6 py-4 font-mono text-xs text-[#BAFF00] tracking-[0.1em]">
-                                            {product.sku ?? "—"}
+                                        <td className="px-4 py-2.5">
+                                            <div className="flex flex-col gap-0.5">
+                                                <span className="font-mono text-[10px] text-[#BAFF00] tracking-[0.1em]">
+                                                    {product.sku ?? "—"}
+                                                </span>
+                                                <span
+                                                    className={`font-mono text-[10px] tracking-[0.2em] uppercase font-bold ${product.isActive ? "text-[#BAFF00]" : "text-[#666]"
+                                                        }`}
+                                                >
+                                                    {product.isActive ? "● LIVE" : "○ ARCHIVED"}
+                                                </span>
+                                            </div>
                                         </td>
-                                        <td className="px-6 py-4 font-mono text-xs text-[#F5F5F0] tracking-[0.05em] uppercase">
+                                        <td className="px-4 py-2.5 font-mono text-[10px] text-[#F5F5F0] tracking-[0.05em] uppercase">
                                             {product.name}
                                         </td>
-                                        <td className="px-6 py-4 font-mono text-sm text-[#F5F5F0] font-bold tracking-[0.05em]">
-                                            ₹{Number(product.price).toLocaleString("en-IN")}
+                                        <td className="px-4 py-2.5 font-mono text-xs tracking-[0.05em]">
+                                            <div className="flex flex-col gap-0.5">
+                                                {hasDiscount(product.cutPrice ? Number(product.cutPrice) : null, Number(product.price)) && product.cutPrice && (
+                                                    <span className="text-[#666]" style={{ textDecoration: "line-through" }}>
+                                                        ₹{Number(product.cutPrice).toLocaleString("en-IN")}
+                                                    </span>
+                                                )}
+                                                <span className="text-[#F5F5F0] font-bold text-[#BAFF00]">
+                                                    ₹{Number(product.price).toLocaleString("en-IN")}
+                                                </span>
+                                            </div>
                                         </td>
-                                        <td className="px-6 py-4 font-mono text-[10px] text-[#999] tracking-[0.1em]">
+                                        <td className="px-4 py-2.5 font-mono text-[9px] text-[#999] tracking-[0.1em]">
                                             {product.sizes.join(" / ")}
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <span
-                                                className={`font-mono text-[10px] tracking-[0.2em] uppercase font-bold ${product.isActive ? "text-[#BAFF00]" : "text-[#666]"
-                                                    }`}
-                                            >
-                                                {product.isActive ? "● LIVE" : "○ ARCHIVED"}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <AdminButton
-                                                variant={product.isActive ? "ghost" : "secondary"}
-                                                size="sm"
-                                                onClick={() => handleToggle(product.id)}
-                                            >
-                                                {product.isActive ? "Archive" : "Reactivate"}
-                                            </AdminButton>
+                                        <td className="px-4 py-2.5 text-right">
+                                            <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                                                <AdminButton
+                                                    variant={product.isFeatured ? "secondary" : "ghost"}
+                                                    size="sm"
+                                                    onClick={() => handleToggleFeatured(product.id)}
+                                                    disabled={!product.isActive}
+                                                    title={product.isFeatured ? "Remove from featured (search)" : "Feature in search"}
+                                                    className="!p-1.5 tracking-normal"
+                                                >
+                                                    <Star
+                                                        className={`w-4 h-4 ${product.isFeatured ? "fill-current text-[#BAFF00]" : ""}`}
+                                                    />
+                                                </AdminButton>
+                                                <AdminButton
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => openEdit(product)}
+                                                    title="Edit"
+                                                    className="!p-1.5 tracking-normal"
+                                                >
+                                                    <Pencil className="w-3.5 h-3.5" />
+                                                </AdminButton>
+                                                <AdminButton
+                                                    variant={product.isActive ? "ghost" : "secondary"}
+                                                    size="sm"
+                                                    onClick={() => handleToggle(product.id)}
+                                                    title={product.isActive ? "Archive" : "Reactivate"}
+                                                    className="!p-1.5 tracking-normal"
+                                                >
+                                                    {product.isActive ? <Archive className="w-3.5 h-3.5" /> : <ArchiveRestore className="w-3.5 h-3.5 text-[#FF3333]" />}
+                                                </AdminButton>
+                                                <AdminButton
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleDelete(product)}
+                                                    disabled={deletingId === product.id}
+                                                    title="Delete"
+                                                    className="text-[#FF3333] hover:bg-[#FF3333]/10 hover:text-[#FF3333] !p-1.5 tracking-normal"
+                                                >
+                                                    {deletingId === product.id ? "…" : <Trash2 className="w-3.5 h-3.5" />}
+                                                </AdminButton>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
@@ -368,6 +796,8 @@ export default function DropsPage() {
                     </table>
                 </div>
             </div>
+            )}
+
         </div>
     );
 }

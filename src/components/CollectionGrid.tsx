@@ -2,24 +2,46 @@
 
 import { useRef, useEffect } from "react"
 import { ProductCard } from "@/components/ProductCard"
+import { trackViewItemList } from "@/lib/analytics"
 
-// Varying aspect ratios for staggered masonry effect
-const ASPECTS = ["aspect-[3/4]", "aspect-[4/5]", "aspect-square", "aspect-[5/6]", "aspect-[2/3]"]
+// Uniform aspect ratio for equal-height cards
+const ASPECT = "aspect-[3/4]"
 
 interface Product {
   id: string
   name: string
+  slug: string
   price: number
+  cutPrice?: number | null
   images: string[]
   tag?: string
 }
 
 interface CollectionGridProps {
   products: Product[]
+  /** When true (home page), uses less top padding on mobile */
+  compactTopPadding?: boolean
 }
 
-export function CollectionGrid({ products }: CollectionGridProps) {
+export function CollectionGrid({ products, compactTopPadding }: CollectionGridProps) {
   const sectionRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (products.length > 0) {
+      trackViewItemList({
+        item_list_id: "collection",
+        item_list_name: "Collection",
+        items: products.map((p, i) => ({
+          item_id: p.id,
+          item_name: p.name,
+          price: p.price,
+          index: i,
+          item_list_id: "collection",
+          item_list_name: "Collection",
+        })),
+      })
+    }
+  }, [products])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -36,8 +58,11 @@ export function CollectionGrid({ products }: CollectionGridProps) {
   }, [])
 
   return (
-    <section ref={sectionRef} className="reveal py-24 md:py-32">
-      <div className="px-6 md:px-12 lg:px-20 mb-14">
+    <section
+      ref={sectionRef}
+      className={`reveal ${compactTopPadding ? "pt-12 sm:pt-24 md:pt-32" : "pt-28 sm:pt-24 md:pt-32 pb-12 sm:pb-24 md:pb-32"}`}
+    >
+      <div className="px-4 sm:px-6 md:px-12 lg:px-20 mb-6 sm:mb-14">
         <div className="flex items-end justify-between">
           <div>
             <span
@@ -47,7 +72,7 @@ export function CollectionGrid({ products }: CollectionGridProps) {
               [ 001 ] Collection
             </span>
             <h2
-              className="text-section text-[var(--vsc-white)]"
+              className="text-section text-[var(--vsc-gray-900)]"
               style={{ fontFamily: "var(--font-space-grotesk)", marginLeft: "-0.02em" }}
             >
               THE
@@ -59,7 +84,7 @@ export function CollectionGrid({ products }: CollectionGridProps) {
             className="hidden md:block text-xs text-[var(--vsc-gray-600)] uppercase tracking-[0.2em] max-w-xs text-right"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
-            Staggered grid.
+            Uniform grid.
             <br />
             Premium heavyweight cotton.
             <br />
@@ -68,24 +93,21 @@ export function CollectionGrid({ products }: CollectionGridProps) {
         </div>
       </div>
 
-      {/* Masonry / staggered grid */}
-      <div
-        className="columns-2 md:columns-3 lg:columns-4 gap-6 px-6 md:px-12 lg:px-20"
-        style={{ columnFill: "balance" }}
-      >
+      {/* Responsive grid: 1→2→3→4 columns, equal-height cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 px-4 sm:px-6 md:px-12 lg:px-20">
         {products.length > 0 ? (
-          products.map((product, index) => (
-            <div key={product.id} className="break-inside-avoid mb-6">
+          products.map((product) => (
+            <div key={product.id} className="flex flex-col">
               <ProductCard
                 product={product}
                 variant="grid"
-                aspectClass={ASPECTS[index % ASPECTS.length]}
+                aspectClass={ASPECT}
               />
             </div>
           ))
         ) : (
-          <div className="break-inside-avoid mb-6 col-span-full">
-            <div className="w-full min-h-[280px] flex flex-col items-center justify-center border border-dashed border-[var(--vsc-gray-700)] p-8">
+          <div className="col-span-full">
+            <div className="w-full min-h-[200px] sm:min-h-[280px] flex flex-col items-center justify-center border border-dashed border-[var(--vsc-gray-700)] p-6 sm:p-8">
               <span
                 className="text-xs text-[var(--vsc-gray-600)] uppercase tracking-[0.2em] block mb-2"
                 style={{ fontFamily: "var(--font-space-mono)" }}
@@ -101,10 +123,10 @@ export function CollectionGrid({ products }: CollectionGridProps) {
             </div>
           </div>
         )}
-        {/* Coming Soon placeholder */}
+        {/* Coming Soon placeholder — same structure as ProductCard for equal height */}
         {products.length > 0 && (
-          <div className="break-inside-avoid mb-6">
-            <div className="w-full min-h-[280px] flex flex-col items-center justify-center border border-dashed border-[var(--vsc-gray-700)] p-8">
+          <div className="flex flex-col">
+            <div className={`w-full relative overflow-hidden flex flex-col items-center justify-center border border-[var(--vsc-gray-700)] p-6 sm:p-8 ${ASPECT} bg-white`}>
               <span
                 className="text-xs text-[var(--vsc-gray-600)] uppercase tracking-[0.2em] block mb-2"
                 style={{ fontFamily: "var(--font-space-mono)" }}
@@ -118,14 +140,13 @@ export function CollectionGrid({ products }: CollectionGridProps) {
                 S2 →
               </span>
             </div>
+            <div className="flex flex-col space-y-2 pt-2" />
           </div>
         )}
       </div>
 
-      <div className="px-6 md:px-12 lg:px-20 mt-10">
-        <div className="w-full h-px bg-[var(--vsc-gray-800)] relative">
-          <div className="absolute left-0 top-0 w-1/4 h-px bg-[var(--vsc-accent)]" />
-        </div>
+      <div className="px-4 sm:px-6 md:px-12 lg:px-20 mt-6 sm:mt-10">
+        <div className="w-full h-px bg-[var(--vsc-accent)]" aria-hidden />
       </div>
     </section>
   )

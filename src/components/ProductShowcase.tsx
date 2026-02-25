@@ -6,7 +6,9 @@ import { ProductCard } from "@/components/ProductCard"
 interface ShowcaseProduct {
     id: string;
     name: string;
+    slug: string;
     price: number;
+    cutPrice?: number | null;
     images: string[];
     tag?: string;
 }
@@ -72,7 +74,7 @@ export function ProductShowcase({ products }: ProductShowcaseProps) {
                             [ 001 ] Collection
                         </span>
                         <h2
-                            className="text-section text-[var(--vsc-white)]"
+                        className="text-section text-[var(--vsc-gray-900)]"
                             style={{
                                 fontFamily: "var(--font-space-grotesk)",
                                 marginLeft: "-0.02em",

@@ -1,270 +1,157 @@
 "use server";
 
-import {
-    getRecentOrdersWithItems,
-    getOrdersWithItems,
-    updateOrder,
-    createAuditLog,
-    countOrders,
-    aggregateOrderTotal,
-    getAllProducts,
-    getActiveProducts,
-    createProduct as createProductHelper,
-    updateProduct,
-    getProductById,
-    getStockLevelsByProductId,
-    updateStockLevel,
-    getLowStockAlerts,
-    createStockLevel,
-    type OrderStatus,
-} from "@/lib/firebase-helpers";
-import { revalidatePath } from "next/cache";
+import * as DashboardController from "@/controllers/admin/DashboardController";
+import * as OrderController from "@/controllers/admin/OrderController";
+import * as ContactController from "@/controllers/admin/ContactController";
+import * as NewsletterController from "@/controllers/admin/NewsletterController";
+import * as ProductController from "@/controllers/admin/ProductController";
+import * as InventoryController from "@/controllers/admin/InventoryController";
+import * as StaticContentController from "@/controllers/admin/StaticContentController";
+import * as ReviewController from "@/controllers/admin/ReviewController";
+import * as InvestmentController from "@/controllers/admin/InvestmentController";
+import * as BackInStockController from "@/controllers/admin/BackInStockController";
+import * as UserController from "@/controllers/admin/UserController";
+import type { OrderStatus } from "@/models/order";
 
-// ─── DASHBOARD STATS ───────────────────────────────────────────────────────────
+// ─── DASHBOARD ─────────────────────────────────────────────────────────────────
 
 export async function getDashboardStats() {
-    const [
-        totalOrders,
-        pendingOrders,
-        paidOrders,
-        totalRevenue,
-        activeProducts,
-        lowStockAlerts,
-        recentOrders,
-    ] = await Promise.all([
-        countOrders(),
-        countOrders("PENDING"),
-        countOrders("PAID"),
-        aggregateOrderTotal(),
-        getActiveProducts().then((products) => products.length),
-        getLowStockAlerts().then((alerts) => alerts.length),
-        getRecentOrdersWithItems(10),
-    ]);
-
-    return {
-        totalOrders,
-        pendingOrders,
-        paidOrders,
-        totalRevenue: totalRevenue.toString(),
-        activeProducts,
-        lowStockAlerts,
-        recentOrders: recentOrders.map((order) => ({
-            id: order.id,
-            customerName: order.customerName,
-            customerEmail: order.customerEmail,
-            status: order.status,
-            totalAmount: order.totalAmount.toString(),
-            createdAt: order.createdAt.toISOString(),
-            items: order.items.map((item) => ({
-                productName: item.product.name,
-                size: item.size,
-                color: item.color,
-                quantity: item.quantity,
-            })),
-        })),
-    };
+    return DashboardController.getDashboardStats();
 }
 
-// ─── ORDERS ─────────────────────────────────────────────────────────────────────
+// ─── ORDERS ────────────────────────────────────────────────────────────────────
 
 export async function getOrders(statusFilter?: OrderStatus) {
-    const orders = await getOrdersWithItems(statusFilter);
-
-    return orders.map((order) => ({
-        id: order.id,
-        customerName: order.customerName,
-        customerEmail: order.customerEmail,
-        status: order.status,
-        totalAmount: order.totalAmount.toString(),
-        paymentId: order.paymentId,
-        trackingNumber: order.trackingNumber,
-        trackingCarrier: order.trackingCarrier,
-        notes: order.notes,
-        createdAt: order.createdAt.toISOString(),
-        items: order.items.map((item) => ({
-            productName: item.product.name,
-            size: item.size,
-            color: item.color,
-            quantity: item.quantity,
-        })),
-    }));
+    return OrderController.getOrders(statusFilter);
 }
 
 export async function updateOrderStatus(orderId: string, status: OrderStatus) {
-    await updateOrder(orderId, { status });
-
-    await createAuditLog({
-        action: `ORDER_${status}`,
-        entity: "Order",
-        entityId: orderId,
-        details: { newStatus: status },
-    });
-
-    revalidatePath("/admin/orders");
-    revalidatePath("/admin");
+    return OrderController.updateOrderStatus(orderId, status);
 }
 
-export async function addTrackingInfo(
-    orderId: string,
-    trackingNumber: string,
-    carrier: string
-) {
-    await updateOrder(orderId, {
-        trackingNumber,
-        trackingCarrier: carrier,
-        status: "SHIPPED",
-    });
-
-    await createAuditLog({
-        action: "ORDER_SHIPPED",
-        entity: "Order",
-        entityId: orderId,
-        details: { trackingNumber, carrier },
-    });
-
-    revalidatePath("/admin/orders");
-    revalidatePath("/admin");
+export async function addTrackingInfo(orderId: string, trackingNumber: string, carrier: string) {
+    return OrderController.addTrackingInfo(orderId, trackingNumber, carrier);
 }
 
-// ─── PRODUCTS / DROPS ───────────────────────────────────────────────────────────
+// ─── CONTACT ───────────────────────────────────────────────────────────────────
+
+export async function getAdminContactSubmissions() {
+    return ContactController.getAdminContactSubmissions();
+}
+
+// ─── NEWSLETTER ────────────────────────────────────────────────────────────────
+
+export async function getAdminNewsletterSubscriptions() {
+    return NewsletterController.getAdminNewsletterSubscriptions();
+}
+
+// ─── BACK IN STOCK NOTIFICATIONS ───────────────────────────────────────────────
+
+export async function getAdminBackInStockNotifications() {
+    return BackInStockController.getAdminBackInStockNotifications();
+}
+
+// ─── PRODUCTS / DROPS ──────────────────────────────────────────────────────────
 
 export async function getProducts() {
-    const products = await getAllProducts();
-    const productsWithStock = await Promise.all(
-        products.map(async (product) => {
-            const stock = await getStockLevelsByProductId(product.id);
-            return {
-                id: product.id,
-                name: product.name,
-                description: product.description,
-                price: product.price.toString(),
-                images: product.images,
-                colors: product.colors,
-                sizes: product.sizes,
-                sku: product.sku,
-                isActive: product.isActive,
-                createdAt: product.createdAt.toISOString(),
-                stock: stock.map((s) => ({
-                    id: s.id,
-                    size: s.size,
-                    quantity: s.quantity,
-                    lowThreshold: s.lowThreshold,
-                })),
-            };
-        })
-    );
-
-    return productsWithStock;
+    return ProductController.getProducts();
 }
 
 export async function createProduct(formData: FormData) {
-    const name = formData.get("name") as string;
-    const description = formData.get("description") as string;
-    const price = parseFloat(formData.get("price") as string);
-    const sku = (formData.get("sku") as string) || null;
-    const imagesString = formData.get("images") as string;
-    const images = imagesString
-        ? imagesString.split(",").map((s) => s.trim()).filter(Boolean)
-        : [];
-    const colors = (formData.get("colors") as string)
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-    const sizes = (formData.get("sizes") as string)
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-
-    const product = await createProductHelper({
-        name,
-        description,
-        price,
-        sku,
-        images,
-        colors,
-        sizes,
-        isActive: true,
-    });
-
-    // Create stock levels for each size
-    await Promise.all(
-        sizes.map((size) =>
-            createStockLevel({
-                productId: product.id,
-                size,
-                quantity: 0,
-                lowThreshold: 5,
-            })
-        )
-    );
-
-    await createAuditLog({
-        action: "PRODUCT_CREATED",
-        entity: "Product",
-        entityId: product.id,
-        details: { name },
-    });
-
-    revalidatePath("/admin/drops");
-    revalidatePath("/admin/inventory");
-    revalidatePath("/admin");
+    return ProductController.createProduct(formData);
 }
 
 export async function toggleProductActive(productId: string) {
-    const product = await getProductById(productId);
-    if (!product) return;
-
-    await updateProduct(productId, { isActive: !product.isActive });
-
-    revalidatePath("/admin/drops");
-    revalidatePath("/admin");
+    return ProductController.toggleProductActive(productId);
 }
 
-// ─── INVENTORY ──────────────────────────────────────────────────────────────────
+export async function toggleProductFeatured(productId: string) {
+    return ProductController.toggleProductFeatured(productId);
+}
+
+export async function updateProductAction(productId: string, formData: FormData) {
+    return ProductController.updateProduct(productId, formData);
+}
+
+export async function deleteDropAction(productId: string) {
+    return ProductController.deleteProduct(productId);
+}
+
+// ─── INVENTORY ─────────────────────────────────────────────────────────────────
 
 export async function getStockLevels() {
-    const products = await getAllProducts();
-    const activeProducts = products.filter((p) => p.isActive);
-    activeProducts.sort((a, b) => a.name.localeCompare(b.name));
-
-    const productsWithStock = await Promise.all(
-        activeProducts.map(async (product) => {
-            const stock = await getStockLevelsByProductId(product.id);
-            return {
-                id: product.id,
-                name: product.name,
-                sku: product.sku,
-                sizes: product.sizes,
-                stock: stock.map((s) => ({
-                    id: s.id,
-                    size: s.size,
-                    quantity: s.quantity,
-                    lowThreshold: s.lowThreshold,
-                })),
-            };
-        })
-    );
-
-    return productsWithStock;
+    return InventoryController.getStockLevels();
 }
 
-export async function updateStock(
-    stockLevelId: string,
-    quantity: number
+export async function updateStock(stockLevelId: string, quantity: number) {
+    return InventoryController.updateStock(stockLevelId, quantity);
+}
+
+// ─── STATIC CONTENT ────────────────────────────────────────────────────────────
+
+export async function getStaticContent() {
+    return StaticContentController.getStaticContent();
+}
+
+export async function updateStaticContent(
+    key: string,
+    url: string,
+    type: "video" | "image",
+    redirectUrl?: string | null
 ) {
-    const stockLevel = await updateStockLevel(stockLevelId, quantity);
+    return StaticContentController.updateStaticContent(key, url, type, redirectUrl);
+}
 
-    await createAuditLog({
-        action: "STOCK_UPDATED",
-        entity: "StockLevel",
-        entityId: stockLevelId,
-        details: {
-            newQuantity: quantity,
-            productId: stockLevel.productId,
-            size: stockLevel.size,
-        },
-    });
+export async function deleteStaticContentAction(key: string) {
+    return StaticContentController.deleteStaticContentAction(key);
+}
 
-    revalidatePath("/admin/inventory");
-    revalidatePath("/admin");
+// ─── REVIEWS ───────────────────────────────────────────────────────────────────
+
+export async function getReviewsAction() {
+    return ReviewController.getReviews();
+}
+
+export async function createReviewAction(
+    authorName: string,
+    text: string,
+    rating?: number | null,
+    sortOrder?: number
+) {
+    return ReviewController.createReview(authorName, text, rating, sortOrder);
+}
+
+export async function updateReviewAction(
+    id: string,
+    updates: { authorName?: string; text?: string; rating?: number | null; sortOrder?: number; isActive?: boolean }
+) {
+    return ReviewController.updateReview(id, updates);
+}
+
+export async function deleteReviewAction(id: string) {
+    return ReviewController.deleteReview(id);
+}
+
+// ─── INVESTMENTS ───────────────────────────────────────────────────────────────
+
+export async function getInvestmentsAction() {
+    return InvestmentController.getInvestments();
+}
+
+export async function createInvestmentAction(formData: FormData) {
+    return InvestmentController.createInvestment(formData);
+}
+
+export async function updateInvestmentAction(id: string, formData: FormData) {
+    return InvestmentController.updateInvestment(id, formData);
+}
+
+export async function deleteInvestmentAction(id: string) {
+    return InvestmentController.deleteInvestment(id);
+}
+
+// ─── USERS ───────────────────────────────────────────────────────────────────────
+
+export async function getAdminUsers() {
+    return UserController.getAdminUsers();
 }

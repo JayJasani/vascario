@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
+import { Suspense } from "react";
 import { SmoothScroller } from "@/components/SmoothScroller";
-import { CartProvider } from "@/context/CartContext";
+import { AppLoadGate } from "@/components/AppLoadGate";
+import { AppProviders } from "@/components/AppProviders";
+import { ScrollToTop } from "@/components/ScrollToTop";
+import { GoogleTagManagerHead, GoogleTagManagerNoScript } from "@/components/GoogleTagManager";
+import { GtmPageView } from "@/components/GtmPageView";
+import { getHomeMetadata } from "@/lib/seo-config";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -18,23 +24,10 @@ const spaceMono = Space_Mono({
   display: "swap",
 });
 
+// Root layout metadata with metadataBase for proper OG image URLs
 export const metadata: Metadata = {
-  title: "VASCARIO — SEASON 1",
-  description:
-    "Premium embroidered streetwear. Limited drops. Wear the culture. VASCARIO — where raw craftsmanship meets digital-age fashion.",
-  keywords: [
-    "streetwear",
-    "embroidered tees",
-    "premium t-shirts",
-    "limited drop",
-    "Gen Z fashion",
-    "VASCARIO",
-  ],
-  openGraph: {
-    title: "VASCARIO — SEASON 1",
-    description: "Premium embroidered streetwear. Limited drops.",
-    type: "website",
-  },
+  ...getHomeMetadata(),
+  metadataBase: new URL("https://www.vascario.com"),
 };
 
 export default function RootLayout({
@@ -43,14 +36,31 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body
-        className={`${spaceGrotesk.variable} ${spaceMono.variable}`}
-      >
+    <html lang="en">
+      <head>
+        <GoogleTagManagerHead />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (typeof window !== 'undefined' && 'scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+              }
+            `,
+          }}
+        />
+      </head>
+      <body className={`${spaceGrotesk.variable} ${spaceMono.variable}`}>
+        <div id="app-initial-loading" aria-hidden="true" />
+        <AppLoadGate />
+        <GoogleTagManagerNoScript />
         <SmoothScroller>
-          <CartProvider>
+          <AppProviders>
+            <Suspense fallback={null}>
+              <GtmPageView />
+            </Suspense>
+            <ScrollToTop />
             {children}
-          </CartProvider>
+          </AppProviders>
         </SmoothScroller>
       </body>
     </html>
