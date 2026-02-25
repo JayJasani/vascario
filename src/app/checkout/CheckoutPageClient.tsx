@@ -122,6 +122,8 @@ export default function CheckoutPageClient() {
             quantity: item.quantity,
             price: item.price,
             color: item.color ?? null,
+            image: item.image ?? "",
+            slug: item.slug ?? "",
           })),
           notes: {
             userId: user?.uid ?? "",
@@ -419,7 +421,7 @@ export default function CheckoutPageClient() {
               <div className="p-5 space-y-4">
                 {items.map((item) => (
                   <div
-                    key={item.id}
+                    key={`${item.id}-${item.size}`}
                     className="flex justify-between items-start pb-3 border-b border-dashed border-[var(--vsc-gray-700)]"
                   >
                     <div className="flex-1 min-w-0 pr-3">
@@ -698,7 +700,7 @@ function StepReview({
         <div className="space-y-4">
           {items.map((item) => (
             <div
-              key={item.id}
+              key={`${item.id}-${item.size}`}
               className="flex justify-between items-center pb-3 border-b border-dashed border-[var(--vsc-gray-700)]"
             >
               <div>

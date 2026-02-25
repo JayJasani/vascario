@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -139,9 +140,10 @@ export default function OrdersPageClient() {
             ) : (
               <div className="space-y-3">
                 {orders.map((order) => (
-                  <div
+                  <Link
                     key={order.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-3 py-3 border border-[var(--vsc-gray-200)] bg-[var(--vsc-cream)]"
+                    href={`/orders/${order.id}`}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-3 py-3 border border-[var(--vsc-gray-200)] bg-[var(--vsc-cream)] hover:border-[var(--vsc-accent)] transition-colors"
                   >
                     <div className="flex flex-col gap-1">
                       <span
@@ -179,7 +181,7 @@ export default function OrdersPageClient() {
                         {formatPrice(order.totalAmount)}
                       </span>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}

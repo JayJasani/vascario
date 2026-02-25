@@ -829,6 +829,7 @@ export function ProductDetailClient({
                     image: product.images[0] ?? "",
                     size: selectedSize || "OS",
                     quantity,
+                    slug: product.slug,
                     color: selectedColor || undefined,
                   });
                   trackAddToCart({

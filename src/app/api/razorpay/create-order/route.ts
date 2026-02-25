@@ -44,6 +44,8 @@ export async function POST(req: NextRequest) {
                   quantity: number
                   price: number
                   color?: string | null
+                  image?: string | null
+                  slug?: string | null
               }[]
             | undefined) ?? []
 
@@ -86,6 +88,10 @@ export async function POST(req: NextRequest) {
                         quantity: item.quantity,
                         size: item.size,
                         color: item.color ?? null,
+                        unitPrice: item.price,
+                        productName: item.name,
+                        productImage: item.image ?? null,
+                        productSlug: item.slug ?? null,
                     })
                 }
 
