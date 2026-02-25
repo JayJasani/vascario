@@ -57,6 +57,11 @@ async function createOrUpdateOrderFromPayment(event: any) {
     (payment.contact as string | undefined) ||
     "";
 
+  const userId =
+    (notes.userId as string | undefined) ||
+    (notes.uid as string | undefined) ||
+    null;
+
   const shippingAddress = {
     fullName: notes.name ?? null,
     email: notes.email ?? null,
@@ -90,12 +95,14 @@ async function createOrUpdateOrderFromPayment(event: any) {
         totalAmount: amount,
         paymentId,
         currency,
+        userId,
         updatedAt: now,
       },
       {merge: true},
     );
   } else {
     await ordersCollection.add({
+      userId,
       customerEmail,
       customerName,
       status: "PAID",

@@ -14,6 +14,7 @@ type LastOrderItem = {
   size: string;
   quantity: number;
   price: number;
+  color: string | null;
 };
 
 type LastOrderSnapshot = {

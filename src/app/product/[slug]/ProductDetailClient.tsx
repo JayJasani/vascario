@@ -829,6 +829,7 @@ export function ProductDetailClient({
                     image: product.images[0] ?? "",
                     size: selectedSize || "OS",
                     quantity,
+                    color: selectedColor || undefined,
                   });
                   trackAddToCart({
                     currency: "INR",

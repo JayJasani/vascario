@@ -6,6 +6,7 @@ import { PrefetchLink } from "@/components/PrefetchLink";
 import {
   HeartIcon,
   ShoppingBagIcon,
+  ClockIcon,
   ArrowRightOnRectangleIcon,
   UserCircleIcon,
   XMarkIcon,
@@ -126,6 +127,16 @@ export function AccountDrawer({
               >
                 <UserCircleIcon className="w-5 h-5 shrink-0" strokeWidth={1.5} />
                 Profile
+              </PrefetchLink>
+            </li>
+            <li>
+              <PrefetchLink
+                href="/orders"
+                onClick={onClose}
+                className="flex items-center gap-3 px-4 py-3 text-[var(--vsc-gray-700)] hover:bg-[var(--vsc-gray-100)] hover:text-[var(--vsc-gray-900)] transition-colors text-xs uppercase tracking-[0.18em]"
+              >
+                <ClockIcon className="w-5 h-5 shrink-0" strokeWidth={1.5} />
+                Orders
               </PrefetchLink>
             </li>
             <li>
