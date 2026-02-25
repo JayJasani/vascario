@@ -169,6 +169,42 @@ export default function CheckoutPageClient() {
 
           const transactionId = response.razorpay_payment_id;
 
+          // Persist a lightweight snapshot of this order for the success page
+          let orderRefId = "";
+          if (typeof window !== "undefined") {
+            const snapshot = {
+              id: transactionId,
+              total: cartTotal,
+              items: items.map((item) => ({
+                id: item.id,
+                name: item.name,
+                size: item.size,
+                quantity: item.quantity,
+                price: item.price,
+              })),
+              shipping,
+              createdAt: new Date().toISOString(),
+            };
+
+            try {
+              const keyPrefix = "vascario:lastOrder:";
+              const uuid =
+                window.crypto && "randomUUID" in window.crypto
+                  ? window.crypto.randomUUID()
+                  : `${Date.now().toString(36)}-${Math.random()
+                      .toString(36)
+                      .slice(2, 8)}`;
+              orderRefId = uuid;
+              window.sessionStorage.setItem(
+                `${keyPrefix}${orderRefId}`,
+                JSON.stringify(snapshot),
+              );
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error("Failed to persist last order snapshot", err);
+            }
+          }
+
           trackPurchase({
             transaction_id: transactionId,
             currency: "INR",
@@ -178,7 +214,8 @@ export default function CheckoutPageClient() {
           });
 
           clearCart();
-          router.push(`/order-success?order=${transactionId}`);
+          const refQuery = orderRefId ? `&ref=${encodeURIComponent(orderRefId)}` : "";
+          router.push(`/order-success?order=${transactionId}${refQuery}`);
         },
         onFailure: () => {
           // eslint-disable-next-line no-alert
