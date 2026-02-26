@@ -326,8 +326,12 @@ export function generateMetadata(config: {
         : [{ url: ogImage }],
   };
 
-  // Always set og:type for link preview tools (website, article, product, etc.)
-  openGraphConfig.type = type;
+  // Map our internal type to Next.js-supported OpenGraph types
+  const ogType =
+    type === "website" || type === "article" ? type : undefined;
+  if (ogType) {
+    openGraphConfig.type = ogType;
+  }
 
   return {
     metadataBase: new URL(SEO_BASE.siteUrl),
