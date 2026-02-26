@@ -186,7 +186,12 @@ export async function GET() {
         ok: true,
         items,
       },
-      { status: 200 },
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "private, max-age=20",
+        },
+      },
     );
   } catch (error) {
     console.error("Cart API GET error:", error);

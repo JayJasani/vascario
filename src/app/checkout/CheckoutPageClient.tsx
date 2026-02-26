@@ -671,7 +671,7 @@ function InputField({
   type?: string;
 }) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2 sm:gap-3">
       <label
         className="text-xs text-[var(--vsc-accent)] uppercase tracking-[0.25em] font-bold"
         style={{ fontFamily: "var(--font-space-mono)" }}
@@ -683,7 +683,7 @@ function InputField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-5 py-4 bg-[var(--vsc-cream)] border-2 border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-sm uppercase tracking-[0.1em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)] transition-colors duration-200"
+        className="w-full px-3 py-3 sm:px-4 sm:py-3 md:px-5 md:py-4 bg-[var(--vsc-cream)] border-2 border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-xs sm:text-sm uppercase tracking-[0.1em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)] transition-colors duration-200"
         style={{ fontFamily: "var(--font-space-mono)" }}
       />
     </div>
@@ -716,8 +716,8 @@ function StepShipping({
     setShipping((prev) => ({ ...prev, [key]: v }));
 
   return (
-    <div className="space-y-10">
-      <div className="flex items-center gap-4 mb-8">
+    <div className="space-y-6 sm:space-y-8 md:space-y-10">
+      <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
         <span
           className="text-4xl md:text-5xl font-bold text-[var(--vsc-accent)]"
           style={{ fontFamily: "var(--font-space-grotesk)" }}
@@ -734,7 +734,7 @@ function StepShipping({
       </div>
 
       {savedAddresses && savedAddresses.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           <div className="flex items-center justify-between">
             <span
               className="text-[10px] text-[var(--vsc-gray-500)] uppercase tracking-[0.25em]"
@@ -743,7 +743,7 @@ function StepShipping({
               Saved addresses
             </span>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5 sm:space-y-2">
             {savedAddresses.map((addr) => {
               const isSelected = selectedAddressId === addr.id;
               return (
@@ -805,7 +805,7 @@ function StepShipping({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
         <InputField
           label="FULL NAME"
           value={shipping.fullName}
@@ -826,7 +826,7 @@ function StepShipping({
         onChange={update("address")}
         placeholder="123 STREET AVE"
       />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12">
         <InputField
           label="CITY"
           value={shipping.city}
@@ -850,7 +850,7 @@ function StepShipping({
       <div className="flex justify-end pt-4">
         <button
           onClick={onNext}
-          className="w-full md:w-auto px-6 py-4 md:px-10 md:py-6 text-sm font-bold uppercase tracking-[0.2em] border-2 border-black transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
+          className="w-full md:w-auto px-4 py-3 sm:px-6 sm:py-4 md:px-10 md:py-6 text-xs sm:text-sm font-bold uppercase tracking-[0.2em] border-2 border-black transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
           style={{
             fontFamily: "var(--font-space-mono)",
             backgroundColor: "black",
@@ -909,8 +909,8 @@ function StepReview({
   const { formatPrice } = useCurrency();
 
   return (
-    <div className="space-y-10">
-      <div className="flex items-center gap-4 mb-8">
+    <div className="space-y-6 sm:space-y-8 md:space-y-10">
+      <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
         <span
           className="text-4xl md:text-5xl font-bold text-[var(--vsc-accent)]"
           style={{ fontFamily: "var(--font-space-grotesk)" }}
@@ -927,7 +927,7 @@ function StepReview({
       </div>
 
       {/* Shipping summary */}
-      <div className="border-2 border-[var(--vsc-gray-600)] p-6 space-y-3">
+      <div className="border-2 border-[var(--vsc-gray-600)] p-4 sm:p-6 space-y-3">
         <h4
           className="text-xs text-[var(--vsc-accent)] uppercase tracking-[0.25em] font-bold mb-4"
           style={{ fontFamily: "var(--font-space-mono)" }}
@@ -956,14 +956,14 @@ function StepReview({
       </div>
 
       {/* Items list */}
-      <div className="border-2 border-[var(--vsc-gray-600)] p-6">
+      <div className="border-2 border-[var(--vsc-gray-600)] p-4 sm:p-6">
         <h4
           className="text-xs text-[var(--vsc-accent)] uppercase tracking-[0.25em] font-bold mb-6"
           style={{ fontFamily: "var(--font-space-mono)" }}
         >
           ORDER ITEMS
         </h4>
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {items.map((item) => (
             <div
               key={`${item.id}-${item.size}`}
@@ -994,7 +994,7 @@ function StepReview({
         </div>
 
         {/* Total */}
-        <div className="flex justify-between items-center pt-6 mt-4 border-t-2 border-[var(--vsc-black)]">
+        <div className="flex justify-between items-center pt-4 sm:pt-6 mt-3 sm:mt-4 border-t-2 border-[var(--vsc-black)]">
           <span
             className="text-sm font-bold uppercase tracking-[0.1em]"
             style={{ fontFamily: "var(--font-space-grotesk)", color: "black" }}
@@ -1011,7 +1011,7 @@ function StepReview({
       </div>
 
       {/* Payment method */}
-      <div className="border-2 border-[var(--vsc-gray-600)] p-6 space-y-4">
+      <div className="border-2 border-[var(--vsc-gray-600)] p-4 sm:p-6 space-y-3 sm:space-y-4">
         <h4
           className="text-xs text-[var(--vsc-accent)] uppercase tracking-[0.25em] font-bold"
           style={{ fontFamily: "var(--font-space-mono)" }}
@@ -1062,7 +1062,7 @@ function StepReview({
       <div className="flex flex-col-reverse sm:flex-row justify-between pt-4 gap-4">
         <button
           onClick={onBack}
-          className="w-full sm:w-auto px-6 py-4 md:px-8 md:py-6 bg-transparent text-[var(--vsc-white)] text-sm font-bold uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors duration-200 border-2 md:border-4 border-[var(--vsc-gray-600)] hover:border-[var(--vsc-accent)]"
+          className="w-full sm:w-auto px-4 py-3 sm:px-6 sm:py-4 md:px-8 md:py-6 bg-transparent text-[var(--vsc-white)] text-xs sm:text-sm font-bold uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors duration-200 border-2 md:border-4 border-[var(--vsc-gray-600)] hover:border-[var(--vsc-accent)]"
           style={{ fontFamily: "var(--font-space-mono)" }}
         >
           ← BACK
@@ -1070,7 +1070,7 @@ function StepReview({
         <button
           onClick={onPlace}
           disabled={isPlacingOrder}
-          className="w-full sm:w-auto px-6 py-4 md:px-10 md:py-6 text-sm font-bold uppercase tracking-[0.2em] border-2 border-black transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto px-4 py-3 sm:px-6 sm:py-4 md:px-10 md:py-6 text-xs sm:text-sm font-bold uppercase tracking-[0.2em] border-2 border-black transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed"
           style={{
             fontFamily: "var(--font-space-mono)",
             backgroundColor: "black",
