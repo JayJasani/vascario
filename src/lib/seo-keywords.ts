@@ -100,6 +100,15 @@ export const SEO_KEYWORDS = {
     "brands like Capsul India",
     "brands like Farak streetwear",
     "new age Indian streetwear brand",
+
+    // Generic competitor-style phrases from leading Indian streetwear brands
+    "luxury streetwear clothing brand in India",
+    "premium streetwear clothing brand in India",
+    "unisex streetwear clothing brand India",
+    "best unisex clothing brand in India",
+    "gender neutral streetwear India",
+    "oversized streetwear clothing India",
+    "top streetwear clothing brand India",
   ],
 
   // SECONDARY: Supporting keywords with good search volume
@@ -293,6 +302,19 @@ export const SEO_KEYWORDS = {
     "best premium streetwear brands in India list",
     "which is the best streetwear brand in India",
     "top Indian streetwear brands making waves",
+
+    // Long-tail phrases inspired by Bluorng-style content & FAQs
+    "premium unisex streetwear clothing brand in India",
+    "best unisex streetwear clothing brand in India",
+    "luxury streetwear clothing brand for Gen Z in India",
+    "gender neutral streetwear clothing India",
+    "where to buy oversized streetwear t-shirts in India",
+    "best oversized t-shirts streetwear brand India",
+    "premium unisex hoodies streetwear India",
+    "designer oversized sweatshirts India",
+    "luxury streetwear jackets India",
+    "streetwear clothing for every season India",
+    "best Indian streetwear clothing brand for men and women",
   ],
 
   // HIGH-INTENT: Keywords with strongest buyer intent (PRIORITY FOR #1 RANKINGS)
