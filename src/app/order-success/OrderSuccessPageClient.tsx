@@ -3,6 +3,7 @@
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useAuth } from "@/context/AuthContext";
 import { Printer } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -35,6 +36,7 @@ type LastOrderSnapshot = {
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const { formatPrice } = useCurrency();
+  const { user } = useAuth();
   const orderId = searchParams.get("order") || "0000";
   const orderRef = searchParams.get("ref");
   const [flickered, setFlickered] = useState(false);
@@ -63,6 +65,78 @@ function OrderSuccessContent() {
       console.error("Failed to load last order snapshot", err);
     }
   }, [orderRef]);
+
+  // Fallback: if no client-side snapshot is available, try to hydrate from the server
+  useEffect(() => {
+    if (!user) return;
+    if (!orderId || orderId === "0000") return;
+    if (lastOrder) return;
+
+    const loadFromApi = async () => {
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch(`/api/users/orders/${orderId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) return;
+
+        const data = (await res.json()) as {
+          order: {
+            id: string;
+            totalAmount: number;
+            shippingAddress: {
+              fullName?: string;
+              email?: string;
+              address?: string;
+              city?: string;
+              zip?: string;
+              country?: string;
+            };
+            createdAt: string | null;
+          };
+          items: {
+            id: string;
+            productName: string | null;
+            size: string | null;
+            quantity: number;
+            unitPrice: number;
+            color: string | null;
+          }[];
+        };
+
+        const snap: LastOrderSnapshot = {
+          id: data.order.id,
+          total: data.order.totalAmount,
+          items: data.items.map((item) => ({
+            id: item.id,
+            name: item.productName ?? "Product",
+            size: item.size ?? "",
+            quantity: item.quantity,
+            price: item.unitPrice,
+            color: item.color,
+          })),
+          shipping: {
+            fullName: data.order.shippingAddress.fullName ?? "",
+            email: data.order.shippingAddress.email ?? "",
+            address: data.order.shippingAddress.address ?? "",
+            city: data.order.shippingAddress.city ?? "",
+            zip: data.order.shippingAddress.zip ?? "",
+            country: data.order.shippingAddress.country ?? "",
+          },
+          createdAt: data.order.createdAt ?? new Date().toISOString(),
+        };
+
+        setLastOrder(snap);
+      } catch {
+        // Silent fail — we'll just show the generic fallback message
+      }
+    };
+
+    void loadFromApi();
+  }, [user, orderId, lastOrder]);
 
   if (!mounted) return null;
 

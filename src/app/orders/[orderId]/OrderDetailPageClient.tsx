@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
@@ -205,17 +206,26 @@ export default function OrderDetailPageClient() {
                   </p>
                 )}
               </div>
-              <div className="flex items-center gap-4">
-                <StatusBadge
-                  status={order.status}
-                  className={userStatusStyles[order.status]}
-                />
-                <span
-                  className="text-lg font-bold text-[var(--vsc-accent)]"
+              <div className="flex flex-col items-start sm:items-end gap-3">
+                <div className="flex items-center gap-4">
+                  <StatusBadge
+                    status={order.status}
+                    className={userStatusStyles[order.status]}
+                  />
+                  <span
+                    className="text-lg font-bold text-[var(--vsc-accent)]"
+                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  >
+                    {formatPrice(order.totalAmount)}
+                  </span>
+                </div>
+                <Link
+                  href={`/order-success?order=${order.id}`}
+                  className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] px-3 py-2 border border-[var(--vsc-gray-900)] text-[var(--vsc-gray-900)] hover:bg-[var(--vsc-gray-900)] hover:text-[var(--vsc-cream)] transition-colors"
                   style={{ fontFamily: "var(--font-space-mono)" }}
                 >
-                  {formatPrice(order.totalAmount)}
-                </span>
+                  DOWNLOAD RECEIPT
+                </Link>
               </div>
             </div>
 
