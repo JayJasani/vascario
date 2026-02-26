@@ -26,6 +26,7 @@ type UserOrderSummary = {
   totalAmount: number;
   paymentId: string | null;
   razorpayOrderId: string | null;
+  paymentMethod: "ONLINE" | "COD" | null;
   createdAt: string | null;
 };
 
@@ -157,7 +158,7 @@ export default function OrdersPageClient() {
                     href={`/orders/${order.id}`}
                     className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-3 py-3 border border-[var(--vsc-gray-200)] bg-[var(--vsc-cream)] hover:border-[var(--vsc-accent)] transition-colors"
                   >
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-1 items-start">
                       <span
                         className="text-xs font-bold text-[var(--vsc-gray-900)] uppercase tracking-[0.15em]"
                         style={{ fontFamily: "var(--font-space-mono)" }}
@@ -178,6 +179,14 @@ export default function OrdersPageClient() {
                             })
                           : "DATE UNKNOWN"}
                       </span>
+                      {order.paymentMethod && (
+                        <span
+                          className="inline-flex w-fit self-start mt-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--vsc-gray-700)] bg-[var(--vsc-white)]"
+                          style={{ fontFamily: "var(--font-space-mono)" }}
+                        >
+                          {order.paymentMethod === "COD" ? "COD" : "ONLINE"}
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-4">
                       <StatusBadge

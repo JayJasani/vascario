@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
         totalAmount: Number(data.totalAmount ?? 0),
         paymentId: data.paymentId ?? null,
         razorpayOrderId: data.razorpayOrderId ?? null,
+        paymentMethod: data.paymentMethod ?? null,
         createdAt: data.createdAt?.toDate?.().toISOString?.() ?? null,
       };
     });

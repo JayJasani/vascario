@@ -9,6 +9,8 @@ export type OrderStatus =
     | "DELIVERED"
     | "CANCELLED";
 
+export type PaymentMethod = "ONLINE" | "COD";
+
 export interface OrderItem {
     id: string;
     orderId: string;
@@ -30,6 +32,9 @@ export interface Order {
     trackingNumber?: string | null;
     trackingCarrier?: string | null;
     notes?: string | null;
+    paymentMethod?: PaymentMethod;
+    currency?: string | null;
+    razorpayOrderId?: string | null;
     createdAt: Date;
     updatedAt: Date;
 }

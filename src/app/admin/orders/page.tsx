@@ -29,6 +29,7 @@ interface Order {
     customerEmail: string;
     status: OrderStatus;
     totalAmount: string;
+    paymentMethod?: "ONLINE" | "COD" | null;
     trackingNumber: string | null;
     trackingCarrier: string | null;
     notes: string | null;
@@ -134,6 +135,7 @@ export default function OrdersPage() {
                             status={order.status}
                             totalAmount={order.totalAmount}
                             items={order.items}
+                            paymentMethod={order.paymentMethod}
                             createdAt={new Date(order.createdAt).toLocaleDateString("en-IN", {
                                 day: "2-digit",
                                 month: "short",

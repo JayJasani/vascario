@@ -5,7 +5,7 @@ import {
     updateOrder,
     createAuditLog,
 } from "@/lib/firebase-helpers";
-import type { OrderStatus } from "@/models/order";
+import type { OrderStatus, PaymentMethod } from "@/models/order";
 
 export interface AdminOrderView {
     id: string;
@@ -14,6 +14,7 @@ export interface AdminOrderView {
     status: OrderStatus;
     totalAmount: string;
     paymentId?: string | null;
+    paymentMethod?: PaymentMethod | null;
     trackingNumber?: string | null;
     trackingCarrier?: string | null;
     notes?: string | null;
@@ -35,6 +36,7 @@ export async function getOrders(statusFilter?: OrderStatus): Promise<AdminOrderV
         status: order.status,
         totalAmount: order.totalAmount.toString(),
         paymentId: order.paymentId,
+        paymentMethod: order.paymentMethod ?? null,
         trackingNumber: order.trackingNumber,
         trackingCarrier: order.trackingCarrier,
         notes: order.notes,
