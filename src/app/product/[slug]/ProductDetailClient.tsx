@@ -28,6 +28,8 @@ import {
 import { getColorDisplayName, parseColorEntry } from "@/lib/hex-to-color-name";
 import { hasDiscount, getDiscountAmount } from "@/lib/discount";
 import { getImageAlt } from "@/lib/seo-utils";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ShareIcon } from "@hugeicons/core-free-icons";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -263,6 +265,61 @@ export function ProductDetailClient({
     setIsZoomActive(false);
   };
 
+  const handleShareProduct = async () => {
+    try {
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      const url =
+        window.location.href ||
+        `${window.location.origin}/product/${product.slug}`;
+      const shareText = `Check out "${product.name}" on VASCARIO.`;
+
+      if (typeof navigator !== "undefined" && (navigator as any).share) {
+        await (navigator as any).share({
+          title: product.name,
+          text: shareText,
+          url,
+        });
+        return;
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+        alert("Product link copied. Share it with your friends.");
+        return;
+      }
+
+      const input = document.createElement("input");
+      input.value = url;
+      document.body.appendChild(input);
+      input.select();
+      try {
+        document.execCommand("copy");
+        alert("Product link copied. Share it with your friends.");
+      } catch {
+        alert("Copy failed. Please use your browser address bar.");
+      } finally {
+        document.body.removeChild(input);
+      }
+    } catch (err) {
+      // If user simply cancels the native share dialog, do nothing
+      if (
+        err &&
+        typeof err === "object" &&
+        "name" in err &&
+        (err as { name?: string }).name === "AbortError"
+      ) {
+        return;
+      }
+      // eslint-disable-next-line no-console
+      console.error("Failed to share product", err);
+      // eslint-disable-next-line no-alert
+      alert("Unable to share right now. Please try again.");
+    }
+  };
+
   return (
     <main className="min-h-screen">
       <ProductStructuredData product={product} />
@@ -492,20 +549,31 @@ export function ProductDetailClient({
           {/* Right — Product Info (still wide) — Sticky */}
           <div className="md:col-span-7 lg:col-span-7 mt-4 sm:mt-0">
             <div className="md:sticky md:top-24">
-              {/* Product name */}
-              <h1
-                className="text-black mb-2 sm:mb-3"
-                style={{
-                  fontFamily: "var(--font-space-grotesk)",
-                  fontSize: "clamp(1.25rem, 4vw, 2.5rem)",
-                  fontWeight: 700,
-                  letterSpacing: "-0.02em",
-                  lineHeight: 1,
-                  textTransform: "uppercase",
-                }}
-              >
-                {product.name}
-              </h1>
+              {/* Product name + share */}
+              <div className="flex items-start justify-between gap-3 mb-2 sm:mb-3">
+                <h1
+                  className="text-black"
+                  style={{
+                    fontFamily: "var(--font-space-grotesk)",
+                    fontSize: "clamp(1.25rem, 4vw, 2.5rem)",
+                    fontWeight: 700,
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {product.name}
+                </h1>
+                <button
+                  type="button"
+                  suppressHydrationWarning
+                  onClick={handleShareProduct}
+                  className="inline-flex items-center justify-center rounded-full border border-[var(--vsc-gray-700)] text-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors duration-200 w-8 h-8 sm:w-9 sm:h-9"
+                  aria-label="Share product"
+                >
+                  <HugeiconsIcon icon={ShareIcon} size={18} />
+                </button>
+              </div>
 
               {/* Price */}
               <div className="flex items-baseline gap-2 sm:gap-3 mb-4 sm:mb-6 flex-wrap">
@@ -982,6 +1050,17 @@ export function ProductDetailClient({
                 {isFavourite(product.id)
                   ? "Remove from favourites"
                   : "Add to favourites"}
+              </button>
+
+              {/* Share product */}
+              <button
+                type="button"
+                suppressHydrationWarning
+                onClick={handleShareProduct}
+                className="mt-2 w-full py-2 border border-[var(--vsc-gray-700)] text-xs font-bold uppercase tracking-[0.18em] text-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors duration-200"
+                style={{ fontFamily: "var(--font-space-mono)" }}
+              >
+                Share product
               </button>
 
               {/* SKU & Additional Info — collapsible */}
