@@ -30,24 +30,47 @@ export async function GET(request: NextRequest) {
       .collection(COLLECTIONS.ORDERS)
       .where("userId", "==", user.uid)
       .orderBy("createdAt", "desc")
-      .limit(50);
+      .limit(50)
+      .select(
+        "status",
+        "totalAmount",
+        "paymentId",
+        "razorpayOrderId",
+        "paymentMethod",
+        "createdAt",
+      );
 
     const snapshot = await ordersRef.get();
 
     const orders = snapshot.docs.map((doc) => {
-      const data = doc.data();
+      const data = doc.data() as {
+        status?: unknown;
+        totalAmount?: unknown;
+        paymentId?: unknown;
+        razorpayOrderId?: unknown;
+        paymentMethod?: unknown;
+        createdAt?: { toDate?: () => Date } | null;
+      };
       return {
         id: doc.id,
-        status: data.status ?? "PENDING",
+        status: (data.status as string) ?? "PENDING",
         totalAmount: Number(data.totalAmount ?? 0),
-        paymentId: data.paymentId ?? null,
-        razorpayOrderId: data.razorpayOrderId ?? null,
-        paymentMethod: data.paymentMethod ?? null,
+        paymentId: (data.paymentId as string | null) ?? null,
+        razorpayOrderId: (data.razorpayOrderId as string | null) ?? null,
+        paymentMethod: (data.paymentMethod as "ONLINE" | "COD" | null) ?? null,
         createdAt: data.createdAt?.toDate?.().toISOString?.() ?? null,
       };
     });
 
-    return Response.json({ orders });
+    return Response.json(
+      { orders },
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "private, max-age=30",
+        },
+      },
+    );
   } catch (error) {
     console.error("Orders API GET error:", error);
     return Response.json({ error: "Failed to fetch orders" }, { status: 500 });

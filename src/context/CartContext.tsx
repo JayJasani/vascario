@@ -184,44 +184,50 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [user])
 
-  // Persist cart to server whenever it changes for a logged-in user
+  // Persist cart to server whenever it changes for a logged-in user (debounced to avoid spam)
   useEffect(() => {
     if (!user) return
     if (typeof window === "undefined") return
 
     const controller = new AbortController()
 
-    ;(async () => {
-      try {
-        const res = await fetch("/api/cart", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            items: state.items.map((item) => ({
-              productId: item.id,
-              name: item.name,
-              price: item.price,
-              image: item.image,
-              size: item.size,
-              quantity: item.quantity,
-            })),
-          }),
-          signal: controller.signal,
-        })
-        if (!res.ok) {
-          // Non-fatal: just log so UI stays responsive
-          console.error("Failed to sync cart to server", await res.text().catch(() => ""))
+    const timeoutId = window.setTimeout(() => {
+      ;(async () => {
+        try {
+          const res = await fetch("/api/cart", {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              items: state.items.map((item) => ({
+                productId: item.id,
+                name: item.name,
+                price: item.price,
+                image: item.image,
+                size: item.size,
+                quantity: item.quantity,
+              })),
+            }),
+            signal: controller.signal,
+          })
+          if (!res.ok) {
+            // Non-fatal: just log so UI stays responsive
+            console.error(
+              "Failed to sync cart to server",
+              await res.text().catch(() => ""),
+            )
+          }
+        } catch (err) {
+          if ((err as any)?.name === "AbortError") return
+          console.error("Error syncing cart to server", err)
         }
-      } catch (err) {
-        if ((err as any)?.name === "AbortError") return
-        console.error("Error syncing cart to server", err)
-      }
-    })()
+      })()
+    }, 400)
 
     return () => {
       controller.abort()
+      window.clearTimeout(timeoutId)
     }
   }, [user, state.items])
 

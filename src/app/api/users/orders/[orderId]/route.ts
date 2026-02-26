@@ -52,16 +52,25 @@ export async function GET(
       .get();
 
     const items = itemsSnapshot.docs.map((doc) => {
-      const data = doc.data() as any;
+      const data = doc.data() as {
+        productId?: unknown;
+        productName?: unknown;
+        productImage?: unknown;
+        productSlug?: unknown;
+        size?: unknown;
+        color?: unknown;
+        quantity?: unknown;
+        unitPrice?: unknown;
+      };
       return {
         id: doc.id,
-        productId: data.productId,
-        productName: data.productName ?? null,
-        productImage: data.productImage ?? null,
-        productSlug: data.productSlug ?? null,
-        size: data.size ?? null,
-        color: data.color ?? null,
-        quantity: data.quantity ?? 0,
+        productId: (data.productId as string) ?? "",
+        productName: (data.productName as string | null) ?? null,
+        productImage: (data.productImage as string | null) ?? null,
+        productSlug: (data.productSlug as string | null) ?? null,
+        size: (data.size as string | null) ?? null,
+        color: (data.color as string | null) ?? null,
+        quantity: (data.quantity as number | null) ?? 0,
         unitPrice: Number(data.unitPrice ?? 0),
       };
     });
@@ -77,7 +86,15 @@ export async function GET(
       shippingAddress: orderData.shippingAddress ?? {},
     };
 
-    return Response.json({ order, items });
+    return Response.json(
+      { order, items },
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "private, max-age=15",
+        },
+      },
+    );
   } catch (error) {
     console.error("Order detail API GET error:", error);
     return Response.json(
