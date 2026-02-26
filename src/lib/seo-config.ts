@@ -384,6 +384,9 @@ export function getProductMetadata(product: {
     product.slug ||
     product.id ||
     product.name.toLowerCase().replace(/\s+/g, "-");
+  const normalizedImages = (product.images || []).map((img) =>
+    img.startsWith("http") ? img : `${SEO_BASE.siteUrl}${img}`,
+  );
   return generateMetadata({
     title: SEO_PAGES.product.titleTemplate(product.name),
     description: SEO_PAGES.product.descriptionTemplate(
@@ -391,7 +394,7 @@ export function getProductMetadata(product: {
       product.description,
     ),
     type: "product",
-    images: product.images || [],
+    images: normalizedImages,
     url: `${SEO_BASE.siteUrl}/product/${productSlug}`,
   });
 }

@@ -1052,17 +1052,6 @@ export function ProductDetailClient({
                   : "Add to favourites"}
               </button>
 
-              {/* Share product */}
-              <button
-                type="button"
-                suppressHydrationWarning
-                onClick={handleShareProduct}
-                className="mt-2 w-full py-2 border border-[var(--vsc-gray-700)] text-xs font-bold uppercase tracking-[0.18em] text-[var(--vsc-gray-700)] hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors duration-200"
-                style={{ fontFamily: "var(--font-space-mono)" }}
-              >
-                Share product
-              </button>
-
               {/* SKU & Additional Info — collapsible */}
               <div className="mt-8 pt-6 border-t border-[var(--vsc-gray-700)]">
                 <button
