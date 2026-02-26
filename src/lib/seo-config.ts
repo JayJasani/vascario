@@ -326,9 +326,8 @@ export function generateMetadata(config: {
         : [{ url: ogImage }],
   };
 
-  if (type === "website" || type === "article") {
-    openGraphConfig.type = type;
-  }
+  // Always set og:type for link preview tools (website, article, product, etc.)
+  openGraphConfig.type = type;
 
   return {
     metadataBase: new URL(SEO_BASE.siteUrl),
