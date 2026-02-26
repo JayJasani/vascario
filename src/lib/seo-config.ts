@@ -306,7 +306,13 @@ export function generateMetadata(config: {
     ? title
     : `${title} — ${SEO_BASE.brandName}`;
 
-  const ogImage = images.length > 0 ? images[0] : SEO_BASE.logo;
+  const normalizedImages = images.map((img) =>
+    img.startsWith("http") ? img : `${SEO_BASE.siteUrl}${img}`,
+  );
+  const ogImage =
+    normalizedImages.length > 0
+      ? normalizedImages[0]
+      : `${SEO_BASE.siteUrl}${SEO_BASE.logo}`;
   const pageUrl = url || SEO_BASE.siteUrl;
 
   const openGraphConfig: any = {
@@ -314,7 +320,10 @@ export function generateMetadata(config: {
     description,
     url: pageUrl,
     siteName: SEO_BASE.siteName,
-    images: images.length > 0 ? images : [{ url: ogImage }],
+    images:
+      normalizedImages.length > 0
+        ? normalizedImages.map((imgUrl) => ({ url: imgUrl }))
+        : [{ url: ogImage }],
   };
 
   if (type === "website" || type === "article") {
@@ -346,7 +355,7 @@ export function generateMetadata(config: {
       card: "summary_large_image",
       title: fullTitle,
       description,
-      images: images.length > 0 ? images : [],
+      images: normalizedImages.length > 0 ? normalizedImages : [ogImage],
       creator: SEO_BASE.twitterHandle,
       site: SEO_BASE.twitterHandle,
     },
