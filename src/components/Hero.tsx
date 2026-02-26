@@ -90,7 +90,7 @@ export function Hero({ onboard1VideoUrl = "/video/onboard1.webm", redirectUrl }:
         <h1 className="leading-none w-[min(24rem,82vw)] sm:w-[min(24rem,75vw)] md:w-[min(26rem,60vw)]">
           <Image
             src="/logo/main.svg"
-            alt="VASCARIO"
+            alt="VASCARIO – Premium luxury streetwear brand in India"
             width={1200}
             height={300}
             className="w-full h-auto max-h-[5rem] sm:max-h-[5rem] md:max-h-[5.25rem] object-contain object-left select-none"
