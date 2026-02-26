@@ -1019,36 +1019,50 @@ function StepReview({
           PAYMENT METHOD
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => onPaymentMethodChange("ONLINE")}
-            className={`w-full px-4 py-3 border text-xs uppercase tracking-[0.15em] transition-colors ${
+          <label
+            className={`flex items-center gap-3 w-full px-4 py-3 border text-xs uppercase tracking-[0.15em] cursor-pointer transition-colors ${
               paymentMethod === "ONLINE"
-                ? "bg-[var(--vsc-accent)] text-black border-[var(--vsc-accent)]"
-                : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-600)] hover:border-[var(--vsc-accent)]"
+                ? "bg-[var(--vsc-accent)] text-[var(--vsc-white)] border-[var(--vsc-accent)]"
+                : "bg-transparent text-black border-[var(--vsc-gray-600)] hover:border-[var(--vsc-accent)]"
             }`}
             style={{
               fontFamily: "var(--font-space-mono)",
               fontWeight: paymentMethod === "ONLINE" ? 700 : 400,
             }}
           >
-            ONLINE (RAZORPAY)
-          </button>
-          <button
-            type="button"
-            onClick={() => onPaymentMethodChange("COD")}
-            className={`w-full px-4 py-3 border text-xs uppercase tracking-[0.15em] transition-colors ${
+            <input
+              type="radio"
+              name="payment-method"
+              value="ONLINE"
+              checked={paymentMethod === "ONLINE"}
+              onChange={() => onPaymentMethodChange("ONLINE")}
+              className="w-3 h-3 sm:w-4 sm:h-4 accent-[var(--vsc-accent)]"
+            />
+            <span className="text-[9px] sm:text-[11px]">
+              ONLINE (UPI / NETBANKING / CARDS)
+            </span>
+          </label>
+          <label
+            className={`flex items-center gap-3 w-full px-4 py-3 border text-xs uppercase tracking-[0.15em] cursor-pointer transition-colors ${
               paymentMethod === "COD"
-                ? "bg-[var(--vsc-accent)] text-black border-[var(--vsc-accent)]"
-                : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-600)] hover:border-[var(--vsc-accent)]"
+                ? "bg-[var(--vsc-accent)] text-[var(--vsc-white)] border-[var(--vsc-accent)]"
+                : "bg-transparent text-black border-[var(--vsc-gray-600)] hover:border-[var(--vsc-accent)]"
             }`}
             style={{
               fontFamily: "var(--font-space-mono)",
               fontWeight: paymentMethod === "COD" ? 700 : 400,
             }}
           >
-            CASH ON DELIVERY
-          </button>
+            <input
+              type="radio"
+              name="payment-method"
+              value="COD"
+              checked={paymentMethod === "COD"}
+              onChange={() => onPaymentMethodChange("COD")}
+              className="w-3 h-3 sm:w-4 sm:h-4 accent-[var(--vsc-accent)]"
+            />
+            <span>CASH ON DELIVERY</span>
+          </label>
         </div>
         <p
           className="text-[10px] text-[var(--vsc-gray-500)] uppercase tracking-[0.15em]"
