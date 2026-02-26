@@ -16,6 +16,7 @@ interface DataCardProps {
     totalAmount: string;
     items: OrderCardItem[];
     createdAt: string;
+    paymentMethod?: "ONLINE" | "COD" | null;
     className?: string;
     children?: React.ReactNode; // For action buttons
 }
@@ -28,6 +29,7 @@ export function DataCard({
     totalAmount,
     items,
     createdAt,
+    paymentMethod,
     className,
     children,
 }: DataCardProps) {
@@ -52,13 +54,20 @@ export function DataCard({
             </div>
 
             {/* Customer info */}
-            <div className="px-4 py-3 border-b border-[#1A1A1A]">
-                <p className="font-mono text-xs text-[#F5F5F0] font-bold uppercase tracking-[0.05em]">
-                    {customerName}
-                </p>
-                <p className="font-mono text-[9px] text-[#666] tracking-[0.1em] mt-0.5">
-                    {customerEmail}
-                </p>
+            <div className="px-4 py-3 border-b border-[#1A1A1A] flex items-center justify-between gap-3">
+                <div>
+                    <p className="font-mono text-xs text-[#F5F5F0] font-bold uppercase tracking-[0.05em]">
+                        {customerName}
+                    </p>
+                    <p className="font-mono text-[9px] text-[#666] tracking-[0.1em] mt-0.5">
+                        {customerEmail}
+                    </p>
+                </div>
+                {paymentMethod && (
+                    <span className="font-mono text-[9px] px-2 py-1 border border-[#2A2A2A] rounded-full uppercase tracking-[0.15em] text-[#BAFF00]">
+                        {paymentMethod === "COD" ? "COD" : "ONLINE"}
+                    </span>
+                )}
             </div>
 
             {/* Order items */}

@@ -69,6 +69,7 @@ export async function POST(req: NextRequest) {
                 paymentId: null,
                 currency,
                 razorpayOrderId: order.id,
+                paymentMethod: "ONLINE",
                 createdAt: FieldValue.serverTimestamp(),
                 updatedAt: FieldValue.serverTimestamp(),
             })

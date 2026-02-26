@@ -33,6 +33,8 @@ const stepVariants = {
   }),
 };
 
+type PaymentMethod = "ONLINE" | "COD";
+
 export default function CheckoutPageClient() {
   const { user } = useAuth();
   const { profile, loading: profileLoading } = useUserProfile();
@@ -41,6 +43,7 @@ export default function CheckoutPageClient() {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
   const [mounted, setMounted] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("ONLINE");
   const router = useRouter();
 
   const beginCheckoutFired = useRef(false);
@@ -154,158 +157,261 @@ export default function CheckoutPageClient() {
     setStep((s) => Math.max(s - 1, 1));
   };
 
+  const clearServerCart = async () => {
+    try {
+      await fetch("/api/cart", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to clear server cart", err);
+    }
+  };
+
   const handlePlaceOrder = async () => {
     try {
       setIsPlacingOrder(true);
 
-      const amountInPaise = Math.round(cartTotal * 100);
+      if (paymentMethod === "COD") {
+        const codRes = await fetch("/api/orders/create-cod", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            totalAmount: cartTotal,
+            currency: "INR",
+            userId: user?.uid ?? "",
+            shipping,
+            items: items.map((item) => ({
+              id: item.id,
+              name: item.name,
+              size: item.size,
+              quantity: item.quantity,
+              price: item.price,
+              color: item.color ?? null,
+              image: item.image ?? "",
+              slug: item.slug ?? "",
+            })),
+          }),
+        });
 
-      const orderRes = await fetch("/api/razorpay/create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount: amountInPaise,
+        if (!codRes.ok) {
+          // eslint-disable-next-line no-alert
+          alert("Unable to place COD order. Please try again.");
+          return;
+        }
+
+        const codData = (await codRes.json()) as {
+          orderId: string;
+          totalAmount: number;
+          currency: string;
+        };
+
+        const transactionId = codData.orderId;
+
+        let orderRefId = "";
+        if (typeof window !== "undefined") {
+          const snapshot = {
+            id: transactionId,
+            total: cartTotal,
+            items: items.map((item) => ({
+              id: item.id,
+              name: item.name,
+              size: item.size,
+              quantity: item.quantity,
+              price: item.price,
+              color: item.color ?? null,
+            })),
+            shipping,
+            createdAt: new Date().toISOString(),
+          };
+
+          try {
+            const keyPrefix = "vascario:lastOrder:";
+            const uuid =
+              window.crypto && "randomUUID" in window.crypto
+                ? window.crypto.randomUUID()
+                : `${Date.now().toString(36)}-${Math.random()
+                    .toString(36)
+                    .slice(2, 8)}`;
+            orderRefId = uuid;
+            window.sessionStorage.setItem(
+              `${keyPrefix}${orderRefId}`,
+              JSON.stringify(snapshot),
+            );
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.error("Failed to persist last order snapshot", err);
+          }
+        }
+
+        trackPurchase({
+          transaction_id: transactionId,
           currency: "INR",
-          receipt: `vascario_rcpt_${Date.now().toString(36)}`,
-          userId: user?.uid ?? "",
-          shipping,
-          items: items.map((item) => ({
-            id: item.id,
-            name: item.name,
-            size: item.size,
-            quantity: item.quantity,
-            price: item.price,
-            color: item.color ?? null,
-            image: item.image ?? "",
-            slug: item.slug ?? "",
-          })),
+          value: cartTotal,
+          items: buildAnalyticsItems(),
+          shipping: 0,
+        });
+
+        await clearServerCart();
+        clearCart();
+        const refQuery = orderRefId ? `&ref=${encodeURIComponent(orderRefId)}` : "";
+        router.push(`/order-success?order=${transactionId}${refQuery}`);
+      } else {
+        const amountInPaise = Math.round(cartTotal * 100);
+
+        const orderRes = await fetch("/api/razorpay/create-order", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            amount: amountInPaise,
+            currency: "INR",
+            receipt: `vascario_rcpt_${Date.now().toString(36)}`,
+            userId: user?.uid ?? "",
+            shipping,
+            items: items.map((item) => ({
+              id: item.id,
+              name: item.name,
+              size: item.size,
+              quantity: item.quantity,
+              price: item.price,
+              color: item.color ?? null,
+              image: item.image ?? "",
+              slug: item.slug ?? "",
+            })),
+            notes: {
+              userId: user?.uid ?? "",
+              email: shipping.email,
+              name: shipping.fullName,
+              address: shipping.address,
+              city: shipping.city,
+              zip: shipping.zip,
+              country: shipping.country,
+            },
+          }),
+        });
+
+        if (!orderRes.ok) {
+          // eslint-disable-next-line no-alert
+          alert("Unable to start payment. Please try again.");
+          return;
+        }
+
+        const orderData = (await orderRes.json()) as {
+          orderId: string;
+          amount: number;
+          currency: string;
+          keyId: string;
+        };
+
+        await openRazorpayCheckout({
+          amount: orderData.amount,
+          currency: orderData.currency,
+          orderId: orderData.orderId,
+          keyId: orderData.keyId,
+          name: "VASCARIO",
+          description: "Order payment",
+          prefill: {
+            name: shipping.fullName,
+            email: shipping.email,
+          },
           notes: {
             userId: user?.uid ?? "",
-            email: shipping.email,
-            name: shipping.fullName,
-            address: shipping.address,
-            city: shipping.city,
-            zip: shipping.zip,
-            country: shipping.country,
           },
-        }),
-      });
-
-      if (!orderRes.ok) {
-        // eslint-disable-next-line no-alert
-        alert("Unable to start payment. Please try again.");
-        return;
-      }
-
-      const orderData = (await orderRes.json()) as {
-        orderId: string;
-        amount: number;
-        currency: string;
-        keyId: string;
-      };
-
-      await openRazorpayCheckout({
-        amount: orderData.amount,
-        currency: orderData.currency,
-        orderId: orderData.orderId,
-        keyId: orderData.keyId,
-        name: "VASCARIO",
-        description: "Order payment",
-        prefill: {
-          name: shipping.fullName,
-          email: shipping.email,
-        },
-        notes: {
-          userId: user?.uid ?? "",
-        },
-        onSuccess: async (response) => {
-          const verifyRes = await fetch("/api/razorpay/verify-payment", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(response),
-          });
-
-          if (!verifyRes.ok) {
-            // eslint-disable-next-line no-alert
-            alert("Payment verification failed. Please contact support.");
-            return;
-          }
-
-          const transactionId = response.razorpay_payment_id;
-
-          // Persist a lightweight snapshot of this order for the success page
-          let orderRefId = "";
-          if (typeof window !== "undefined") {
-            const snapshot = {
-              id: transactionId,
-              total: cartTotal,
-              items: items.map((item) => ({
-                id: item.id,
-                name: item.name,
-                size: item.size,
-                quantity: item.quantity,
-                price: item.price,
-                color: item.color ?? null,
-              })),
-              shipping,
-              createdAt: new Date().toISOString(),
-            };
-
-            try {
-              const keyPrefix = "vascario:lastOrder:";
-              const uuid =
-                window.crypto && "randomUUID" in window.crypto
-                  ? window.crypto.randomUUID()
-                  : `${Date.now().toString(36)}-${Math.random()
-                      .toString(36)
-                      .slice(2, 8)}`;
-              orderRefId = uuid;
-              window.sessionStorage.setItem(
-                `${keyPrefix}${orderRefId}`,
-                JSON.stringify(snapshot),
-              );
-            } catch (err) {
-              // eslint-disable-next-line no-console
-              console.error("Failed to persist last order snapshot", err);
-            }
-          }
-
-          trackPurchase({
-            transaction_id: transactionId,
-            currency: "INR",
-            value: cartTotal,
-            items: buildAnalyticsItems(),
-            shipping: 0,
-          });
-
-          clearCart();
-          const refQuery = orderRefId ? `&ref=${encodeURIComponent(orderRefId)}` : "";
-          router.push(`/order-success?order=${transactionId}${refQuery}`);
-        },
-        onFailure: async () => {
-          try {
-            await fetch("/api/razorpay/mark-order-cancelled", {
+          onSuccess: async (response) => {
+            const verifyRes = await fetch("/api/razorpay/verify-payment", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({
-                razorpayOrderId: orderData.orderId,
-              }),
+              body: JSON.stringify(response),
             });
-          } catch (err) {
-            // eslint-disable-next-line no-console
-            console.error("Failed to mark order as cancelled", err);
-          } finally {
-            // eslint-disable-next-line no-alert
-            alert("Payment was cancelled.");
-          }
-        },
-      });
+
+            if (!verifyRes.ok) {
+              // eslint-disable-next-line no-alert
+              alert("Payment verification failed. Please contact support.");
+              return;
+            }
+
+            const transactionId = response.razorpay_payment_id;
+
+            // Persist a lightweight snapshot of this order for the success page
+            let orderRefId = "";
+            if (typeof window !== "undefined") {
+              const snapshot = {
+                id: transactionId,
+                total: cartTotal,
+                items: items.map((item) => ({
+                  id: item.id,
+                  name: item.name,
+                  size: item.size,
+                  quantity: item.quantity,
+                  price: item.price,
+                  color: item.color ?? null,
+                })),
+                shipping,
+                createdAt: new Date().toISOString(),
+              };
+
+              try {
+                const keyPrefix = "vascario:lastOrder:";
+                const uuid =
+                  window.crypto && "randomUUID" in window.crypto
+                    ? window.crypto.randomUUID()
+                    : `${Date.now().toString(36)}-${Math.random()
+                        .toString(36)
+                        .slice(2, 8)}`;
+                orderRefId = uuid;
+                window.sessionStorage.setItem(
+                  `${keyPrefix}${orderRefId}`,
+                  JSON.stringify(snapshot),
+                );
+              } catch (err) {
+                // eslint-disable-next-line no-console
+                console.error("Failed to persist last order snapshot", err);
+              }
+            }
+
+            trackPurchase({
+              transaction_id: transactionId,
+              currency: "INR",
+              value: cartTotal,
+              items: buildAnalyticsItems(),
+              shipping: 0,
+            });
+
+            await clearServerCart();
+            clearCart();
+            const refQuery = orderRefId ? `&ref=${encodeURIComponent(orderRefId)}` : "";
+            router.push(`/order-success?order=${transactionId}${refQuery}`);
+          },
+          onFailure: async () => {
+            try {
+              await fetch("/api/razorpay/mark-order-cancelled", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  razorpayOrderId: orderData.orderId,
+                }),
+              });
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error("Failed to mark order as cancelled", err);
+            } finally {
+              // eslint-disable-next-line no-alert
+              alert("Payment was cancelled.");
+            }
+          },
+        });
+      }
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Error during payment", error);
@@ -472,6 +578,8 @@ export default function CheckoutPageClient() {
                     shipping={shipping}
                     items={items}
                     cartTotal={cartTotal}
+                    paymentMethod={paymentMethod}
+                    onPaymentMethodChange={setPaymentMethod}
                     onBack={goBack}
                     onPlace={handlePlaceOrder}
                     isPlacingOrder={isPlacingOrder}
@@ -770,6 +878,8 @@ function StepReview({
   shipping,
   items,
   cartTotal,
+  paymentMethod,
+  onPaymentMethodChange,
   onBack,
   onPlace,
   isPlacingOrder,
@@ -790,6 +900,8 @@ function StepReview({
     quantity: number;
   }[];
   cartTotal: number;
+  paymentMethod: PaymentMethod;
+  onPaymentMethodChange: (method: PaymentMethod) => void;
   onBack: () => void;
   onPlace: () => void;
   isPlacingOrder: boolean;
@@ -898,6 +1010,54 @@ function StepReview({
         </div>
       </div>
 
+      {/* Payment method */}
+      <div className="border-2 border-[var(--vsc-gray-600)] p-6 space-y-4">
+        <h4
+          className="text-xs text-[var(--vsc-accent)] uppercase tracking-[0.25em] font-bold"
+          style={{ fontFamily: "var(--font-space-mono)" }}
+        >
+          PAYMENT METHOD
+        </h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => onPaymentMethodChange("ONLINE")}
+            className={`w-full px-4 py-3 border text-xs uppercase tracking-[0.15em] transition-colors ${
+              paymentMethod === "ONLINE"
+                ? "bg-[var(--vsc-accent)] text-black border-[var(--vsc-accent)]"
+                : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-600)] hover:border-[var(--vsc-accent)]"
+            }`}
+            style={{
+              fontFamily: "var(--font-space-mono)",
+              fontWeight: paymentMethod === "ONLINE" ? 700 : 400,
+            }}
+          >
+            ONLINE (RAZORPAY)
+          </button>
+          <button
+            type="button"
+            onClick={() => onPaymentMethodChange("COD")}
+            className={`w-full px-4 py-3 border text-xs uppercase tracking-[0.15em] transition-colors ${
+              paymentMethod === "COD"
+                ? "bg-[var(--vsc-accent)] text-black border-[var(--vsc-accent)]"
+                : "bg-transparent text-[var(--vsc-white)] border-[var(--vsc-gray-600)] hover:border-[var(--vsc-accent)]"
+            }`}
+            style={{
+              fontFamily: "var(--font-space-mono)",
+              fontWeight: paymentMethod === "COD" ? 700 : 400,
+            }}
+          >
+            CASH ON DELIVERY
+          </button>
+        </div>
+        <p
+          className="text-[10px] text-[var(--vsc-gray-500)] uppercase tracking-[0.15em]"
+          style={{ fontFamily: "var(--font-space-mono)" }}
+        >
+          COD orders are confirmed now and paid in cash when the parcel is delivered.
+        </p>
+      </div>
+
       {/* CTA */}
       <div className="flex flex-col-reverse sm:flex-row justify-between pt-4 gap-4">
         <button
@@ -917,7 +1077,11 @@ function StepReview({
             color: "white",
           }}
         >
-          {isPlacingOrder ? "PROCESSING..." : "PLACE ORDER \u2192"}
+          {isPlacingOrder
+            ? "PROCESSING..."
+            : paymentMethod === "COD"
+              ? "PLACE COD ORDER \u2192"
+              : "PAY NOW \u2192"}
         </button>
       </div>
     </div>

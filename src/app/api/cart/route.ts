@@ -194,3 +194,130 @@ export async function GET() {
   }
 }
 
+// Replace the entire cart with the provided items (full sync).
+export async function PUT(request: NextRequest) {
+  try {
+    const user = await verifyUserFromCookies();
+    if (!user) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return Response.json({ error: "Invalid request body" }, { status: 400 });
+    }
+
+    const items = (body as { items?: Array<{
+      productId?: string;
+      name?: string;
+      price?: number;
+      image?: string;
+      size?: string;
+      quantity?: number;
+    }> }).items ?? [];
+
+    const cartCollection = db
+      .collection(COLLECTIONS.USERS)
+      .doc(user.uid)
+      .collection("cartItems");
+
+    // Clear existing items
+    const existingSnap = await cartCollection.get();
+    if (!existingSnap.empty) {
+      const clearBatch = db.batch();
+      existingSnap.docs.forEach((doc) => clearBatch.delete(doc.ref));
+      await clearBatch.commit();
+    }
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return Response.json({ ok: true, items: [] }, { status: 200 });
+    }
+
+    const batch = db.batch();
+
+    for (const raw of items) {
+      const {
+        productId,
+        name,
+        price,
+        image,
+        size,
+        quantity,
+      } = raw;
+
+      if (
+        !productId ||
+        typeof productId !== "string" ||
+        !size ||
+        typeof size !== "string" ||
+        typeof price !== "number" ||
+        !Number.isFinite(price) ||
+        typeof quantity !== "number" ||
+        !Number.isFinite(quantity) ||
+        quantity <= 0
+      ) {
+        continue;
+      }
+
+      const safeName =
+        typeof name === "string" && name.trim().length > 0
+          ? name.trim()
+          : "Unknown item";
+      const safeImage = typeof image === "string" ? image : "";
+
+      const docId = `${productId}_${size}`;
+      const ref = cartCollection.doc(docId);
+
+      batch.set(ref, {
+        userId: user.uid,
+        productId,
+        name: safeName,
+        price,
+        image: safeImage,
+        size,
+        quantity,
+        updatedAt: FieldValue.serverTimestamp(),
+        createdAt: FieldValue.serverTimestamp(),
+      });
+    }
+
+    await batch.commit();
+
+    return Response.json({ ok: true }, { status: 200 });
+  } catch (error) {
+    console.error("Cart API PUT error:", error);
+    return Response.json({ error: "Failed to sync cart" }, { status: 500 });
+  }
+}
+
+export async function DELETE() {
+  try {
+    const user = await verifyUserFromCookies();
+    if (!user) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const cartCollection = db
+      .collection(COLLECTIONS.USERS)
+      .doc(user.uid)
+      .collection("cartItems");
+
+    const snap = await cartCollection.get();
+    if (snap.empty) {
+      return Response.json({ ok: true }, { status: 200 });
+    }
+
+    const batch = db.batch();
+    snap.docs.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+    await batch.commit();
+
+    return Response.json({ ok: true }, { status: 200 });
+  } catch (error) {
+    console.error("Cart API DELETE error:", error);
+    return Response.json({ error: "Failed to clear cart" }, { status: 500 });
+  }
+}
+
+

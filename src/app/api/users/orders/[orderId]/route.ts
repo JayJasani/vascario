@@ -72,6 +72,7 @@ export async function GET(
       totalAmount: Number(orderData.totalAmount ?? 0),
       paymentId: orderData.paymentId ?? null,
       razorpayOrderId: orderData.razorpayOrderId ?? null,
+      paymentMethod: orderData.paymentMethod ?? null,
       createdAt: orderData.createdAt?.toDate?.().toISOString?.() ?? null,
       shippingAddress: orderData.shippingAddress ?? {},
     };

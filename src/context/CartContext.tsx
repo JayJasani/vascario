@@ -113,47 +113,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const [state, dispatch] = useReducer(cartReducer, { items: [] })
 
-  const storageKey = user ? `vascario:cart:${user.uid}` : null
-
-  // Hydrate from localStorage when user changes
-  useEffect(() => {
-    if (!storageKey) {
-      dispatch({ type: "HYDRATE", payload: [] })
-      return
-    }
-    if (typeof window === "undefined") return
-    try {
-      const raw = window.localStorage.getItem(storageKey)
-      if (raw) {
-        const parsed = JSON.parse(raw) as CartItem[]
-        dispatch({ type: "HYDRATE", payload: parsed })
-      }
-    } catch (err) {
-      console.error("Failed to load cart from storage", err)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storageKey])
-
-  // Persist whenever cart or user changes
-  useEffect(() => {
-    if (!storageKey) return
-    if (typeof window === "undefined") return
-    try {
-      window.localStorage.setItem(storageKey, JSON.stringify(state.items))
-    } catch (err) {
-      console.error("Failed to save cart to storage", err)
-    }
-  }, [state.items, storageKey])
-
   // Hydrate from server (Firestore) so cart is shared across browsers
   useEffect(() => {
     if (!user) {
       // When logged out, ensure in-memory cart is cleared
       dispatch({ type: "HYDRATE", payload: [] })
-      return
-    }
-    // If we already have items (from localStorage or a previous server sync), skip loading again
-    if (state.items.length > 0) {
       return
     }
     let cancelled = false
@@ -218,7 +182,48 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true
     }
-  }, [user, state.items.length])
+  }, [user])
+
+  // Persist cart to server whenever it changes for a logged-in user
+  useEffect(() => {
+    if (!user) return
+    if (typeof window === "undefined") return
+
+    const controller = new AbortController()
+
+    ;(async () => {
+      try {
+        const res = await fetch("/api/cart", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            items: state.items.map((item) => ({
+              productId: item.id,
+              name: item.name,
+              price: item.price,
+              image: item.image,
+              size: item.size,
+              quantity: item.quantity,
+            })),
+          }),
+          signal: controller.signal,
+        })
+        if (!res.ok) {
+          // Non-fatal: just log so UI stays responsive
+          console.error("Failed to sync cart to server", await res.text().catch(() => ""))
+        }
+      } catch (err) {
+        if ((err as any)?.name === "AbortError") return
+        console.error("Error syncing cart to server", err)
+      }
+    })()
+
+    return () => {
+      controller.abort()
+    }
+  }, [user, state.items])
 
   const addItem = (item: CartItem) => dispatch({ type: "ADD_ITEM", payload: item })
   const removeItem = (id: string, size: string) =>

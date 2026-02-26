@@ -5,13 +5,10 @@ import { toDate, toTimestamp } from "./utils";
 import { getProductById } from "./product.repository";
 import type { Order, OrderItem, OrderStatus, OrderWithItems } from "@/models/order";
 
-export async function getOrderById(id: string | null | undefined): Promise<Order | null> {
-    if (!isValidId(id)) return null;
-    const doc: DocumentSnapshot = await db.collection(COLLECTIONS.ORDERS).doc(id!).get();
-    if (!doc.exists) return null;
-
+function mapOrderFromDoc(doc: DocumentSnapshot): Order {
     const data = doc.data();
     if (!data) throw new Error(`Order document ${doc.id} has no data`);
+
     return {
         id: doc.id,
         customerEmail: data.customerEmail as string,
@@ -23,9 +20,20 @@ export async function getOrderById(id: string | null | undefined): Promise<Order
         trackingNumber: (data.trackingNumber as string | null) || null,
         trackingCarrier: (data.trackingCarrier as string | null) || null,
         notes: (data.notes as string | null) || null,
+        paymentMethod: (data.paymentMethod as Order["paymentMethod"]) ?? undefined,
+        currency: (data.currency as string | null) ?? null,
+        razorpayOrderId: (data.razorpayOrderId as string | null) ?? null,
         createdAt: toDate(data.createdAt),
         updatedAt: toDate(data.updatedAt),
     } as Order;
+}
+
+export async function getOrderById(id: string | null | undefined): Promise<Order | null> {
+    if (!isValidId(id)) return null;
+    const doc: DocumentSnapshot = await db.collection(COLLECTIONS.ORDERS).doc(id!).get();
+    if (!doc.exists) return null;
+
+    return mapOrderFromDoc(doc);
 }
 
 export async function getAllOrders(statusFilter?: OrderStatus): Promise<Order[]> {
@@ -33,24 +41,7 @@ export async function getAllOrders(statusFilter?: OrderStatus): Promise<Order[]>
     if (statusFilter) query = query.where("status", "==", statusFilter);
     const snapshot = await query.orderBy("createdAt", "desc").get();
 
-    return snapshot.docs.map((doc: DocumentSnapshot) => {
-        const data = doc.data();
-        if (!data) throw new Error(`Order document ${doc.id} has no data`);
-        return {
-            id: doc.id,
-            customerEmail: data.customerEmail as string,
-            customerName: data.customerName as string,
-            status: data.status as OrderStatus,
-            totalAmount: Number(data.totalAmount),
-            shippingAddress: (data.shippingAddress as Record<string, unknown>) || {},
-            paymentId: (data.paymentId as string | null) || null,
-            trackingNumber: (data.trackingNumber as string | null) || null,
-            trackingCarrier: (data.trackingCarrier as string | null) || null,
-            notes: (data.notes as string | null) || null,
-            createdAt: toDate(data.createdAt),
-            updatedAt: toDate(data.updatedAt),
-        } as Order;
-    });
+    return snapshot.docs.map((doc: DocumentSnapshot) => mapOrderFromDoc(doc));
 }
 
 export async function getRecentOrders(limit: number = 10): Promise<Order[]> {
@@ -60,44 +51,14 @@ export async function getRecentOrders(limit: number = 10): Promise<Order[]> {
         .limit(limit)
         .get();
 
-    return snapshot.docs.map((doc: DocumentSnapshot) => {
-        const data = doc.data();
-        if (!data) throw new Error(`Order document ${doc.id} has no data`);
-        return {
-            id: doc.id,
-            customerEmail: data.customerEmail as string,
-            customerName: data.customerName as string,
-            status: data.status as OrderStatus,
-            totalAmount: Number(data.totalAmount),
-            shippingAddress: (data.shippingAddress as Record<string, unknown>) || {},
-            paymentId: (data.paymentId as string | null) || null,
-            trackingNumber: (data.trackingNumber as string | null) || null,
-            trackingCarrier: (data.trackingCarrier as string | null) || null,
-            notes: (data.notes as string | null) || null,
-            createdAt: toDate(data.createdAt),
-            updatedAt: toDate(data.updatedAt),
-        } as Order;
-    });
+    return snapshot.docs.map((doc: DocumentSnapshot) => mapOrderFromDoc(doc));
 }
 
 async function buildOrderWithItems(
     doc: DocumentSnapshot,
     data: Record<string, unknown>
 ): Promise<OrderWithItems> {
-    const order: Order = {
-        id: doc.id,
-        customerEmail: data.customerEmail as string,
-        customerName: data.customerName as string,
-        status: data.status as OrderStatus,
-        totalAmount: Number(data.totalAmount),
-        shippingAddress: (data.shippingAddress as Record<string, unknown>) || {},
-        paymentId: (data.paymentId as string | null) || null,
-        trackingNumber: (data.trackingNumber as string | null) || null,
-        trackingCarrier: (data.trackingCarrier as string | null) || null,
-        notes: (data.notes as string | null) || null,
-        createdAt: toDate(data.createdAt),
-        updatedAt: toDate(data.updatedAt),
-    };
+    const order: Order = mapOrderFromDoc(doc);
 
     const itemsSnapshot = await db
         .collection(COLLECTIONS.ORDER_ITEMS)
