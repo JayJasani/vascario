@@ -2,8 +2,7 @@
 
 import { useCart, type CartItem } from "@/context/CartContext"
 import { useCurrency } from "@/context/CurrencyContext"
-import { Navbar } from "@/components/Navbar"
-import { Footer } from "@/components/Footer"
+import { StorefrontShell } from "@/components/layouts/StorefrontShell"
 import Link from "next/link"
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
@@ -133,10 +132,9 @@ export default function CartPageClient({ initialItems }: CartPageClientProps = {
     if (!mounted) return null
 
     return (
-        <main className="min-h-screen bg-[var(--vsc-cream)]">
-            <Navbar />
-
-            <div className="pt-24 sm:pt-28 md:pt-36 pb-12 sm:pb-20 px-4 sm:px-6 md:px-12 lg:px-20">
+    <StorefrontShell>
+      <main className="min-h-screen bg-[var(--vsc-cream)]">
+        <div className="pt-24 sm:pt-28 md:pt-36 pb-12 sm:pb-20 px-4 sm:px-6 md:px-12 lg:px-20">
                         {/* ===== KINETIC TITLE ===== */}
                 <div className="relative mb-8 md:mb-8">
                     <h1
@@ -475,10 +473,9 @@ export default function CartPageClient({ initialItems }: CartPageClientProps = {
                         </div>
                     </div>
                 )}
-            </div>
-
-            <Footer />
-        </main>
+        </div>
+      </main>
+    </StorefrontShell>
     )
 }
 

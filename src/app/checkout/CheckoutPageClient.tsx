@@ -1,7 +1,6 @@
 "use client";
 
-import { Footer } from "@/components/Footer";
-import { Navbar } from "@/components/Navbar";
+import { StorefrontShell } from "@/components/layouts/StorefrontShell";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -426,49 +425,49 @@ export default function CheckoutPageClient() {
 
   if (!user) {
     return (
-      <main className="min-h-screen bg-[var(--vsc-cream)]">
-        <Navbar />
-        <div className="flex flex-col items-center justify-center min-h-screen gap-6 sm:gap-8 px-4">
-          <p
-            className="text-xl sm:text-2xl md:text-4xl font-bold text-[var(--vsc-gray-600)] uppercase tracking-[0.1em] text-center"
-            style={{ fontFamily: "var(--font-space-grotesk)" }}
-          >
-            SIGN IN TO CHECK OUT
-          </p>
-          <Link
-            href="/login?redirect=/checkout"
-            className="w-full sm:w-auto text-center px-6 sm:px-10 py-4 sm:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-xs sm:text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
-            style={{ fontFamily: "var(--font-space-mono)" }}
-          >
-            SIGN IN →
-          </Link>
-        </div>
-        <Footer />
-      </main>
+      <StorefrontShell>
+        <main className="min-h-screen bg-[var(--vsc-cream)]">
+          <div className="flex flex-col items-center justify-center min-h-screen gap-6 sm:gap-8 px-4">
+            <p
+              className="text-xl sm:text-2xl md:text-4xl font-bold text-[var(--vsc-gray-600)] uppercase tracking-[0.1em] text-center"
+              style={{ fontFamily: "var(--font-space-grotesk)" }}
+            >
+              SIGN IN TO CHECK OUT
+            </p>
+            <Link
+              href="/login?redirect=/checkout"
+              className="w-full sm:w-auto text-center px-6 sm:px-10 py-4 sm:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-xs sm:text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
+              style={{ fontFamily: "var(--font-space-mono)" }}
+            >
+              SIGN IN →
+            </Link>
+          </div>
+        </main>
+      </StorefrontShell>
     );
   }
 
   if (items.length === 0) {
     return (
-      <main className="min-h-screen bg-[var(--vsc-cream)]">
-        <Navbar />
-        <div className="flex flex-col items-center justify-center min-h-screen gap-6 sm:gap-8 px-4">
-          <p
-            className="text-xl sm:text-2xl md:text-4xl font-bold text-[var(--vsc-gray-600)] uppercase tracking-[0.1em] text-center"
-            style={{ fontFamily: "var(--font-space-grotesk)" }}
-          >
-            YOUR BAG IS EMPTY
-          </p>
-          <Link
-            href="/"
-            className="w-full sm:w-auto text-center px-6 sm:px-10 py-4 sm:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-xs sm:text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
-            style={{ fontFamily: "var(--font-space-mono)" }}
-          >
-            CONTINUE SHOPPING →
-          </Link>
-        </div>
-        <Footer />
-      </main>
+      <StorefrontShell>
+        <main className="min-h-screen bg-[var(--vsc-cream)]">
+          <div className="flex flex-col items-center justify-center min-h-screen gap-6 sm:gap-8 px-4">
+            <p
+              className="text-xl sm:text-2xl md:text-4xl font-bold text-[var(--vsc-gray-600)] uppercase tracking-[0.1em] text-center"
+              style={{ fontFamily: "var(--font-space-grotesk)" }}
+            >
+              YOUR BAG IS EMPTY
+            </p>
+            <Link
+              href="/"
+              className="w-full sm:w-auto text-center px-6 sm:px-10 py-4 sm:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-xs sm:text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
+              style={{ fontFamily: "var(--font-space-mono)" }}
+            >
+              CONTINUE SHOPPING →
+            </Link>
+          </div>
+        </main>
+      </StorefrontShell>
     );
   }
 
@@ -478,10 +477,9 @@ export default function CheckoutPageClient() {
   ];
 
   return (
-    <main className="min-h-screen bg-[var(--vsc-cream)]">
-      <Navbar />
-
-      <div className="pt-24 sm:pt-28 md:pt-36 pb-12 sm:pb-20 px-4 sm:px-6 md:px-12 lg:px-20">
+    <StorefrontShell>
+      <main className="min-h-screen bg-[var(--vsc-cream)]">
+        <div className="pt-24 sm:pt-28 md:pt-36 pb-12 sm:pb-20 px-4 sm:px-6 md:px-12 lg:px-20">
         {/* ===== TERMINAL TITLE ===== */}
         <div className="mb-8 sm:mb-12">
           <h1
@@ -646,10 +644,9 @@ export default function CheckoutPageClient() {
             </div>
           </div>
         </div>
-      </div>
-
-      <Footer />
-    </main>
+        </div>
+      </main>
+    </StorefrontShell>
   );
 }
 

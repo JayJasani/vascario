@@ -1,7 +1,6 @@
 "use client";
 
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
+import { StorefrontShell } from "@/components/layouts/StorefrontShell";
 import { useState } from "react";
 import {
   MENS_SIZE_DATA,
@@ -15,10 +14,10 @@ export default function SizeChartPageClient() {
   const [unit, setUnit] = useState<"in" | "cm">("in");
 
   return (
-    <main className="min-h-screen bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)]">
-      <Navbar />
+    <StorefrontShell>
+      <main className="min-h-screen bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)]">
 
-      <section className="pt-32 pb-24 px-6 md:px-12 lg:px-40 max-w-5xl mx-auto">
+        <section className="pt-32 pb-24 px-6 md:px-12 lg:px-40 max-w-5xl mx-auto">
         {/* Header */}
         <header className="mb-10 md:mb-14">
           <p
@@ -641,10 +640,9 @@ export default function SizeChartPageClient() {
             </div>
           </section>
         </div>
-      </section>
-
-      <Footer />
-    </main>
+        </section>
+      </main>
+    </StorefrontShell>
   );
 }
 

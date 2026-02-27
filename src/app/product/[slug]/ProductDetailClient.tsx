@@ -1,8 +1,7 @@
 "use client";
 
-import { Footer } from "@/components/Footer";
 import { MarqueeStrip } from "@/components/MarqueeStrip";
-import { Navbar } from "@/components/Navbar";
+import { StorefrontShell } from "@/components/layouts/StorefrontShell";
 import {
   BreadcrumbStructuredData,
   ProductStructuredData,
@@ -321,51 +320,51 @@ export function ProductDetailClient({
   };
 
   return (
-    <main className="min-h-screen">
-      <ProductStructuredData product={product} />
-      <BreadcrumbStructuredData
-        items={[
-          { name: "Home", url: "/" },
-          { name: "Collection", url: "/collection" },
-          { name: product.name, url: `/product/${product.slug}` },
-        ]}
-      />
-      <Navbar />
+    <StorefrontShell>
+      <main className="min-h-screen">
+        <ProductStructuredData product={product} />
+        <BreadcrumbStructuredData
+          items={[
+            { name: "Home", url: "/" },
+            { name: "Collection", url: "/collection" },
+            { name: product.name, url: `/product/${product.slug}` },
+          ]}
+        />
 
-      {/* Product section */}
-      <section className="pt-28 sm:pt-24 md:pt-32 pb-12 sm:pb-24 md:pb-32">
-        {/* Breadcrumb */}
-        <div className="px-6 md:px-12 lg:px-20 mb-8">
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href="/"
-              className="text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors"
-              style={{ fontFamily: "var(--font-space-mono)" }}
-            >
-              Home
-            </Link>
-            <span className="text-[var(--vsc-gray-700)] text-xs">/</span>
-            <Link
-              href="/collection"
-              className="text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors"
-              style={{ fontFamily: "var(--font-space-mono)" }}
-            >
-              Collection
-            </Link>
-            <span className="text-[var(--vsc-gray-700)] text-xs">/</span>
-            <span
-              className="text-[10px] text-[var(--vsc-gray-400)] uppercase tracking-[0.2em]"
-              style={{ fontFamily: "var(--font-space-mono)" }}
-            >
-              {product.name}
-            </span>
+        {/* Product section */}
+        <section className="pt-28 sm:pt-24 md:pt-32 pb-12 sm:pb-24 md:pb-32">
+          {/* Breadcrumb */}
+          <div className="px-6 md:px-12 lg:px-20 mb-8">
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href="/"
+                className="text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors"
+                style={{ fontFamily: "var(--font-space-mono)" }}
+              >
+                Home
+              </Link>
+              <span className="text-[var(--vsc-gray-700)] text-xs">/</span>
+              <Link
+                href="/collection"
+                className="text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors"
+                style={{ fontFamily: "var(--font-space-mono)" }}
+              >
+                Collection
+              </Link>
+              <span className="text-[var(--vsc-gray-700)] text-xs">/</span>
+              <span
+                className="text-[10px] text-[var(--vsc-gray-400)] uppercase tracking-[0.2em]"
+                style={{ fontFamily: "var(--font-space-mono)" }}
+              >
+                {product.name}
+              </span>
+            </div>
           </div>
-        </div>
 
-        {/* Main content — layout */}
-        <div className="px-4 sm:px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 md:gap-8">
-          {/* Left — Image Gallery (slightly wider) */}
-          <div className="md:col-span-5 lg:col-span-5">
+          {/* Main content — layout */}
+          <div className="px-4 sm:px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 md:gap-8">
+            {/* Left — Image Gallery (slightly wider) */}
+            <div className="md:col-span-5 lg:col-span-5">
             {/* Main image – slightly smaller so details panel can grow */}
             <div className="relative">
               <div
@@ -544,10 +543,10 @@ export function ProductDetailClient({
                 ))}
               </div>
             )}
-          </div>
+            </div>
 
-          {/* Right — Product Info (still wide) — Sticky */}
-          <div className="md:col-span-7 lg:col-span-7 mt-4 sm:mt-0">
+            {/* Right — Product Info (still wide) — Sticky */}
+            <div className="md:col-span-7 lg:col-span-7 mt-4 sm:mt-0">
             <div className="md:sticky md:top-24">
               {/* Product name + share */}
               <div className="flex items-start justify-between gap-3 mb-2 sm:mb-3">
@@ -1128,13 +1127,13 @@ export function ProductDetailClient({
             </div>
           </div>
         </div>
-      </section>
+        </section>
 
-      {/* Embroidery detail section */}
-      <section className="pt-12 sm:pt-24 md:pt-32 pb-12 sm:pb-24 md:pb-32 border-t border-[var(--vsc-gray-700)]">
-        <div className="px-6 md:px-12 lg:px-20">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-            <div>
+        {/* Embroidery detail section */}
+        <section className="pt-12 sm:pt-24 md:pt-32 pb-12 sm:pb-24 md:pb-32 border-t border-[var(--vsc-gray-700)]">
+          <div className="px-6 md:px-12 lg:px-20">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+              <div>
               <span
                 className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.3em] block mb-4"
                 style={{ fontFamily: "var(--font-space-mono)" }}
@@ -1167,8 +1166,8 @@ export function ProductDetailClient({
                 hand-selected thread palettes. The result: a texture you can
                 feel, a quality that lasts.
               </p>
-            </div>
-            <div className="relative aspect-square bg-[var(--vsc-gray-900)] border border-[var(--vsc-gray-700)] overflow-hidden">
+              </div>
+              <div className="relative aspect-square bg-[var(--vsc-gray-900)] border border-[var(--vsc-gray-700)] overflow-hidden">
               {makingProcessVideoUrl ? (
                 <video
                   src={makingProcessVideoUrl}
@@ -1202,13 +1201,13 @@ export function ProductDetailClient({
                   </span>
                 </div>
               )}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <MarqueeStrip />
-      <Footer />
-    </main>
+        <MarqueeStrip />
+      </main>
+    </StorefrontShell>
   );
 }

@@ -1,10 +1,9 @@
-import { Navbar } from "@/components/Navbar"
 import { CollectionGrid } from "@/components/CollectionGrid"
-import { Footer } from "@/components/Footer"
 import { getActiveProducts } from "../storefront-actions"
 import { getCollectionMetadata } from "@/lib/seo-config"
 import { ItemListStructuredDataServer } from "@/components/StructuredDataServer"
 import { SEO_BASE } from "@/lib/seo-config"
+import { StorefrontShell } from "@/components/layouts/StorefrontShell"
 
 export const metadata = getCollectionMetadata()
 
@@ -22,11 +21,11 @@ export default async function CollectionPage() {
   }))
 
   return (
-    <main className="min-h-screen">
-      <ItemListStructuredDataServer items={itemListItems} />
-      <Navbar />
-      <CollectionGrid products={products} />
-      <Footer />
-    </main>
+    <StorefrontShell>
+      <main className="min-h-screen">
+        <ItemListStructuredDataServer items={itemListItems} />
+        <CollectionGrid products={products} />
+      </main>
+    </StorefrontShell>
   )
 }

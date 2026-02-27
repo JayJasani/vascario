@@ -1,12 +1,11 @@
-import { Navbar } from "@/components/Navbar"
 import { Hero } from "@/components/Hero"
 import { MarqueeStrip } from "@/components/MarqueeStrip"
 import { CollectionGrid } from "@/components/CollectionGrid"
 import { EditorialSection } from "@/components/EditorialSection"
 import { ReviewsSection } from "@/components/ReviewsSection"
-import { Footer } from "@/components/Footer"
 import { OrganizationStructuredDataServer, WebsiteStructuredDataServer } from "@/components/StructuredDataServer"
 import { ResourcePreloader } from "@/components/ResourcePreloader"
+import { StorefrontShell } from "@/components/layouts/StorefrontShell"
 import { getActiveProducts, getStaticContentUrls, getReviews } from "./storefront-actions"
 
 export default async function Home() {
@@ -42,22 +41,22 @@ export default async function Home() {
   }
 
   return (
-    <main className="min-h-screen">
-      <OrganizationStructuredDataServer />
-      <WebsiteStructuredDataServer searchUrl="https://www.vascario.com/collection?search={search_term_string}" />
-      <ResourcePreloader images={criticalImages} videos={criticalVideos} />
-      <Navbar />
-      <Hero onboard1VideoUrl={onboard1Url} redirectUrl={onboard1Redirect || undefined} />
-      <MarqueeStrip />
-      <CollectionGrid products={products} compactTopPadding />
-      <EditorialSection 
-        onboard2VideoUrl={onboard2Url} 
-        tshirtCloseupUrl={tshirtCloseupUrl}
-        onboard2RedirectUrl={onboard2Redirect || undefined}
-        tshirtCloseupRedirectUrl={tshirtCloseupRedirect || undefined}
-      />
-      <ReviewsSection reviews={reviews} />
-      <Footer />
-    </main>
+    <StorefrontShell>
+      <main className="min-h-screen">
+        <OrganizationStructuredDataServer />
+        <WebsiteStructuredDataServer searchUrl="https://www.vascario.com/collection?search={search_term_string}" />
+        <ResourcePreloader images={criticalImages} videos={criticalVideos} />
+        <Hero onboard1VideoUrl={onboard1Url} redirectUrl={onboard1Redirect || undefined} />
+        <MarqueeStrip />
+        <CollectionGrid products={products} compactTopPadding />
+        <EditorialSection 
+          onboard2VideoUrl={onboard2Url} 
+          tshirtCloseupUrl={tshirtCloseupUrl}
+          onboard2RedirectUrl={onboard2Redirect || undefined}
+          tshirtCloseupRedirectUrl={tshirtCloseupRedirect || undefined}
+        />
+        <ReviewsSection reviews={reviews} />
+      </main>
+    </StorefrontShell>
   )
 }

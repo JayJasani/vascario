@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
+import { StorefrontShell } from "@/components/layouts/StorefrontShell";
 import { useAuth } from "@/context/AuthContext";
 import { useUserProfile } from "@/context/UserProfileContext";
 import type { UserAddress } from "@/models/user";
@@ -261,24 +260,23 @@ export default function ProfilePageClient() {
 
   if (authLoading || (user && profileLoading)) {
     return (
-      <main className="min-h-screen bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)]">
-        <Navbar />
-        <section className="pt-32 pb-24 px-6 md:px-12 lg:px-20">
-          <div className="max-w-2xl mx-auto flex items-center justify-center py-20">
-            <p className="text-sm text-[var(--vsc-gray-500)]" style={{ fontFamily: "var(--font-space-mono)" }}>Loading profile...</p>
-          </div>
-        </section>
-        <Footer />
-      </main>
+      <StorefrontShell>
+        <main className="min-h-screen bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)]">
+          <section className="pt-32 pb-24 px-6 md:px-12 lg:px-20">
+            <div className="max-w-2xl mx-auto flex items-center justify-center py-20">
+              <p className="text-sm text-[var(--vsc-gray-500)]" style={{ fontFamily: "var(--font-space-mono)" }}>Loading profile...</p>
+            </div>
+          </section>
+        </main>
+      </StorefrontShell>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)]">
-      <Navbar />
-
-      <section className="pt-24 sm:pt-32 pb-16 sm:pb-24 px-4 sm:px-6 md:px-12 lg:px-20">
-        <div className="max-w-2xl mx-auto space-y-8 sm:space-y-12">
+    <StorefrontShell>
+      <main className="min-h-screen bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)]">
+        <section className="pt-24 sm:pt-32 pb-16 sm:pb-24 px-4 sm:px-6 md:px-12 lg:px-20">
+          <div className="max-w-2xl mx-auto space-y-8 sm:space-y-12">
           <header>
             <p
               className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.3em] mb-2"
@@ -794,10 +792,9 @@ export default function ProfilePageClient() {
             )}
           </div>
         </div>
-      </section>
-
-      <Footer />
-    </main>
+        </section>
+      </main>
+    </StorefrontShell>
   );
 }
 

@@ -1,7 +1,6 @@
 "use client";
 
-import { Footer } from "@/components/Footer";
-import { Navbar } from "@/components/Navbar";
+import { StorefrontShell } from "@/components/layouts/StorefrontShell";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useAuth } from "@/context/AuthContext";
 import { Printer } from "lucide-react";
@@ -157,12 +156,12 @@ function OrderSuccessContent() {
           }
         }
       `}</style>
-      <main className="min-h-screen bg-[var(--vsc-cream)] overflow-hidden">
-        <Navbar />
+      <StorefrontShell>
+        <main className="min-h-screen bg-[var(--vsc-cream)] overflow-hidden">
 
-        {/* ===== MASSIVE MARQUEE HERO ===== */}
-        <div className="no-print pt-24 md:pt-32">
-          <div className="relative overflow-hidden py-8 md:py-12 bg-[var(--vsc-accent)]">
+          {/* ===== MASSIVE MARQUEE HERO ===== */}
+          <div className="no-print pt-24 md:pt-32">
+            <div className="relative overflow-hidden py-8 md:py-12 bg-[var(--vsc-accent)]">
             <div
               className="flex whitespace-nowrap"
               style={{
@@ -212,13 +211,13 @@ function OrderSuccessContent() {
               ))}
             </div>
           </div>
-        </div>
+          </div>
 
-        {/* ===== CONTENT ===== */}
-        <div className="px-6 md:px-12 lg:px-20 py-16 md:py-24">
-          <div className="max-w-2xl mx-auto">
-            {/* ===== DIGITAL RECEIPT — THERMAL PAPER ===== */}
-            <div
+          {/* ===== CONTENT ===== */}
+          <div className="px-6 md:px-12 lg:px-20 py-16 md:py-24">
+            <div className="max-w-2xl mx-auto">
+              {/* ===== DIGITAL RECEIPT — THERMAL PAPER ===== */}
+              <div
               className="relative bg-[var(--vsc-cream)]"
               style={{
                 animation: !flickered ? "crt-flicker 0.15s ease 4" : "none",
@@ -428,10 +427,10 @@ function OrderSuccessContent() {
                 )`,
                 }}
               />
-            </div>
+              </div>
 
-            {/* ===== PRINT BUTTON ===== */}
-            <div className="no-print flex items-center justify-center gap-4 mt-2 mb-6">
+              {/* ===== PRINT BUTTON ===== */}
+              <div className="no-print flex items-center justify-center gap-4 mt-2 mb-6">
               <button
                 onClick={() => window.print()}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-bold uppercase tracking-[0.1em] text-[var(--vsc-black)] hover:text-[var(--vsc-accent)] transition-colors"
@@ -440,10 +439,10 @@ function OrderSuccessContent() {
                 <Printer className="w-4 h-4" />
                 PRINT
               </button>
-            </div>
+              </div>
 
-            {/* ===== CTA BUTTONS ===== */}
-            <div className="no-print flex flex-col sm:flex-row items-center justify-center gap-6">
+              {/* ===== CTA BUTTONS ===== */}
+              <div className="no-print flex flex-col sm:flex-row items-center justify-center gap-6">
               <Link
                 href="/"
                 className="w-full sm:w-auto text-center px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
@@ -457,12 +456,11 @@ function OrderSuccessContent() {
               >
                 TRACK ORDER
               </button>
+              </div>
             </div>
           </div>
-        </div>
-
-        <Footer />
-      </main>
+        </main>
+      </StorefrontShell>
     </>
   );
 }
