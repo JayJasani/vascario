@@ -27,6 +27,8 @@ import {
 import { getColorDisplayName, parseColorEntry } from "@/lib/hex-to-color-name";
 import { hasDiscount, getDiscountAmount } from "@/lib/discount";
 import { getImageAlt } from "@/lib/seo-utils";
+import { ProductCard } from "@/components/ProductCard";
+import type { StorefrontProduct } from "@/models/storefront";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ShareIcon } from "@hugeicons/core-free-icons";
 import Image from "next/image";
@@ -108,9 +110,11 @@ function renderDescription(text: string) {
 export function ProductDetailClient({
   product,
   makingProcessVideoUrl,
+  relatedProducts = [],
 }: {
   product: ProductDetailData;
   makingProcessVideoUrl?: string;
+  relatedProducts?: StorefrontProduct[];
 }) {
   // Set "M" as default size if available, otherwise empty string
   const defaultSize = product.sizes.includes("M") ? "M" : "";
@@ -1208,6 +1212,59 @@ export function ProductDetailClient({
             </div>
           </div>
         </section>
+
+        {/* Related Products */}
+        {relatedProducts.length > 0 && (
+          <section className="pt-12 sm:pt-24 pb-12 sm:pb-24 border-t border-[var(--vsc-gray-700)]">
+            <div className="px-6 md:px-12 lg:px-20">
+              <div className="flex items-end justify-between mb-8 sm:mb-12">
+                <div>
+                  <span
+                    className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.3em] block mb-2"
+                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  >
+                    More to Explore
+                  </span>
+                  <h2
+                    className="text-2xl sm:text-3xl font-bold uppercase tracking-[0.05em] text-black"
+                    style={{ fontFamily: "var(--font-space-grotesk)" }}
+                  >
+                    Related Products
+                  </h2>
+                </div>
+                <Link
+                  href="/collection"
+                  className="hidden sm:inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-[var(--vsc-gray-600)] hover:text-[var(--vsc-accent)] transition-colors"
+                  style={{ fontFamily: "var(--font-space-mono)" }}
+                >
+                  View All Collection <span aria-hidden>→</span>
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                {relatedProducts.map((p) => (
+                  <div key={p.id} className="flex flex-col">
+                    <ProductCard
+                      product={p}
+                      variant="grid"
+                      aspectClass="aspect-[3/4]"
+                    />
+                  </div>
+                ))}
+              </div>
+              
+              <div className="mt-8 sm:hidden flex justify-center">
+                <Link
+                  href="/collection"
+                  className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--vsc-gray-600)] hover:text-[var(--vsc-accent)] transition-colors border border-[var(--vsc-gray-700)] px-6 py-3"
+                  style={{ fontFamily: "var(--font-space-mono)" }}
+                >
+                  View All Collection <span aria-hidden>→</span>
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
 
         <MarqueeStrip />
       </main>

@@ -1,7 +1,7 @@
 import { cache, Suspense } from "react"
 import { notFound, redirect } from "next/navigation"
 import type { Metadata } from "next"
-import { getProductBySlug, getProductById, getStaticContentUrls } from "@/app/storefront-actions"
+import { getProductBySlug, getProductById, getStaticContentUrls, getActiveProducts } from "@/app/storefront-actions"
 import { ProductDetailClient } from "./ProductDetailClient"
 import { getProductMetadata } from "@/lib/seo-config"
 import { ProductStructuredDataServer, BreadcrumbStructuredDataServer } from "@/components/StructuredDataServer"
@@ -42,14 +42,19 @@ export async function generateMetadata({
 }
 
 async function ProductDetailData({ slug }: { slug: string }) {
-    const [product, staticContent] = await Promise.all([
+    const [product, staticContent, activeProducts] = await Promise.all([
         getProductForPage(slug),
         getStaticContentUrls(),
+        getActiveProducts(),
     ])
 
     if (!product) {
         notFound()
     }
+
+    const relatedProducts = activeProducts
+        .filter((p) => p.id !== product.id)
+        .slice(0, 4)
 
     const breadcrumbItems = [
         { name: "Home", url: SEO_BASE.siteUrl },
@@ -68,7 +73,11 @@ async function ProductDetailData({ slug }: { slug: string }) {
             />
             <BreadcrumbStructuredDataServer items={breadcrumbItems} />
             <ResourcePreloader images={criticalImages} />
-            <ProductDetailClient product={product} makingProcessVideoUrl={staticContent.making_process || undefined} />
+            <ProductDetailClient 
+                product={product} 
+                makingProcessVideoUrl={staticContent.making_process || undefined} 
+                relatedProducts={relatedProducts}
+            />
         </>
     )
 }
