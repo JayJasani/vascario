@@ -18,6 +18,7 @@ const navItems = [
     { label: "STATIC CONTENT", href: "/admin/static-content", icon: "▤" },
     { label: "REVIEWS", href: "/admin/reviews", icon: "★" },
     { label: "INVESTMENT", href: "/admin/investment", icon: "◆" },
+    { label: "COUPONS", href: "/admin/coupons", icon: "%" },
     { label: "CONTACT", href: "/admin/contact", icon: "✉" },
     { label: "NEWSLETTER", href: "/admin/newsletter", icon: "◉" },
     { label: "BACK IN STOCK", href: "/admin/back-in-stock", icon: "◇" },

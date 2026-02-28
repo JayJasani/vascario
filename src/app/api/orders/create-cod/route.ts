@@ -9,6 +9,25 @@ export async function POST(req: NextRequest) {
         const totalAmount = Number(body.totalAmount)
         const currency = (body.currency as string | undefined) ?? "INR"
 
+        const rawSubtotal = body.subtotalAmount
+        let subtotalAmount = Number(
+            rawSubtotal === undefined || rawSubtotal === null ? totalAmount : rawSubtotal,
+        )
+        if (!Number.isFinite(subtotalAmount) || subtotalAmount <= 0) {
+            subtotalAmount = totalAmount
+        }
+
+        const rawDiscount = Number(body.discountAmount ?? subtotalAmount - totalAmount)
+        const discountAmount =
+            !Number.isFinite(rawDiscount) || rawDiscount <= 0
+                ? 0
+                : Math.min(rawSubtotal ? subtotalAmount : totalAmount, rawDiscount)
+
+        const couponCode =
+            typeof body.couponCode === "string" && body.couponCode.trim()
+                ? (body.couponCode as string).trim().toUpperCase()
+                : null
+
         if (!totalAmount || !Number.isFinite(totalAmount) || totalAmount <= 0) {
             return NextResponse.json({ error: "Invalid total amount" }, { status: 400 })
         }
@@ -47,6 +66,9 @@ export async function POST(req: NextRequest) {
             customerName: shipping?.fullName ?? "",
             status: "PENDING",
             totalAmount,
+            subtotalAmount,
+            discountAmount,
+            couponCode,
             shippingAddress: shipping ?? {},
             paymentId: null,
             currency,

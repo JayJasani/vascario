@@ -3,6 +3,7 @@
 import { StorefrontShell } from "@/components/layouts/StorefrontShell";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useAuth } from "@/context/AuthContext";
+import type { OrderStatus } from "@/models/order";
 import { Printer } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -20,6 +21,10 @@ type LastOrderItem = {
 type LastOrderSnapshot = {
   id: string;
   total: number;
+  subtotal?: number;
+  discountAmount?: number;
+  couponCode?: string | null;
+  status?: OrderStatus;
   items: LastOrderItem[];
   shipping: {
     fullName: string;
@@ -32,6 +37,22 @@ type LastOrderSnapshot = {
   };
   createdAt: string;
 };
+
+function getStatusLabel(status?: OrderStatus | null): string {
+  if (!status) return "CONFIRMED";
+
+  switch (status) {
+    case "CANCELLED":
+      return "CANCELLED";
+    case "FAILED":
+      return "FAILED";
+    case "PENDING":
+      return "PENDING";
+    default:
+      // Treat all successful/active states as CONFIRMED for this UI
+      return "CONFIRMED";
+  }
+}
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
@@ -111,7 +132,11 @@ function OrderSuccessContent() {
         const data = (await res.json()) as {
           order: {
             id: string;
+            status: OrderStatus;
             totalAmount: number;
+            subtotalAmount?: number;
+            discountAmount?: number;
+            couponCode?: string | null;
             shippingAddress: {
               fullName?: string;
               email?: string;
@@ -135,7 +160,11 @@ function OrderSuccessContent() {
 
         const snap: LastOrderSnapshot = {
           id: data.order.id,
+          status: data.order.status,
           total: data.order.totalAmount,
+          subtotal: data.order.subtotalAmount ?? data.order.totalAmount,
+          discountAmount: data.order.discountAmount ?? 0,
+          couponCode: data.order.couponCode ?? null,
           items: data.items.map((item) => ({
             id: item.id,
             name: item.productName ?? "Product",
@@ -169,7 +198,14 @@ function OrderSuccessContent() {
   if (!mounted) return null;
 
   const displayOrderId = lastOrder?.id ?? orderId;
-  const marqueeText = `ORDER #${displayOrderId} CONFIRMED  ★  YOUR DROP IS LOCKED  ★  ORDER #${displayOrderId} CONFIRMED  ★  YOUR DROP IS LOCKED  ★  `;
+  const statusLabel = getStatusLabel(lastOrder?.status);
+  const marqueeMessage =
+    statusLabel === "CANCELLED" || statusLabel === "FAILED"
+      ? "CHECK ORDER DETAILS OR CONTACT SUPPORT"
+      : "YOUR DROP IS LOCKED";
+  const marqueeText = `ORDER #${displayOrderId} ${statusLabel}  ★  ${marqueeMessage}  ★  ORDER #${displayOrderId} ${statusLabel}  ★  ${marqueeMessage}  ★  `;
+  const subtotal = lastOrder?.subtotal ?? lastOrder?.total ?? 0;
+  const discountAmount = lastOrder?.discountAmount ?? 0;
 
   return (
     <>
@@ -321,7 +357,7 @@ function OrderSuccessContent() {
                     className="text-xs font-bold uppercase tracking-[0.1em] px-3 py-1 bg-[var(--vsc-accent)] !text-white"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                   >
-                    CONFIRMED
+                    {statusLabel}
                   </span>
                 </div>
               </div>
@@ -421,9 +457,25 @@ function OrderSuccessContent() {
                     className="text-xs font-bold text-[var(--vsc-black)]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                   >
-                    {formatPrice(lastOrder?.total ?? 0)}
+                    {formatPrice(subtotal)}
                   </span>
                 </div>
+                {false && discountAmount > 0 && (
+                  <div className="flex justify-between">
+                    <span
+                      className="text-xs text-[var(--vsc-gray-600)] uppercase tracking-[0.15em]"
+                      style={{ fontFamily: "var(--font-space-mono)" }}
+                    >
+                      DISCOUNT
+                    </span>
+                    <span
+                      className="text-xs font-bold text-[var(--vsc-black)]"
+                      style={{ fontFamily: "var(--font-space-mono)" }}
+                    >
+                      -{formatPrice(discountAmount)}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span
                     className="text-xs text-[var(--vsc-gray-600)] uppercase tracking-[0.15em]"
@@ -528,30 +580,32 @@ function OrderSuccessContent() {
               </div>
 
               {/* ===== WHAT'S NEXT ===== */}
-              <div className="no-print mt-10 border border-[var(--vsc-gray-200)] bg-white/70 shadow-sm">
-                <div className="px-6 md:px-8 py-6">
-                  <h3
-                    className="text-xs text-[var(--vsc-gray-600)] uppercase tracking-[0.3em] mb-3"
-                    style={{ fontFamily: "var(--font-space-mono)" }}
-                  >
-                    WHAT&apos;S NEXT
-                  </h3>
-                  <p
-                    className="text-xs text-[var(--vsc-gray-800)] uppercase tracking-[0.1em]"
-                    style={{ fontFamily: "var(--font-space-mono)" }}
-                  >
-                    YOUR ORDER IS LOCKED IN. HERE&apos;S WHAT HAPPENS NOW:
-                  </p>
-                  <ul
-                    className="mt-4 space-y-2 text-[10px] text-[var(--vsc-gray-700)] uppercase tracking-[0.12em]"
-                    style={{ fontFamily: "var(--font-space-mono)" }}
-                  >
-                    <li>✔ YOU&apos;LL RECEIVE A SHIPPING NOTIFICATION AS SOON AS YOUR PIECES LEAVE THE STUDIO.</li>
-                    <li>✔ CREATE OR LOG INTO YOUR ACCOUNT TO TRACK FUTURE DROPS FASTER.</li>
-                    <li>✔ FOLLOW @VASCARIO ON SOCIALS TO SEE HOW THE COMMUNITY STYLES THIS DROP.</li>
-                  </ul>
+              {statusLabel !== "CANCELLED" && (
+                <div className="no-print mt-10 border border-[var(--vsc-gray-200)] bg-white/70 shadow-sm">
+                  <div className="px-6 md:px-8 py-6">
+                    <h3
+                      className="text-xs text-[var(--vsc-gray-600)] uppercase tracking-[0.3em] mb-3"
+                      style={{ fontFamily: "var(--font-space-mono)" }}
+                    >
+                      WHAT&apos;S NEXT
+                    </h3>
+                    <p
+                      className="text-xs text-[var(--vsc-gray-800)] uppercase tracking-[0.1em]"
+                      style={{ fontFamily: "var(--font-space-mono)" }}
+                    >
+                      YOUR ORDER IS LOCKED IN. HERE&apos;S WHAT HAPPENS NOW:
+                    </p>
+                    <ul
+                      className="mt-4 space-y-2 text-[10px] text-[var(--vsc-gray-700)] uppercase tracking-[0.12em]"
+                      style={{ fontFamily: "var(--font-space-mono)" }}
+                    >
+                      <li>✔ YOU&apos;LL RECEIVE A SHIPPING NOTIFICATION AS SOON AS YOUR PIECES LEAVE THE STUDIO.</li>
+                      <li>✔ CREATE OR LOG INTO YOUR ACCOUNT TO TRACK FUTURE DROPS FASTER.</li>
+                      <li>✔ FOLLOW @VASCARIO ON SOCIALS TO SEE HOW THE COMMUNITY STYLES THIS DROP.</li>
+                    </ul>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </main>

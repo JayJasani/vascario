@@ -127,6 +127,14 @@ export async function GET(
         : "INR";
 
     const totalAmount = Number(orderData.totalAmount ?? 0);
+    const subtotalAmount = Number(
+      orderData.subtotalAmount != null ? orderData.subtotalAmount : totalAmount,
+    );
+    const discountAmountRaw = Number(orderData.discountAmount ?? subtotalAmount - totalAmount);
+    const discountAmount =
+      !Number.isFinite(discountAmountRaw) || discountAmountRaw <= 0
+        ? 0
+        : Math.min(subtotalAmount, discountAmountRaw);
     const shipping = (orderData.shippingAddress ?? {}) as {
       fullName?: string;
       email?: string;
@@ -147,6 +155,19 @@ export async function GET(
           day: "numeric",
         })
       : "";
+
+    const rawStatus =
+      typeof orderData.status === "string"
+        ? orderData.status.toUpperCase()
+        : "PENDING";
+    let statusLabel = "CONFIRMED";
+    if (rawStatus === "CANCELLED") {
+      statusLabel = "CANCELLED";
+    } else if (rawStatus === "FAILED") {
+      statusLabel = "FAILED";
+    } else if (rawStatus === "PENDING") {
+      statusLabel = "PENDING";
+    }
 
     const itemsHtml =
       items.length > 0
@@ -407,7 +428,7 @@ export async function GET(
         </div>
         <div class="row">
           <div class="label">Status</div>
-          <div class="value">CONFIRMED</div>
+          <div class="value">${escapeHtml(statusLabel)}</div>
         </div>
       </div>
       ${
@@ -462,9 +483,19 @@ export async function GET(
         <div class="totals-row">
           <div class="totals-label">Subtotal</div>
           <div class="totals-value">${escapeHtml(
-            formatCurrency(totalAmount, currency),
+            formatCurrency(subtotalAmount, currency),
           )}</div>
         </div>
+        ${
+          discountAmount > 0
+            ? `<div class="totals-row">
+          <div class="totals-label">Discount</div>
+          <div class="totals-value">-${escapeHtml(
+            formatCurrency(discountAmount, currency),
+          )}</div>
+        </div>`
+            : ""
+        }
         <div class="totals-row">
           <div class="totals-label">Shipping</div>
           <div class="totals-value">FREE</div>

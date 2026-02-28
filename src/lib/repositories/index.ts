@@ -16,6 +16,7 @@ export type { StaticContent } from "@/models/static-content";
 export type { Review } from "@/models/review";
 export type { Investment } from "@/models/investment";
 export type { BackInStockNotification } from "@/models/back-in-stock";
+export type { Coupon } from "@/models/coupon";
 
 // Product
 export {
@@ -99,3 +100,12 @@ export {
     getBackInStockNotificationsByProductId,
     getAllBackInStockNotifications,
 } from "./back-in-stock.repository";
+
+// Coupons
+export {
+    getAllCoupons,
+    getCouponByCode,
+    createCoupon,
+    updateCoupon,
+    deleteCoupon,
+} from "./coupon.repository";

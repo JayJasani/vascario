@@ -20,6 +20,13 @@ const userStatusStyles: Record<OrderStatus, string> = {
   CANCELLED: "bg-[#FF3333] text-white border-[#FF3333]",
 };
 
+const RECEIPT_AVAILABLE_STATUSES: OrderStatus[] = [
+  "PAID",
+  "IN_PRODUCTION",
+  "SHIPPED",
+  "DELIVERED",
+];
+
 type OrderDetail = {
   id: string;
   status: OrderStatus;
@@ -217,13 +224,15 @@ export default function OrderDetailPageClient() {
                       {formatPrice(order.totalAmount)}
                     </span>
                   </div>
-                  <Link
-                    href={`/order-success?order=${order.id}`}
-                    className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] px-3 py-2 border border-[var(--vsc-gray-900)] text-[var(--vsc-gray-900)] hover:bg-[var(--vsc-gray-900)] hover:text-[var(--vsc-cream)] transition-colors"
-                    style={{ fontFamily: "var(--font-space-mono)" }}
-                  >
-                    DOWNLOAD RECEIPT
-                  </Link>
+                  {RECEIPT_AVAILABLE_STATUSES.includes(order.status) && (
+                    <Link
+                      href={`/order-success?order=${order.id}`}
+                      className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] px-3 py-2 border border-[var(--vsc-gray-900)] text-[var(--vsc-gray-900)] hover:bg-[var(--vsc-gray-900)] hover:text-[var(--vsc-cream)] transition-colors"
+                      style={{ fontFamily: "var(--font-space-mono)" }}
+                    >
+                      DOWNLOAD RECEIPT
+                    </Link>
+                  )}
                 </div>
               </div>
 

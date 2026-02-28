@@ -17,6 +17,25 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Invalid amount" }, { status: 400 })
         }
 
+        const rawSubtotal = body.subtotalAmount
+        let subtotalAmount = Number(
+            rawSubtotal === undefined || rawSubtotal === null ? amount / 100 : rawSubtotal,
+        )
+        if (!Number.isFinite(subtotalAmount) || subtotalAmount <= 0) {
+            subtotalAmount = amount / 100
+        }
+
+        const rawDiscount = Number(body.discountAmount ?? subtotalAmount - amount / 100)
+        const discountAmount =
+            !Number.isFinite(rawDiscount) || rawDiscount <= 0
+                ? 0
+                : Math.min(subtotalAmount, rawDiscount)
+
+        const couponCode =
+            typeof body.couponCode === "string" && body.couponCode.trim()
+                ? (body.couponCode as string).trim().toUpperCase()
+                : null
+
         const order = await createRazorpayOrder({
             amount,
             currency,
@@ -58,6 +77,9 @@ export async function POST(req: NextRequest) {
                 customerName: notes.name ?? "",
                 status: "PENDING",
                 totalAmount: amount / 100,
+                subtotalAmount,
+                discountAmount,
+                couponCode,
                 shippingAddress: shipping ?? {
                     fullName: notes.name ?? null,
                     email: notes.email ?? null,

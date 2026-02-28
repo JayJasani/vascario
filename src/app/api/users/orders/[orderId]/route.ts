@@ -99,10 +99,26 @@ export async function GET(
       };
     });
 
+    const totalAmount = Number(orderData.totalAmount ?? 0);
+    const subtotalAmount = Number(
+      orderData.subtotalAmount != null ? orderData.subtotalAmount : totalAmount,
+    );
+    const discountAmountRaw = Number(orderData.discountAmount ?? subtotalAmount - totalAmount);
+    const discountAmount =
+      !Number.isFinite(discountAmountRaw) || discountAmountRaw <= 0
+        ? 0
+        : Math.min(subtotalAmount, discountAmountRaw);
+
     const order = {
       id: orderDoc.id,
       status: orderData.status ?? "PENDING",
-      totalAmount: Number(orderData.totalAmount ?? 0),
+      totalAmount,
+      subtotalAmount,
+      discountAmount,
+      couponCode:
+        typeof orderData.couponCode === "string" && orderData.couponCode.trim()
+          ? (orderData.couponCode as string).trim().toUpperCase()
+          : null,
       paymentId: orderData.paymentId ?? null,
       razorpayOrderId: orderData.razorpayOrderId ?? null,
       paymentMethod: orderData.paymentMethod ?? null,
