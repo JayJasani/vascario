@@ -9,6 +9,7 @@ import * as InventoryController from "@/controllers/admin/InventoryController";
 import * as StaticContentController from "@/controllers/admin/StaticContentController";
 import * as ReviewController from "@/controllers/admin/ReviewController";
 import * as InvestmentController from "@/controllers/admin/InvestmentController";
+import * as CouponController from "@/controllers/admin/CouponController";
 import * as BackInStockController from "@/controllers/admin/BackInStockController";
 import * as UserController from "@/controllers/admin/UserController";
 import type { OrderStatus } from "@/models/order";
@@ -148,6 +149,24 @@ export async function updateInvestmentAction(id: string, formData: FormData) {
 
 export async function deleteInvestmentAction(id: string) {
     return InvestmentController.deleteInvestment(id);
+}
+
+// ─── COUPONS ────────────────────────────────────────────────────────────────────
+
+export async function getCouponsAction() {
+    return CouponController.getCoupons();
+}
+
+export async function createCouponAction(formData: FormData) {
+    return CouponController.createCoupon(formData);
+}
+
+export async function updateCouponAction(id: string, formData: FormData) {
+    return CouponController.updateCoupon(id, formData);
+}
+
+export async function deleteCouponAction(id: string) {
+    return CouponController.deleteCoupon(id);
 }
 
 // ─── USERS ───────────────────────────────────────────────────────────────────────

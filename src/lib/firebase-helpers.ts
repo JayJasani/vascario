@@ -70,4 +70,10 @@ export {
     updateInvestment,
     deleteInvestment,
     getTotalInvestment,
+    // Coupons
+    getAllCoupons,
+    getCouponByCode,
+    createCoupon,
+    updateCoupon,
+    deleteCoupon,
 } from "@/lib/repositories";

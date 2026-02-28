@@ -6,10 +6,10 @@ import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useUserProfile, type UserProfile as UserProfileType } from "@/context/UserProfileContext";
 import {
-    trackAddShippingInfo,
-    trackBeginCheckout,
-    trackPurchase,
-    type AnalyticsItem,
+  trackAddShippingInfo,
+  trackBeginCheckout,
+  trackPurchase,
+  type AnalyticsItem,
 } from "@/lib/analytics";
 import { openRazorpayCheckout } from "@/lib/payments/razorpay-client";
 import { AnimatePresence, motion } from "framer-motion";
@@ -34,6 +34,20 @@ const stepVariants = {
 
 type PaymentMethod = "ONLINE" | "COD";
 
+type AvailableCoupon = {
+  code: string;
+  label: string;
+  type: "PERCENT" | "FLAT";
+  value: number;
+  minCartTotal: number | null;
+  maxDiscount: number | null;
+  isActive: boolean;
+  isPublic: boolean;
+  isApplicable: boolean;
+  discountAmount: number;
+  reason: string | null;
+};
+
 export default function CheckoutPageClient() {
   const { user } = useAuth();
   const { profile, loading: profileLoading } = useUserProfile();
@@ -43,9 +57,29 @@ export default function CheckoutPageClient() {
   const [direction, setDirection] = useState(1);
   const [mounted, setMounted] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("ONLINE");
+  const [couponCodeInput, setCouponCodeInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    label: string;
+  } | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [serverSubtotal, setServerSubtotal] = useState<number | null>(null);
+  const [serverDiscount, setServerDiscount] = useState<number | null>(null);
+  const [serverTotal, setServerTotal] = useState<number | null>(null);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
+  const [showCouponList, setShowCouponList] = useState(false);
+  const [availableCoupons, setAvailableCoupons] = useState<AvailableCoupon[] | null>(null);
+  const [loadingAvailableCoupons, setLoadingAvailableCoupons] = useState(false);
+  const [availableCouponsError, setAvailableCouponsError] = useState<string | null>(null);
   const router = useRouter();
 
   const beginCheckoutFired = useRef(false);
+
+  const subtotal = serverSubtotal ?? cartTotal;
+  const couponDiscount =
+    serverDiscount != null ? serverDiscount : 0;
+  const effectiveTotal =
+    serverTotal != null ? serverTotal : Math.max(0, subtotal - couponDiscount);
 
   useEffect(() => {
     setMounted(true);
@@ -66,12 +100,12 @@ export default function CheckoutPageClient() {
       beginCheckoutFired.current = true;
       trackBeginCheckout({
         currency: "INR",
-        value: cartTotal,
+        value: effectiveTotal,
         items: buildAnalyticsItems(),
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mounted, items.length]);
+  }, [mounted, items.length, effectiveTotal]);
 
   // Form state
   const [shipping, setShipping] = useState({
@@ -144,7 +178,7 @@ export default function CheckoutPageClient() {
     if (step === 1) {
       trackAddShippingInfo({
         currency: "INR",
-        value: cartTotal,
+        value: effectiveTotal,
         items: buildAnalyticsItems(),
         shipping_tier: "standard",
       });
@@ -182,7 +216,10 @@ export default function CheckoutPageClient() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            totalAmount: cartTotal,
+            totalAmount: effectiveTotal,
+            subtotalAmount: subtotal,
+            discountAmount: couponDiscount,
+            couponCode: appliedCoupon?.code ?? null,
             currency: "INR",
             userId: user?.uid ?? "",
             shipping,
@@ -217,7 +254,10 @@ export default function CheckoutPageClient() {
         if (typeof window !== "undefined") {
           const snapshot = {
             id: transactionId,
-            total: cartTotal,
+            total: effectiveTotal,
+            subtotal,
+            discountAmount: couponDiscount,
+            couponCode: appliedCoupon?.code ?? null,
             items: items.map((item) => ({
               id: item.id,
               name: item.name,
@@ -252,7 +292,7 @@ export default function CheckoutPageClient() {
         trackPurchase({
           transaction_id: transactionId,
           currency: "INR",
-          value: cartTotal,
+          value: effectiveTotal,
           items: buildAnalyticsItems(),
           shipping: 0,
         });
@@ -262,7 +302,7 @@ export default function CheckoutPageClient() {
         const refQuery = orderRefId ? `&ref=${encodeURIComponent(orderRefId)}` : "";
         router.push(`/order-success?order=${transactionId}${refQuery}`);
       } else {
-        const amountInPaise = Math.round(cartTotal * 100);
+        const amountInPaise = Math.round(effectiveTotal * 100);
 
         const orderRes = await fetch("/api/razorpay/create-order", {
           method: "POST",
@@ -294,6 +334,9 @@ export default function CheckoutPageClient() {
               zip: shipping.zip,
               country: shipping.country,
             },
+            subtotalAmount: subtotal,
+            discountAmount: couponDiscount,
+            couponCode: appliedCoupon?.code ?? null,
           }),
         });
 
@@ -354,7 +397,10 @@ export default function CheckoutPageClient() {
             if (typeof window !== "undefined") {
               const snapshot = {
                 id: orderIdentifier,
-                total: cartTotal,
+                total: effectiveTotal,
+                subtotal,
+                discountAmount: couponDiscount,
+                couponCode: appliedCoupon?.code ?? null,
                 items: items.map((item) => ({
                   id: item.id,
                   name: item.name,
@@ -389,7 +435,7 @@ export default function CheckoutPageClient() {
             trackPurchase({
               transaction_id: transactionId,
               currency: "INR",
-              value: cartTotal,
+              value: effectiveTotal,
               items: buildAnalyticsItems(),
               shipping: 0,
             });
@@ -484,6 +530,123 @@ export default function CheckoutPageClient() {
     { num: "01", label: "SHIP" },
     { num: "02", label: "PAY" },
   ];
+
+  const applyCouponByCode = (rawCode: string) => {
+    const code = rawCode.trim().toUpperCase();
+    if (!code) {
+      setAppliedCoupon(null);
+      setCouponError("Enter a code to apply");
+      return;
+    }
+    setApplyingCoupon(true);
+    setCouponError(null);
+    void (async () => {
+      try {
+        const res = await fetch("/api/cart/apply-coupon", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ code }),
+        });
+        const data = (await res.json()) as {
+          ok: boolean;
+          error?: string;
+          coupon?: { code: string; label: string };
+          subtotal?: number;
+          discountAmount?: number;
+          total?: number;
+        };
+        if (!res.ok || !data.ok) {
+          setAppliedCoupon(null);
+          setServerSubtotal(null);
+          setServerDiscount(null);
+          setServerTotal(null);
+          setCouponError(data.error || "Unable to apply coupon");
+          return;
+        }
+        if (!data.coupon) {
+          setAppliedCoupon(null);
+          setCouponError("Unable to apply coupon");
+          return;
+        }
+        setAppliedCoupon({
+          code: data.coupon.code,
+          label: data.coupon.label,
+        });
+        setCouponCodeInput(data.coupon.code);
+        setServerSubtotal(
+          typeof data.subtotal === "number" ? data.subtotal : null,
+        );
+        setServerDiscount(
+          typeof data.discountAmount === "number"
+            ? data.discountAmount
+            : null,
+        );
+        setServerTotal(typeof data.total === "number" ? data.total : null);
+      } catch {
+        setAppliedCoupon(null);
+        setServerSubtotal(null);
+        setServerDiscount(null);
+        setServerTotal(null);
+        setCouponError("Failed to apply coupon. Please try again.");
+      } finally {
+        setApplyingCoupon(false);
+      }
+    })();
+  };
+
+  const handleApplyCoupon = () => {
+    applyCouponByCode(couponCodeInput);
+  };
+
+  const handleApplyCouponFromList = (code: string) => {
+    setCouponCodeInput(code);
+    applyCouponByCode(code);
+    setShowCouponList(false);
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponError(null);
+    setCouponCodeInput("");
+    setServerSubtotal(null);
+    setServerDiscount(null);
+    setServerTotal(null);
+  };
+
+  const handleToggleCouponList = () => {
+    const next = !showCouponList;
+    setShowCouponList(next);
+    if (!next) return;
+
+    // Already loaded and not currently loading – just show cached list
+    if (availableCoupons && !loadingAvailableCoupons) return;
+
+    setLoadingAvailableCoupons(true);
+    setAvailableCouponsError(null);
+    void (async () => {
+      try {
+        const res = await fetch("/api/cart/available-coupons");
+        const data = (await res.json()) as {
+          ok: boolean;
+          error?: string;
+          coupons?: AvailableCoupon[];
+        };
+        if (!res.ok || !data.ok || !data.coupons) {
+          setAvailableCoupons(null);
+          setAvailableCouponsError(data.error || "Unable to load offers");
+          return;
+        }
+        setAvailableCoupons(data.coupons);
+      } catch {
+        setAvailableCoupons(null);
+        setAvailableCouponsError("Failed to load offers. Please try again.");
+      } finally {
+        setLoadingAvailableCoupons(false);
+      }
+    })();
+  };
 
   return (
     <StorefrontShell>
@@ -584,7 +747,9 @@ export default function CheckoutPageClient() {
                   <StepReview
                     shipping={shipping}
                     items={items}
-                    cartTotal={cartTotal}
+                    subtotal={subtotal}
+                    discountAmount={couponDiscount}
+                    total={effectiveTotal}
                     paymentMethod={paymentMethod}
                     onPaymentMethodChange={setPaymentMethod}
                     onBack={goBack}
@@ -635,19 +800,214 @@ export default function CheckoutPageClient() {
                     </span>
                   </div>
                 ))}
-                <div className="flex justify-between items-center pt-2 border-t-2 border-[var(--vsc-gray-300)]">
-                  <span
-                    className="text-xs font-bold text-[var(--vsc-gray-900)] uppercase tracking-[0.1em]"
-                    style={{ fontFamily: "var(--font-space-grotesk)" }}
-                  >
-                    TOTAL
-                  </span>
-                  <span
-                    className="text-lg font-bold text-[var(--vsc-accent)]"
-                    style={{ fontFamily: "var(--font-space-mono)" }}
-                  >
-                    {formatPrice(cartTotal)}
-                  </span>
+
+                {/* Coupon + totals */}
+                <div className="mt-4 space-y-3">
+                  <div className="space-y-2">
+                    <span
+                      className="text-[10px] text-[var(--vsc-gray-500)] uppercase tracking-[0.25em]"
+                      style={{ fontFamily: "var(--font-space-mono)" }}
+                    >
+                      Discount code
+                    </span>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={couponCodeInput}
+                        onChange={(e) => {
+                          setCouponCodeInput(e.target.value.toUpperCase());
+                          if (couponError) setCouponError(null);
+                        }}
+                        placeholder="VASCARIO10"
+                        className="flex-1 px-3 py-2 border border-[var(--vsc-gray-300)] bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)] text-xs tracking-[0.15em] uppercase placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]"
+                        style={{ fontFamily: "var(--font-space-mono)" }}
+                      />
+                      {appliedCoupon ? (
+                        <button
+                          type="button"
+                          onClick={handleRemoveCoupon}
+                          className="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] border border-[var(--vsc-gray-900)] text-[var(--vsc-gray-900)] hover:bg-[var(--vsc-gray-900)] hover:text-[var(--vsc-cream)] transition-colors"
+                          style={{ fontFamily: "var(--font-space-mono)" }}
+                        >
+                          Remove
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleApplyCoupon}
+                          disabled={subtotal <= 0 || applyingCoupon}
+                          className="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] border border-[var(--vsc-gray-900)] text-[var(--vsc-gray-900)] hover:bg-[var(--vsc-gray-900)] hover:text-[var(--vsc-cream)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                          style={{ fontFamily: "var(--font-space-mono)" }}
+                        >
+                          {applyingCoupon ? "Applying…" : "Apply"}
+                        </button>
+                      )}
+                    </div>
+                    {appliedCoupon && (
+                      <p
+                        className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.18em]"
+                        style={{ fontFamily: "var(--font-space-mono)" }}
+                      >
+                        Applied: {appliedCoupon.label || appliedCoupon.code}
+                      </p>
+                    )}
+                    {couponError && (
+                      <p
+                        className="text-[10px] text-[#ef4444] uppercase tracking-[0.18em]"
+                        style={{ fontFamily: "var(--font-space-mono)" }}
+                      >
+                        {couponError}
+                      </p>
+                    )}
+                    <div className="mt-1 flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={handleToggleCouponList}
+                        className="text-[10px] text-[var(--vsc-gray-700)] hover:text-[var(--vsc-gray-900)] uppercase tracking-[0.18em] underline-offset-2 hover:underline"
+                        style={{ fontFamily: "var(--font-space-mono)" }}
+                      >
+                        {showCouponList ? "Hide all offers" : "View all offers"}
+                      </button>
+                      {availableCoupons && availableCoupons.length > 0 && (
+                        <span
+                          className="text-[9px] text-[var(--vsc-gray-500)] uppercase tracking-[0.18em]"
+                          style={{ fontFamily: "var(--font-space-mono)" }}
+                        >
+                          {availableCoupons.filter((c) => c.isApplicable).length} applicable
+                        </span>
+                      )}
+                    </div>
+                    {showCouponList && (
+                      <div className="mt-3 border border-[var(--vsc-gray-200)] bg-[var(--vsc-cream)] divide-y divide-[var(--vsc-gray-200)] max-h-64 overflow-y-auto">
+                        {loadingAvailableCoupons && (
+                          <div
+                            className="px-3 py-2 text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.18em]"
+                            style={{ fontFamily: "var(--font-space-mono)" }}
+                          >
+                            Loading offers…
+                          </div>
+                        )}
+                        {availableCouponsError && !loadingAvailableCoupons && (
+                          <div
+                            className="px-3 py-2 text-[10px] text-[#ef4444] uppercase tracking-[0.18em]"
+                            style={{ fontFamily: "var(--font-space-mono)" }}
+                          >
+                            {availableCouponsError}
+                          </div>
+                        )}
+                        {!loadingAvailableCoupons &&
+                          !availableCouponsError &&
+                          (availableCoupons && availableCoupons.length > 0 ? (
+                            availableCoupons.map((c) => (
+                              <div
+                                key={c.code}
+                                className="flex items-center justify-between px-3 py-2 gap-3"
+                              >
+                                <div className="flex-1 min-w-0">
+                                  <p
+                                    className="text-[10px] text-[var(--vsc-gray-900)] uppercase tracking-[0.12em] truncate"
+                                    style={{ fontFamily: "var(--font-space-mono)" }}
+                                  >
+                                    {c.label || c.code}
+                                  </p>
+                                  <p
+                                    className="text-[9px] text-[var(--vsc-gray-600)] uppercase tracking-[0.12em]"
+                                    style={{ fontFamily: "var(--font-space-mono)" }}
+                                  >
+                                    {c.type === "PERCENT"
+                                      ? `${c.value}% OFF`
+                                      : `₹${Math.round(c.value).toLocaleString("en-IN")} OFF`}
+                                    {c.minCartTotal != null &&
+                                      ` · Min ₹${Math.round(c.minCartTotal).toLocaleString("en-IN")}`}
+                                  </p>
+                                  <p
+                                    className={`text-[9px] uppercase tracking-[0.14em] mt-0.5 ${
+                                      c.isApplicable
+                                        ? "text-[var(--vsc-accent)]"
+                                        : "text-[var(--vsc-gray-500)]"
+                                    }`}
+                                    style={{ fontFamily: "var(--font-space-mono)" }}
+                                  >
+                                    {c.isApplicable
+                                      ? c.discountAmount > 0
+                                        ? `Active • Save ${formatPrice(c.discountAmount)}`
+                                        : "Active for your cart"
+                                      : c.reason || "Not applicable for this order"}
+                                  </p>
+                                </div>
+                                <button
+                                  type="button"
+                                  disabled={!c.isApplicable || applyingCoupon}
+                                  onClick={() => handleApplyCouponFromList(c.code)}
+                                  className={`px-3 py-2 text-[9px] font-bold uppercase tracking-[0.18em] border border-[var(--vsc-gray-900)] transition-colors ${
+                                    c.isApplicable && !applyingCoupon
+                                      ? "text-[var(--vsc-gray-900)] hover:bg-[var(--vsc-gray-900)] hover:text-[var(--vsc-cream)]"
+                                      : "text-[var(--vsc-gray-400)] bg-[var(--vsc-gray-200)] cursor-not-allowed"
+                                  }`}
+                                  style={{ fontFamily: "var(--font-space-mono)" }}
+                                >
+                                  {c.isApplicable ? "Apply" : "Inactive"}
+                                </button>
+                              </div>
+                            ))
+                          ) : (
+                            <div
+                              className="px-3 py-2 text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.18em]"
+                              style={{ fontFamily: "var(--font-space-mono)" }}
+                            >
+                              No offers available right now.
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-1 border-t border-[var(--vsc-gray-200)] pt-3">
+                    <div className="flex justify-between items-center">
+                      <span
+                        className="text-xs text-[var(--vsc-gray-500)] uppercase tracking-[0.2em]"
+                        style={{ fontFamily: "var(--font-space-mono)" }}
+                      >
+                        Subtotal
+                      </span>
+                      <span
+                        className="text-xs font-bold text-[var(--vsc-gray-900)]"
+                        style={{ fontFamily: "var(--font-space-mono)" }}
+                      >
+                        {formatPrice(subtotal)}
+                      </span>
+                    </div>
+                    {couponDiscount > 0 && (
+                      <div className="flex justify-between items-center">
+                        <span
+                          className="text-xs text-[var(--vsc-gray-500)] uppercase tracking-[0.2em]"
+                          style={{ fontFamily: "var(--font-space-mono)" }}
+                        >
+                          Discount
+                        </span>
+                        <span
+                          className="text-xs font-bold text-[var(--vsc-accent)]"
+                          style={{ fontFamily: "var(--font-space-mono)" }}
+                        >
+                          -{formatPrice(couponDiscount)}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center pt-2 border-t border-[var(--vsc-gray-300)] mt-1">
+                      <span
+                        className="text-xs font-bold text-[var(--vsc-gray-900)] uppercase tracking-[0.1em]"
+                        style={{ fontFamily: "var(--font-space-grotesk)" }}
+                      >
+                        Total
+                      </span>
+                      <span
+                        className="text-lg font-bold text-[var(--vsc-accent)]"
+                        style={{ fontFamily: "var(--font-space-mono)" }}
+                      >
+                        {formatPrice(effectiveTotal)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -953,7 +1313,9 @@ function StepPayment({
 function StepReview({
   shipping,
   items,
-  cartTotal,
+  subtotal,
+  discountAmount,
+  total,
   paymentMethod,
   onPaymentMethodChange,
   onBack,
@@ -976,7 +1338,9 @@ function StepReview({
     size: string;
     quantity: number;
   }[];
-  cartTotal: number;
+  subtotal: number;
+  discountAmount: number;
+  total: number;
   paymentMethod: PaymentMethod;
   onPaymentMethodChange: (method: PaymentMethod) => void;
   onBack: () => void;
@@ -1078,20 +1442,52 @@ function StepReview({
           ))}
         </div>
 
-        {/* Total */}
-        <div className="flex justify-between items-center pt-4 sm:pt-6 mt-3 sm:mt-4 border-t-2 border-[var(--vsc-black)]">
-          <span
-            className="text-sm font-bold uppercase tracking-[0.1em]"
-            style={{ fontFamily: "var(--font-space-grotesk)", color: "black" }}
-          >
-            TOTAL
-          </span>
-          <span
-            className="text-xl font-bold text-[var(--vsc-accent)]"
-            style={{ fontFamily: "var(--font-space-mono)" }}
-          >
-            {formatPrice(cartTotal)}
-          </span>
+        {/* Totals */}
+        <div className="pt-4 sm:pt-6 mt-3 sm:mt-4 border-t-2 border-[var(--vsc-black)] space-y-1">
+          <div className="flex justify-between items-center">
+            <span
+              className="text-xs text-[var(--vsc-gray-600)] uppercase tracking-[0.15em]"
+              style={{ fontFamily: "var(--font-space-mono)" }}
+            >
+              Subtotal
+            </span>
+            <span
+              className="text-xs font-bold text-[var(--vsc-black)]"
+              style={{ fontFamily: "var(--font-space-mono)" }}
+            >
+              {formatPrice(subtotal)}
+            </span>
+          </div>
+          {discountAmount > 0 && (
+            <div className="flex justify-between items-center">
+              <span
+                className="text-xs text-[var(--vsc-gray-600)] uppercase tracking-[0.15em]"
+                style={{ fontFamily: "var(--font-space-mono)" }}
+              >
+                Discount
+              </span>
+              <span
+                className="text-xs font-bold text-[var(--vsc-accent)]"
+                style={{ fontFamily: "var(--font-space-mono)" }}
+              >
+                -{formatPrice(discountAmount)}
+              </span>
+            </div>
+          )}
+          <div className="flex justify-between items-center pt-2">
+            <span
+              className="text-sm font-bold uppercase tracking-[0.1em]"
+              style={{ fontFamily: "var(--font-space-grotesk)", color: "black" }}
+            >
+              Total
+            </span>
+            <span
+              className="text-xl font-bold text-[var(--vsc-accent)]"
+              style={{ fontFamily: "var(--font-space-mono)" }}
+            >
+              {formatPrice(total)}
+            </span>
+          </div>
         </div>
       </div>
 
