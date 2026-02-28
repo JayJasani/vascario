@@ -801,166 +801,168 @@ export default function CheckoutPageClient() {
                   </div>
                 ))}
 
-                {/* Coupon + totals */}
+                {/* Coupon (temporarily disabled) + totals */}
                 <div className="mt-4 space-y-3">
-                  <div className="space-y-2">
-                    <span
-                      className="text-[10px] text-[var(--vsc-gray-500)] uppercase tracking-[0.25em]"
-                      style={{ fontFamily: "var(--font-space-mono)" }}
-                    >
-                      Discount code
-                    </span>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={couponCodeInput}
-                        onChange={(e) => {
-                          setCouponCodeInput(e.target.value.toUpperCase());
-                          if (couponError) setCouponError(null);
-                        }}
-                        placeholder="VASCARIO10"
-                        className="flex-1 px-3 py-2 border border-[var(--vsc-gray-300)] bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)] text-xs tracking-[0.15em] uppercase placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]"
-                        style={{ fontFamily: "var(--font-space-mono)" }}
-                      />
-                      {appliedCoupon ? (
-                        <button
-                          type="button"
-                          onClick={handleRemoveCoupon}
-                          className="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] border border-[var(--vsc-gray-900)] text-[var(--vsc-gray-900)] hover:bg-[var(--vsc-gray-900)] hover:text-[var(--vsc-cream)] transition-colors"
-                          style={{ fontFamily: "var(--font-space-mono)" }}
-                        >
-                          Remove
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={handleApplyCoupon}
-                          disabled={subtotal <= 0 || applyingCoupon}
-                          className="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] border border-[var(--vsc-gray-900)] text-[var(--vsc-gray-900)] hover:bg-[var(--vsc-gray-900)] hover:text-[var(--vsc-cream)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-                          style={{ fontFamily: "var(--font-space-mono)" }}
-                        >
-                          {applyingCoupon ? "Applying…" : "Apply"}
-                        </button>
-                      )}
-                    </div>
-                    {appliedCoupon && (
-                      <p
-                        className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.18em]"
+                  {/* {false && (
+                    <div className="space-y-2">
+                      <span
+                        className="text-[10px] text-[var(--vsc-gray-500)] uppercase tracking-[0.25em]"
                         style={{ fontFamily: "var(--font-space-mono)" }}
                       >
-                        Applied: {appliedCoupon.label || appliedCoupon.code}
-                      </p>
-                    )}
-                    {couponError && (
-                      <p
-                        className="text-[10px] text-[#ef4444] uppercase tracking-[0.18em]"
-                        style={{ fontFamily: "var(--font-space-mono)" }}
-                      >
-                        {couponError}
-                      </p>
-                    )}
-                    <div className="mt-1 flex items-center justify-between">
-                      <button
-                        type="button"
-                        onClick={handleToggleCouponList}
-                        className="text-[10px] text-[var(--vsc-gray-700)] hover:text-[var(--vsc-gray-900)] uppercase tracking-[0.18em] underline-offset-2 hover:underline"
-                        style={{ fontFamily: "var(--font-space-mono)" }}
-                      >
-                        {showCouponList ? "Hide all offers" : "View all offers"}
-                      </button>
-                      {availableCoupons && availableCoupons.length > 0 && (
-                        <span
-                          className="text-[9px] text-[var(--vsc-gray-500)] uppercase tracking-[0.18em]"
+                        Discount code
+                      </span>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={couponCodeInput}
+                          onChange={(e) => {
+                            setCouponCodeInput(e.target.value.toUpperCase());
+                            if (couponError) setCouponError(null);
+                          }}
+                          placeholder="VASCARIO10"
+                          className="flex-1 px-3 py-2 border border-[var(--vsc-gray-300)] bg-[var(--vsc-cream)] text-[var(--vsc-gray-900)] text-xs tracking-[0.15em] uppercase placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]"
                           style={{ fontFamily: "var(--font-space-mono)" }}
-                        >
-                          {availableCoupons.filter((c) => c.isApplicable).length} applicable
-                        </span>
-                      )}
-                    </div>
-                    {showCouponList && (
-                      <div className="mt-3 border border-[var(--vsc-gray-200)] bg-[var(--vsc-cream)] divide-y divide-[var(--vsc-gray-200)] max-h-64 overflow-y-auto">
-                        {loadingAvailableCoupons && (
-                          <div
-                            className="px-3 py-2 text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.18em]"
+                        />
+                        {appliedCoupon ? (
+                          <button
+                            type="button"
+                            onClick={handleRemoveCoupon}
+                            className="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] border border-[var(--vsc-gray-900)] text-[var(--vsc-gray-900)] hover:bg-[var(--vsc-gray-900)] hover:text-[var(--vsc-cream)] transition-colors"
                             style={{ fontFamily: "var(--font-space-mono)" }}
                           >
-                            Loading offers…
-                          </div>
-                        )}
-                        {availableCouponsError && !loadingAvailableCoupons && (
-                          <div
-                            className="px-3 py-2 text-[10px] text-[#ef4444] uppercase tracking-[0.18em]"
+                            Remove
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={handleApplyCoupon}
+                            disabled={subtotal <= 0 || applyingCoupon}
+                            className="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] border border-[var(--vsc-gray-900)] text-[var(--vsc-gray-900)] hover:bg-[var(--vsc-gray-900)] hover:text-[var(--vsc-cream)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
                             style={{ fontFamily: "var(--font-space-mono)" }}
                           >
-                            {availableCouponsError}
-                          </div>
+                            {applyingCoupon ? "Applying…" : "Apply"}
+                          </button>
                         )}
-                        {!loadingAvailableCoupons &&
-                          !availableCouponsError &&
-                          (availableCoupons && availableCoupons.length > 0 ? (
-                            availableCoupons.map((c) => (
-                              <div
-                                key={c.code}
-                                className="flex items-center justify-between px-3 py-2 gap-3"
-                              >
-                                <div className="flex-1 min-w-0">
-                                  <p
-                                    className="text-[10px] text-[var(--vsc-gray-900)] uppercase tracking-[0.12em] truncate"
-                                    style={{ fontFamily: "var(--font-space-mono)" }}
-                                  >
-                                    {c.label || c.code}
-                                  </p>
-                                  <p
-                                    className="text-[9px] text-[var(--vsc-gray-600)] uppercase tracking-[0.12em]"
-                                    style={{ fontFamily: "var(--font-space-mono)" }}
-                                  >
-                                    {c.type === "PERCENT"
-                                      ? `${c.value}% OFF`
-                                      : `₹${Math.round(c.value).toLocaleString("en-IN")} OFF`}
-                                    {c.minCartTotal != null &&
-                                      ` · Min ₹${Math.round(c.minCartTotal).toLocaleString("en-IN")}`}
-                                  </p>
-                                  <p
-                                    className={`text-[9px] uppercase tracking-[0.14em] mt-0.5 ${
-                                      c.isApplicable
-                                        ? "text-[var(--vsc-accent)]"
-                                        : "text-[var(--vsc-gray-500)]"
-                                    }`}
-                                    style={{ fontFamily: "var(--font-space-mono)" }}
-                                  >
-                                    {c.isApplicable
-                                      ? c.discountAmount > 0
-                                        ? `Active • Save ${formatPrice(c.discountAmount)}`
-                                        : "Active for your cart"
-                                      : c.reason || "Not applicable for this order"}
-                                  </p>
-                                </div>
-                                <button
-                                  type="button"
-                                  disabled={!c.isApplicable || applyingCoupon}
-                                  onClick={() => handleApplyCouponFromList(c.code)}
-                                  className={`px-3 py-2 text-[9px] font-bold uppercase tracking-[0.18em] border border-[var(--vsc-gray-900)] transition-colors ${
-                                    c.isApplicable && !applyingCoupon
-                                      ? "text-[var(--vsc-gray-900)] hover:bg-[var(--vsc-gray-900)] hover:text-[var(--vsc-cream)]"
-                                      : "text-[var(--vsc-gray-400)] bg-[var(--vsc-gray-200)] cursor-not-allowed"
-                                  }`}
-                                  style={{ fontFamily: "var(--font-space-mono)" }}
-                                >
-                                  {c.isApplicable ? "Apply" : "Inactive"}
-                                </button>
-                              </div>
-                            ))
-                          ) : (
+                      </div>
+                      {appliedCoupon && (
+                        <p
+                          className="text-[10px] text-[var(--vsc-accent)] uppercase tracking-[0.18em]"
+                          style={{ fontFamily: "var(--font-space-mono)" }}
+                        >
+                          Applied: {appliedCoupon.label || appliedCoupon.code}
+                        </p>
+                      )}
+                      {couponError && (
+                        <p
+                          className="text-[10px] text-[#ef4444] uppercase tracking-[0.18em]"
+                          style={{ fontFamily: "var(--font-space-mono)" }}
+                        >
+                          {couponError}
+                        </p>
+                      )}
+                      <div className="mt-1 flex items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={handleToggleCouponList}
+                          className="text-[10px] text-[var(--vsc-gray-700)] hover:text-[var(--vsc-gray-900)] uppercase tracking-[0.18em] underline-offset-2 hover:underline"
+                          style={{ fontFamily: "var(--font-space-mono)" }}
+                        >
+                          {showCouponList ? "Hide all offers" : "View all offers"}
+                        </button>
+                        {availableCoupons && availableCoupons.length > 0 && (
+                          <span
+                            className="text-[9px] text-[var(--vsc-gray-500)] uppercase tracking-[0.18em]"
+                            style={{ fontFamily: "var(--font-space-mono)" }}
+                          >
+                            {availableCoupons.filter((c) => c.isApplicable).length} applicable
+                          </span>
+                        )}
+                      </div>
+                      {showCouponList && (
+                        <div className="mt-3 border border-[var(--vsc-gray-200)] bg-[var(--vsc-cream)] divide-y divide-[var(--vsc-gray-200)] max-h-64 overflow-y-auto">
+                          {loadingAvailableCoupons && (
                             <div
                               className="px-3 py-2 text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.18em]"
                               style={{ fontFamily: "var(--font-space-mono)" }}
                             >
-                              No offers available right now.
+                              Loading offers…
                             </div>
-                          ))}
-                      </div>
-                    )}
-                  </div>
+                          )}
+                          {availableCouponsError && !loadingAvailableCoupons && (
+                            <div
+                              className="px-3 py-2 text-[10px] text-[#ef4444] uppercase tracking-[0.18em]"
+                              style={{ fontFamily: "var(--font-space-mono)" }}
+                            >
+                              {availableCouponsError}
+                            </div>
+                          )}
+                          {!loadingAvailableCoupons &&
+                            !availableCouponsError &&
+                            (availableCoupons && availableCoupons.length > 0 ? (
+                              availableCoupons.map((c) => (
+                                <div
+                                  key={c.code}
+                                  className="flex items-center justify-between px-3 py-2 gap-3"
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <p
+                                      className="text-[10px] text-[var(--vsc-gray-900)] uppercase tracking-[0.12em] truncate"
+                                      style={{ fontFamily: "var(--font-space-mono)" }}
+                                    >
+                                      {c.label || c.code}
+                                    </p>
+                                    <p
+                                      className="text-[9px] text-[var(--vsc-gray-600)] uppercase tracking-[0.12em]"
+                                      style={{ fontFamily: "var(--font-space-mono)" }}
+                                    >
+                                      {c.type === "PERCENT"
+                                        ? `${c.value}% OFF`
+                                        : `₹${Math.round(c.value).toLocaleString("en-IN")} OFF`}
+                                      {c.minCartTotal != null &&
+                                        ` · Min ₹${Math.round(c.minCartTotal).toLocaleString("en-IN")}`}
+                                    </p>
+                                    <p
+                                      className={`text-[9px] uppercase tracking-[0.14em] mt-0.5 ${
+                                        c.isApplicable
+                                          ? "text-[var(--vsc-accent)]"
+                                          : "text-[var(--vsc-gray-500)]"
+                                      }`}
+                                      style={{ fontFamily: "var(--font-space-mono)" }}
+                                    >
+                                      {c.isApplicable
+                                        ? c.discountAmount > 0
+                                          ? `Active • Save ${formatPrice(c.discountAmount)}`
+                                          : "Active for your cart"
+                                        : c.reason || "Not applicable for this order"}
+                                    </p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    disabled={!c.isApplicable || applyingCoupon}
+                                    onClick={() => handleApplyCouponFromList(c.code)}
+                                    className={`px-3 py-2 text-[9px] font-bold uppercase tracking-[0.18em] border border-[var(--vsc-gray-900)] transition-colors ${
+                                      c.isApplicable && !applyingCoupon
+                                        ? "text-[var(--vsc-gray-900)] hover:bg-[var(--vsc-gray-900)] hover:text-[var(--vsc-cream)]"
+                                        : "text-[var(--vsc-gray-400)] bg-[var(--vsc-gray-200)] cursor-not-allowed"
+                                    }`}
+                                    style={{ fontFamily: "var(--font-space-mono)" }}
+                                  >
+                                    {c.isApplicable ? "Apply" : "Inactive"}
+                                  </button>
+                                </div>
+                              ))
+                            ) : (
+                              <div
+                                className="px-3 py-2 text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.18em]"
+                                style={{ fontFamily: "var(--font-space-mono)" }}
+                              >
+                                No offers available right now.
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  )} */}
 
                   <div className="space-y-1 border-t border-[var(--vsc-gray-200)] pt-3">
                     <div className="flex justify-between items-center">

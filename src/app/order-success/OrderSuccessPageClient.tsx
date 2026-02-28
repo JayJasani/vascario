@@ -460,7 +460,7 @@ function OrderSuccessContent() {
                     {formatPrice(subtotal)}
                   </span>
                 </div>
-                {discountAmount > 0 && (
+                {false && discountAmount > 0 && (
                   <div className="flex justify-between">
                     <span
                       className="text-xs text-[var(--vsc-gray-600)] uppercase tracking-[0.15em]"
