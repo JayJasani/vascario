@@ -227,6 +227,51 @@ export default function OrderDetailPageClient() {
                 </div>
               </div>
 
+              {/* Shipping address */}
+              {order.shippingAddress &&
+                Object.keys(order.shippingAddress).length > 0 && (
+                  <div className="border-2 sm:border-3 md:border-4 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] p-4 sm:p-6">
+                    <h2
+                      className="text-xs font-bold text-[var(--vsc-gray-600)] uppercase tracking-[0.25em] mb-4"
+                      style={{ fontFamily: "var(--font-space-mono)" }}
+                    >
+                      SHIPPING ADDRESS
+                    </h2>
+                    <div className="space-y-1 text-sm text-[var(--vsc-gray-900)] uppercase tracking-[0.05em]" style={{ fontFamily: "var(--font-space-mono)" }}>
+                      {(order.shippingAddress.fullName as string) && (
+                        <p className="font-bold">
+                          {String(order.shippingAddress.fullName)}
+                        </p>
+                      )}
+                      {(order.shippingAddress.phone as string) && (
+                        <p className="text-[var(--vsc-gray-700)]">
+                          {String(order.shippingAddress.phone)}
+                        </p>
+                      )}
+                      {(order.shippingAddress.email as string) && (
+                        <p className="text-[var(--vsc-gray-700)]">
+                          {String(order.shippingAddress.email)}
+                        </p>
+                      )}
+                      {(order.shippingAddress.address as string) && (
+                        <p className="text-[var(--vsc-gray-700)]">
+                          {String(order.shippingAddress.address)}
+                        </p>
+                      )}
+                      <p className="text-[var(--vsc-gray-700)]">
+                        {[
+                          order.shippingAddress.city,
+                          order.shippingAddress.zip,
+                          order.shippingAddress.country,
+                        ]
+                          .filter(Boolean)
+                          .map((v) => String(v))
+                          .join(", ") || "—"}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
               {/* Products grid */}
               <div>
                 <h2

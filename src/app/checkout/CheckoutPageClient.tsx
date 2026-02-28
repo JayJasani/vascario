@@ -77,6 +77,7 @@ export default function CheckoutPageClient() {
   const [shipping, setShipping] = useState({
     fullName: "",
     email: "",
+    phone: "",
     address: "",
     city: "",
     zip: "",
@@ -319,6 +320,7 @@ export default function CheckoutPageClient() {
           prefill: {
             name: shipping.fullName,
             email: shipping.email,
+            contact: shipping.phone.replace(/\D/g, "").slice(0, 10) || undefined,
           },
           notes: {
             userId: user?.uid ?? "",
@@ -338,13 +340,20 @@ export default function CheckoutPageClient() {
               return;
             }
 
+            const verifyData = (await verifyRes.json()) as {
+              success: boolean;
+              orderId?: string | null;
+            };
+
+            const orderDocId = verifyData.orderId ?? null;
             const transactionId = response.razorpay_payment_id;
+            const orderIdentifier = orderDocId ?? transactionId;
 
             // Persist a lightweight snapshot of this order for the success page
             let orderRefId = "";
             if (typeof window !== "undefined") {
               const snapshot = {
-                id: transactionId,
+                id: orderIdentifier,
                 total: cartTotal,
                 items: items.map((item) => ({
                   id: item.id,
@@ -388,7 +397,7 @@ export default function CheckoutPageClient() {
             await clearServerCart();
             clearCart();
             const refQuery = orderRefId ? `&ref=${encodeURIComponent(orderRefId)}` : "";
-            router.push(`/order-success?order=${transactionId}${refQuery}`);
+            router.push(`/order-success?order=${orderIdentifier}${refQuery}`);
           },
           onFailure: async () => {
             try {
@@ -660,12 +669,16 @@ function InputField({
   onChange,
   placeholder,
   type = "text",
+  required,
+  error,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
   type?: string;
+  required?: boolean;
+  error?: string;
 }) {
   return (
     <div className="flex flex-col gap-2 sm:gap-3">
@@ -674,18 +687,39 @@ function InputField({
         style={{ fontFamily: "var(--font-space-mono)" }}
       >
         {label}
+        {required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-3 py-3 sm:px-4 sm:py-3 md:px-5 md:py-4 bg-[var(--vsc-cream)] border-2 border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-xs sm:text-sm uppercase tracking-[0.1em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)] transition-colors duration-200"
+        required={required}
+        aria-invalid={!!error}
+        className={`w-full px-3 py-3 sm:px-4 sm:py-3 md:px-5 md:py-4 bg-[var(--vsc-cream)] border-2 text-[var(--vsc-gray-900)] text-xs sm:text-sm uppercase tracking-[0.1em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none transition-colors duration-200 ${
+          error
+            ? "border-red-500 focus:border-red-600"
+            : "border-[var(--vsc-gray-300)] focus:border-[var(--vsc-gray-900)]"
+        }`}
         style={{ fontFamily: "var(--font-space-mono)" }}
       />
+      {error && (
+        <span className="text-xs text-red-500 uppercase tracking-[0.05em]" style={{ fontFamily: "var(--font-space-mono)" }}>
+          {error}
+        </span>
+      )}
     </div>
   );
 }
+
+const SHIPPING_REQUIRED_FIELDS = [
+  "fullName",
+  "phone",
+  "address",
+  "city",
+  "zip",
+  "country",
+] as const;
 
 function StepShipping({
   shipping,
@@ -698,6 +732,7 @@ function StepShipping({
   shipping: {
     fullName: string;
     email: string;
+    phone: string;
     address: string;
     city: string;
     zip: string;
@@ -709,8 +744,32 @@ function StepShipping({
   setSelectedAddressId: (id: string | null) => void;
   onNext: () => void;
 }) {
-  const update = (key: keyof typeof shipping) => (v: string) =>
+  const [errors, setErrors] = useState<Partial<Record<keyof typeof shipping, string>>>({});
+  const update = (key: keyof typeof shipping) => (v: string) => {
     setShipping((prev) => ({ ...prev, [key]: v }));
+    if (errors[key]) setErrors((e) => ({ ...e, [key]: undefined }));
+  };
+
+  const handleContinue = () => {
+    const nextErrors: Partial<Record<keyof typeof shipping, string>> = {};
+    for (const key of SHIPPING_REQUIRED_FIELDS) {
+      const val = shipping[key].trim();
+      if (!val) {
+        const label =
+          key === "fullName"
+            ? "Full name"
+            : key === "zip"
+              ? "ZIP code"
+              : key.charAt(0).toUpperCase() + key.slice(1);
+        nextErrors[key] = `${label} is required`;
+      }
+    }
+    if (shipping.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(shipping.email)) {
+      nextErrors.email = "Please enter a valid email address";
+    }
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length === 0) onNext();
+  };
 
   return (
     <div className="space-y-6 sm:space-y-8 md:space-y-10">
@@ -808,6 +867,8 @@ function StepShipping({
           value={shipping.fullName}
           onChange={update("fullName")}
           placeholder="JOHN DOE"
+          required
+          error={errors.fullName}
         />
         <InputField
           label="EMAIL"
@@ -815,13 +876,25 @@ function StepShipping({
           onChange={update("email")}
           placeholder="JOHN@VASCARIO.COM"
           type="email"
+          error={errors.email}
         />
       </div>
+      <InputField
+        label="MOBILE NUMBER"
+        value={shipping.phone}
+        onChange={update("phone")}
+        placeholder="98765 43210"
+        type="tel"
+        required
+        error={errors.phone}
+      />
       <InputField
         label="ADDRESS"
         value={shipping.address}
         onChange={update("address")}
         placeholder="123 STREET AVE"
+        required
+        error={errors.address}
       />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12">
         <InputField
@@ -829,24 +902,30 @@ function StepShipping({
           value={shipping.city}
           onChange={update("city")}
           placeholder="NEW YORK"
+          required
+          error={errors.city}
         />
         <InputField
           label="ZIP CODE"
           value={shipping.zip}
           onChange={update("zip")}
           placeholder="10001"
+          required
+          error={errors.zip}
         />
         <InputField
           label="COUNTRY"
           value={shipping.country}
           onChange={update("country")}
           placeholder="US"
+          required
+          error={errors.country}
         />
       </div>
 
       <div className="flex justify-end pt-4">
         <button
-          onClick={onNext}
+          onClick={handleContinue}
           className="w-full md:w-auto px-4 py-3 sm:px-6 sm:py-4 md:px-10 md:py-6 text-xs sm:text-sm font-bold uppercase tracking-[0.2em] border-2 border-black transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
           style={{
             fontFamily: "var(--font-space-mono)",
@@ -884,6 +963,7 @@ function StepReview({
   shipping: {
     fullName: string;
     email: string;
+    phone: string;
     address: string;
     city: string;
     zip: string;
@@ -937,6 +1017,14 @@ function StepReview({
         >
           {shipping.fullName || "—"}
         </p>
+        {shipping.phone ? (
+          <p
+            className="text-xs text-[var(--vsc-gray-400)] uppercase tracking-[0.1em]"
+            style={{ fontFamily: "var(--font-space-mono)" }}
+          >
+            {shipping.phone}
+          </p>
+        ) : null}
         <p
           className="text-xs text-[var(--vsc-gray-400)] uppercase tracking-[0.1em]"
           style={{ fontFamily: "var(--font-space-mono)" }}

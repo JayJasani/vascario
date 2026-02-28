@@ -24,6 +24,7 @@ type LastOrderSnapshot = {
   shipping: {
     fullName: string;
     email: string;
+    phone?: string;
     address: string;
     city: string;
     zip: string;
@@ -41,6 +42,30 @@ function OrderSuccessContent() {
   const [flickered, setFlickered] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [lastOrder, setLastOrder] = useState<LastOrderSnapshot | null>(null);
+  const [hydratedFromServer, setHydratedFromServer] = useState(false);
+
+  const handlePrint = async () => {
+    if (!mounted) return;
+
+    const effectiveOrderId = lastOrder?.id ?? orderId;
+
+    // Require a real order + authenticated user so that
+    // printed content always comes from the server-rendered receipt.
+    if (!effectiveOrderId || effectiveOrderId === "0000" || !user) {
+      // No trusted server receipt available — do nothing.
+      return;
+    }
+
+    try {
+      const token = await user.getIdToken();
+      const url = `/api/users/orders/${effectiveOrderId}/receipt?idToken=${encodeURIComponent(
+        token,
+      )}`;
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch {
+      // Silent failure — avoid falling back to printing local, user-editable DOM.
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -65,11 +90,12 @@ function OrderSuccessContent() {
     }
   }, [orderRef]);
 
-  // Fallback: if no client-side snapshot is available, try to hydrate from the server
+  // Hydrate from the server so that we always resolve the canonical order id
+  // and fresh data, even if a client snapshot exists.
   useEffect(() => {
     if (!user) return;
     if (!orderId || orderId === "0000") return;
-    if (lastOrder) return;
+    if (hydratedFromServer) return;
 
     const loadFromApi = async () => {
       try {
@@ -89,6 +115,7 @@ function OrderSuccessContent() {
             shippingAddress: {
               fullName?: string;
               email?: string;
+              phone?: string;
               address?: string;
               city?: string;
               zip?: string;
@@ -120,6 +147,7 @@ function OrderSuccessContent() {
           shipping: {
             fullName: data.order.shippingAddress.fullName ?? "",
             email: data.order.shippingAddress.email ?? "",
+            phone: data.order.shippingAddress.phone ?? "",
             address: data.order.shippingAddress.address ?? "",
             city: data.order.shippingAddress.city ?? "",
             zip: data.order.shippingAddress.zip ?? "",
@@ -129,17 +157,19 @@ function OrderSuccessContent() {
         };
 
         setLastOrder(snap);
+        setHydratedFromServer(true);
       } catch {
         // Silent fail — we'll just show the generic fallback message
       }
     };
 
     void loadFromApi();
-  }, [user, orderId, lastOrder]);
+  }, [user, orderId, hydratedFromServer]);
 
   if (!mounted) return null;
 
-  const marqueeText = `ORDER #${orderId} CONFIRMED  ★  YOUR DROP IS LOCKED  ★  ORDER #${orderId} CONFIRMED  ★  YOUR DROP IS LOCKED  ★  `;
+  const displayOrderId = lastOrder?.id ?? orderId;
+  const marqueeText = `ORDER #${displayOrderId} CONFIRMED  ★  YOUR DROP IS LOCKED  ★  ORDER #${displayOrderId} CONFIRMED  ★  YOUR DROP IS LOCKED  ★  `;
 
   return (
     <>
@@ -257,7 +287,7 @@ function OrderSuccessContent() {
                     className="text-xs font-bold text-[var(--vsc-black)] uppercase tracking-[0.1em]"
                     style={{ fontFamily: "var(--font-space-mono)" }}
                   >
-                    #{orderId}
+                    #{displayOrderId}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -295,6 +325,43 @@ function OrderSuccessContent() {
                   </span>
                 </div>
               </div>
+
+              {/* Shipping address */}
+              {lastOrder?.shipping &&
+                (lastOrder.shipping.fullName ||
+                  lastOrder.shipping.address ||
+                  lastOrder.shipping.city ||
+                  lastOrder.shipping.phone) && (
+                  <div className="px-8 md:px-12 py-6 space-y-2 border-b-2 border-dashed border-[var(--vsc-gray-200)]">
+                    <h4
+                      className="text-[10px] text-[var(--vsc-gray-600)] uppercase tracking-[0.3em] mb-2"
+                      style={{ fontFamily: "var(--font-space-mono)" }}
+                    >
+                      SHIPPING ADDRESS
+                    </h4>
+                    <div className="space-y-0.5 text-xs text-[var(--vsc-black)] uppercase tracking-[0.05em]" style={{ fontFamily: "var(--font-space-mono)" }}>
+                      {lastOrder.shipping.fullName && (
+                        <p className="font-bold">{lastOrder.shipping.fullName}</p>
+                      )}
+                      {lastOrder.shipping.phone && (
+                        <p className="text-[var(--vsc-gray-700)]">{lastOrder.shipping.phone}</p>
+                      )}
+                      {lastOrder.shipping.email && (
+                        <p className="text-[var(--vsc-gray-700)]">{lastOrder.shipping.email}</p>
+                      )}
+                      {lastOrder.shipping.address && (
+                        <p className="text-[var(--vsc-gray-700)]">{lastOrder.shipping.address}</p>
+                      )}
+                      {(lastOrder.shipping.city || lastOrder.shipping.zip || lastOrder.shipping.country) && (
+                        <p className="text-[var(--vsc-gray-700)]">
+                          {[lastOrder.shipping.city, lastOrder.shipping.zip, lastOrder.shipping.country]
+                            .filter(Boolean)
+                            .join(", ")}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
 
               {/* Items purchased */}
               <div className="px-8 md:px-12 py-6 space-y-4 border-b-2 border-dashed border-[var(--vsc-gray-200)]">
@@ -432,7 +499,9 @@ function OrderSuccessContent() {
               {/* ===== PRINT BUTTON ===== */}
               <div className="no-print flex items-center justify-center gap-4 mt-2 mb-6">
               <button
-                onClick={() => window.print()}
+                onClick={() => {
+                  void handlePrint();
+                }}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-bold uppercase tracking-[0.1em] text-[var(--vsc-black)] hover:text-[var(--vsc-accent)] transition-colors"
                 style={{ fontFamily: "var(--font-space-mono)" }}
               >
@@ -443,19 +512,45 @@ function OrderSuccessContent() {
 
               {/* ===== CTA BUTTONS ===== */}
               <div className="no-print flex flex-col sm:flex-row items-center justify-center gap-6">
-              <Link
-                href="/"
-                className="w-full sm:w-auto text-center px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
-                style={{ fontFamily: "var(--font-space-mono)" }}
-              >
-                CONTINUE SHOPPING →
-              </Link>
-              {/* <button
-                className="w-full sm:w-auto text-center px-6 py-4 md:px-10 md:py-6 bg-transparent text-[var(--vsc-white)] text-sm font-bold uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors duration-200 border-2 md:border-4 border-[var(--vsc-gray-600)] hover:border-[var(--vsc-accent)]"
-                style={{ fontFamily: "var(--font-space-mono)" }}
-              >
-                TRACK ORDER
-              </button> */}
+                <Link
+                  href="/"
+                  className="w-full sm:w-auto text-center px-6 py-4 md:px-10 md:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)] active:scale-[0.97]"
+                  style={{ fontFamily: "var(--font-space-mono)" }}
+                >
+                  CONTINUE SHOPPING →
+                </Link>
+                {/* <button
+                  className="w-full sm:w-auto text-center px-6 py-4 md:px-10 md:py-6 bg-transparent text-[var(--vsc-white)] text-sm font-bold uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors duration-200 border-2 md:border-4 border-[var(--vsc-gray-600)] hover:border-[var(--vsc-accent)]"
+                  style={{ fontFamily: "var(--font-space-mono)" }}
+                >
+                  TRACK ORDER
+                </button> */}
+              </div>
+
+              {/* ===== WHAT'S NEXT ===== */}
+              <div className="no-print mt-10 border border-[var(--vsc-gray-200)] bg-white/70 shadow-sm">
+                <div className="px-6 md:px-8 py-6">
+                  <h3
+                    className="text-xs text-[var(--vsc-gray-600)] uppercase tracking-[0.3em] mb-3"
+                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  >
+                    WHAT&apos;S NEXT
+                  </h3>
+                  <p
+                    className="text-xs text-[var(--vsc-gray-800)] uppercase tracking-[0.1em]"
+                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  >
+                    YOUR ORDER IS LOCKED IN. HERE&apos;S WHAT HAPPENS NOW:
+                  </p>
+                  <ul
+                    className="mt-4 space-y-2 text-[10px] text-[var(--vsc-gray-700)] uppercase tracking-[0.12em]"
+                    style={{ fontFamily: "var(--font-space-mono)" }}
+                  >
+                    <li>✔ YOU&apos;LL RECEIVE A SHIPPING NOTIFICATION AS SOON AS YOUR PIECES LEAVE THE STUDIO.</li>
+                    <li>✔ CREATE OR LOG INTO YOUR ACCOUNT TO TRACK FUTURE DROPS FASTER.</li>
+                    <li>✔ FOLLOW @VASCARIO ON SOCIALS TO SEE HOW THE COMMUNITY STYLES THIS DROP.</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

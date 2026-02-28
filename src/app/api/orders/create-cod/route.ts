@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
             | {
                   fullName: string
                   email: string
+                  phone?: string
                   address: string
                   city: string
                   zip: string

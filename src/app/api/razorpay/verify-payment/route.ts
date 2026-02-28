@@ -30,6 +30,8 @@ export async function POST(req: NextRequest) {
             )
         }
 
+        let orderDocId: string | null = null
+
         try {
             const snapshot = await db
                 .collection(COLLECTIONS.ORDERS)
@@ -38,7 +40,9 @@ export async function POST(req: NextRequest) {
                 .get()
 
             if (!snapshot.empty) {
-                const docRef = snapshot.docs[0].ref
+                const doc = snapshot.docs[0]
+                const docRef = doc.ref
+                orderDocId = doc.id
                 await docRef.update({
                     status: "PAID",
                     paymentId: razorpay_payment_id,
@@ -50,7 +54,7 @@ export async function POST(req: NextRequest) {
             console.error("Failed to update order status after Razorpay verification", err)
         }
 
-        return NextResponse.json({ success: true }, { status: 200 })
+        return NextResponse.json({ success: true, orderId: orderDocId }, { status: 200 })
     } catch (error) {
         // eslint-disable-next-line no-console
         console.error("Error verifying Razorpay payment", error)

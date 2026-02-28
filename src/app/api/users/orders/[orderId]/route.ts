@@ -31,10 +31,34 @@ export async function GET(
 
     const { orderId } = await context.params;
 
-    const orderDoc = await db
+    let orderDoc = await db
       .collection(COLLECTIONS.ORDERS)
       .doc(orderId)
       .get();
+
+    if (!orderDoc.exists) {
+      // Fallback: allow lookup by paymentId or razorpayOrderId so that
+      // legacy URLs that used those values still resolve correctly.
+      const byPaymentId = await db
+        .collection(COLLECTIONS.ORDERS)
+        .where("paymentId", "==", orderId)
+        .limit(1)
+        .get();
+
+      if (!byPaymentId.empty) {
+        orderDoc = byPaymentId.docs[0];
+      } else {
+        const byRazorpayOrderId = await db
+          .collection(COLLECTIONS.ORDERS)
+          .where("razorpayOrderId", "==", orderId)
+          .limit(1)
+          .get();
+
+        if (!byRazorpayOrderId.empty) {
+          orderDoc = byRazorpayOrderId.docs[0];
+        }
+      }
+    }
 
     if (!orderDoc.exists) {
       return Response.json({ error: "Order not found" }, { status: 404 });
@@ -48,7 +72,7 @@ export async function GET(
 
     const itemsSnapshot = await db
       .collection(COLLECTIONS.ORDER_ITEMS)
-      .where("orderId", "==", orderId)
+      .where("orderId", "==", orderDoc.id)
       .get();
 
     const items = itemsSnapshot.docs.map((doc) => {
