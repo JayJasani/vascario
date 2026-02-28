@@ -7,6 +7,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 import { useAuth } from "@/context/AuthContext"
+import { useRouter } from "next/navigation"
 import {
     trackViewCart,
     trackRemoveFromCart,
@@ -22,6 +23,7 @@ export default function CartPageClient({ initialItems }: CartPageClientProps = {
     const { formatPrice } = useCurrency()
     const { items, updateQuantity, removeItem, cartTotal, cartCount, refreshPrices } = useCart()
     const [mounted, setMounted] = useState(false)
+    const router = useRouter()
 
     const [repricing, setRepricing] = useState(false)
 
@@ -210,14 +212,19 @@ export default function CartPageClient({ initialItems }: CartPageClientProps = {
                         <div className="lg:col-span-2">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
                                 {effectiveItems.map((item, index) => (
-                                    <div
-                                        key={`${item.id}-${item.size}-${index}`}
-                                        className={`relative border-2 sm:border-3 md:border-4 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] overflow-hidden group ${index === 0 ? "md:col-span-2" : ""
-                                            }`}
-                                    >
+                                <div
+                                    key={`${item.id}-${item.size}-${index}`}
+                                    onClick={() => {
+                                        const slugOrId = item.slug || item.id
+                                        router.push(`/product/${slugOrId}`)
+                                    }}
+                                    className={`relative cursor-pointer border-2 sm:border-3 md:border-4 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] overflow-hidden group ${index === 0 ? "md:col-span-2" : ""
+                                        }`}
+                                >
                                         {/* Remove button */}
                                         <button
-                                            onClick={() => {
+                                            onClick={(event) => {
+                                                event.stopPropagation()
                                                 trackRemoveFromCart({
                                                     currency: "INR",
                                                     value: item.price * item.quantity,
@@ -286,7 +293,8 @@ export default function CartPageClient({ initialItems }: CartPageClientProps = {
                                                 {/* Quantity Controls — Squishy */}
                                                 <div className="flex items-center gap-0 border-2 border-[var(--vsc-white)]">
                                                     <button
-                                                        onClick={() => {
+                                                        onClick={(event) => {
+                                                            event.stopPropagation()
                                                             if (item.quantity > 1) {
                                                                 trackChangeQuantity({ item_id: item.id, item_name: item.name, quantity: item.quantity - 1, previous_quantity: item.quantity })
                                                                 updateQuantity(item.id, item.size, item.quantity - 1)
@@ -311,7 +319,8 @@ export default function CartPageClient({ initialItems }: CartPageClientProps = {
                                                         {item.quantity}
                                                     </span>
                                                     <button
-                                                        onClick={() => {
+                                                        onClick={(event) => {
+                                                            event.stopPropagation()
                                                             trackChangeQuantity({ item_id: item.id, item_name: item.name, quantity: item.quantity + 1, previous_quantity: item.quantity })
                                                             updateQuantity(item.id, item.size, item.quantity + 1)
                                                         }}
