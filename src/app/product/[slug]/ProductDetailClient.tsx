@@ -143,6 +143,7 @@ export function ProductDetailClient({
       ? (product.stockBySize.find((s) => s.size === selectedSize)?.quantity ??
         0)
       : product.totalStock;
+  const isFullyOutOfStock = product.totalStock <= 0;
   const hasRequiredSelections = product.sizes.length === 0 || !!selectedSize;
   const canAddToCart =
     hasRequiredSelections &&
@@ -742,7 +743,7 @@ export function ProductDetailClient({
                       : `Out of stock for ${selectedSize}`
                     : product.totalStock > 0
                       ? `${product.totalStock} in stock`
-                      : "Out of stock"}
+                      : "Coming soon"}
                 </span>
               </div>
 
@@ -944,7 +945,9 @@ export function ProductDetailClient({
                   : !hasRequiredSelections
                     ? "Select a size"
                     : stockForSelectedSize === 0
-                      ? "Out of stock"
+                      ? isFullyOutOfStock
+                        ? "Coming soon"
+                        : "Out of stock"
                       : `Max ${stockForSelectedSize} available`}
               </button>
 
@@ -1047,8 +1050,8 @@ export function ProductDetailClient({
                 style={{ fontFamily: "var(--font-space-mono)" }}
               >
                 {isFavourite(product.id)
-                  ? "Remove from favourites"
-                  : "Add to favourites"}
+                  ? "Remove from wishlist"
+                  : "Add to wishlist"}
               </button>
 
               {/* SKU & Additional Info — collapsible */}

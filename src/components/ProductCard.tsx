@@ -3,10 +3,14 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { HeartIcon as HeartOutlineIcon } from "@heroicons/react/24/outline"
+import { HeartIcon as HeartSolidIcon } from "@heroicons/react/24/solid"
 import { useCurrency } from "@/context/CurrencyContext"
+import { useAuth } from "@/context/AuthContext"
+import { useFavourites } from "@/context/FavouritesContext"
 import { hasDiscount, getDiscountPercentage } from "@/lib/discount"
 import { getImageAlt } from "@/lib/seo-utils"
-import { trackSelectItem } from "@/lib/analytics"
+import { trackAddToWishlist, trackRemoveFromWishlist, trackSelectItem } from "@/lib/analytics"
 
 interface Product {
   id: string
@@ -33,10 +37,13 @@ interface ProductCardProps {
 export function ProductCard({ product, variant = "default", aspectClass, href, preview }: ProductCardProps) {
   const router = useRouter()
   const { formatPrice } = useCurrency()
+  const { user } = useAuth()
+  const { toggleFavourite, isFavourite } = useFavourites()
   const isFeatured = variant === "featured"
   const isGrid = variant === "grid"
   // Only show "Out of stock" when total stock is explicitly 0 (not when undefined). If any size has stock, don't show.
   const outOfStock = product.totalStock !== undefined && product.totalStock <= 0
+  const hasTopRightBadge = outOfStock || hasDiscount(product.cutPrice, product.price)
 
   const linkClass = isGrid
     ? "group relative block w-full overflow-hidden transition-colors duration-200"
@@ -46,6 +53,7 @@ export function ProductCard({ product, variant = "default", aspectClass, href, p
 
   const aspect = aspectClass ?? "aspect-[3/4]"
   const targetHref = href ?? `/product/${product.slug}`
+  const isWishlisted = isFavourite(product.id)
 
   const handleClick = () => {
     trackSelectItem({
@@ -111,6 +119,61 @@ export function ProductCard({ product, variant = "default", aspectClass, href, p
           </div>
         )}
 
+        {/* Wishlist (favourites) toggle */}
+        {!preview && (
+          <button
+            type="button"
+            aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            className={`absolute ${hasTopRightBadge ? "top-12" : "top-3"} right-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white border border-white/20 hover:border-[var(--vsc-accent)] hover:text-[var(--vsc-accent)] transition-colors`}
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              if (!user) {
+                router.push(`/login?redirect=${encodeURIComponent(targetHref)}`)
+                return
+              }
+              const wasAlreadyFavourite = isWishlisted
+              toggleFavourite({
+                id: product.id,
+                name: product.name,
+                slug: product.slug,
+                price: product.price,
+                cutPrice: product.cutPrice ?? null,
+                image: product.images[0] ?? "",
+              })
+              const wishlistItem = {
+                item_id: product.id,
+                item_name: product.name,
+                price: product.price,
+              }
+              if (wasAlreadyFavourite) {
+                trackRemoveFromWishlist({
+                  currency: "INR",
+                  value: product.price,
+                  items: [wishlistItem],
+                })
+              } else {
+                trackAddToWishlist({
+                  currency: "INR",
+                  value: product.price,
+                  items: [wishlistItem],
+                })
+              }
+            }}
+            onMouseDown={(e) => {
+              // Prevent link from capturing press -> navigation
+              e.preventDefault()
+              e.stopPropagation()
+            }}
+          >
+            {isWishlisted ? (
+              <HeartSolidIcon className="h-4 w-4" />
+            ) : (
+              <HeartOutlineIcon className="h-4 w-4" />
+            )}
+          </button>
+        )}
+
         {/* Discount tag — when cut price > price (top-right, unless out of stock) */}
         {!outOfStock && hasDiscount(product.cutPrice, product.price) && (
           <div
@@ -121,13 +184,13 @@ export function ProductCard({ product, variant = "default", aspectClass, href, p
           </div>
         )}
 
-        {/* Out of stock — top right of full frame */}
+        {/* Out of stock / coming soon — top right of full frame */}
         {outOfStock && (
           <div
-            className="absolute top-3 right-3 px-2 py-1 rounded bg-red-600 text-white text-[10px] font-bold uppercase tracking-[0.12em] z-10"
+            className="absolute top-3 right-3 px-2 py-1 rounded bg-[var(--vsc-gray-900)] text-white text-[10px] font-bold uppercase tracking-[0.12em] z-10 border border-[var(--vsc-accent)]/40"
             style={{ fontFamily: "var(--font-space-mono)" }}
           >
-            Out of stock
+            Coming soon
           </div>
         )}
       </div>
