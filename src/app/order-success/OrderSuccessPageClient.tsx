@@ -450,12 +450,12 @@ function OrderSuccessContent() {
               >
                 CONTINUE SHOPPING →
               </Link>
-              <button
+              {/* <button
                 className="w-full sm:w-auto text-center px-6 py-4 md:px-10 md:py-6 bg-transparent text-[var(--vsc-white)] text-sm font-bold uppercase tracking-[0.2em] hover:text-[var(--vsc-accent)] transition-colors duration-200 border-2 md:border-4 border-[var(--vsc-gray-600)] hover:border-[var(--vsc-accent)]"
                 style={{ fontFamily: "var(--font-space-mono)" }}
               >
                 TRACK ORDER
-              </button>
+              </button> */}
               </div>
             </div>
           </div>
