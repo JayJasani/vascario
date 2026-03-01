@@ -4,8 +4,11 @@ import Script from "next/script";
 
 export const GTM_ID = "GTM-PN35346F";
 const GA4_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID;
+const isDev = process.env.NODE_ENV === "development";
 
 export function GoogleTagManagerHead() {
+  if (isDev) return null;
+
   return (
     <>
       {/* Google Tag Manager */}
@@ -49,6 +52,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 }
 
 export function GoogleTagManagerNoScript() {
+  if (isDev) return null;
+
   return (
     <noscript>
       <iframe

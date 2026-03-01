@@ -54,9 +54,10 @@ export class GA4Provider implements AnalyticsProvider {
   ]);
 
   init(): void {
-    if (typeof window === "undefined") return;
+    const isDev = process.env.NODE_ENV !== "production";
+    if (typeof window === "undefined" || isDev) return;
     const ga4Id = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID;
-    if (!ga4Id && process.env.NODE_ENV === "development") {
+    if (!ga4Id) {
       console.warn(
         "[Analytics] NEXT_PUBLIC_GA4_MEASUREMENT_ID is not set. GA4 events will not trigger. " +
           "Add it to .env.local (e.g. G-XXXXXXXXXX) or configure GTM to forward events to GA4.",
@@ -68,6 +69,8 @@ export class GA4Provider implements AnalyticsProvider {
     event: E,
     params: AnalyticsEventMap[E],
   ): void {
+    if (process.env.NODE_ENV !== "production") return;
+
     // 1. Send via gtag when available (direct GA4 — most reliable)
     const sentViaGtag = sendViaGtag(event, params);
 
@@ -86,13 +89,15 @@ export class GA4Provider implements AnalyticsProvider {
     if (
       !sentViaGtag &&
       typeof window !== "undefined" &&
-      process.env.NODE_ENV === "development"
+      process.env.NODE_ENV !== "production"
     ) {
       console.debug(`[Analytics] Event "${event}" sent to dataLayer (gtag not loaded). Check NEXT_PUBLIC_GA4_MEASUREMENT_ID.`, params);
     }
   }
 
   identify(userId: string, traits?: Record<string, unknown>): void {
+    if (process.env.NODE_ENV !== "production") return;
+
     pushToDataLayer({
       event: "user_identify",
       user_id: userId,
@@ -101,6 +106,8 @@ export class GA4Provider implements AnalyticsProvider {
   }
 
   reset(): void {
+    if (process.env.NODE_ENV !== "production") return;
+
     pushToDataLayer({
       event: "user_reset",
       user_id: undefined,
