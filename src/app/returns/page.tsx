@@ -9,15 +9,23 @@ export default function ReturnsPage() {
   const returnsFAQs = [
     {
       question: "What is the return window?",
-      answer: "We accept returns on unworn, unwashed items within 7 days of delivery, with original tags and packaging intact.",
+      answer: "We accept returns within 7 days of delivery. Items must be new, unworn, and unwashed with original tags and packaging intact.",
+    },
+    {
+      question: "Do you accept returns for defective and non-defective items?",
+      answer: "Yes. We accept returns for both defective and non-defective products. Exchanges are also accepted within the 7-day window.",
     },
     {
       question: "How do I start a return?",
-      answer: "Email wear@vascario.com with your Order ID, item(s) you'd like to return or exchange, and a short note on the issue (fit, defect, etc.).",
+      answer: "Email wear@vascario.com with your Order ID, item(s) you'd like to return or exchange, and a short note on the issue (fit, defect, etc.). Returns are by mail; the return label is the customer's responsibility.",
+    },
+    {
+      question: "Is there a restocking fee?",
+      answer: "A restocking fee of INR 100 applies per return. Refunds are processed within 5 days once we receive and inspect the item.",
     },
     {
       question: "What items cannot be returned?",
-      answer: "Final-sale items and heavily worn or damaged garments can't be accepted back. If you're unsure, reach out first and we'll help you out.",
+      answer: "We accept new items only. Final-sale items and heavily worn or damaged garments can't be accepted back. If you're unsure, reach out first and we'll help you out.",
     },
   ];
 
@@ -54,10 +62,58 @@ export default function ReturnsPage() {
           >
             <section>
               <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
-                Return window
+                Countries & policy
+              </h2>
+              <p className="mb-2">
+                This return policy applies to <strong className="font-bold text-[var(--vsc-gray-900)]">India</strong>.
+                Policy URL:{" "}
+                <a
+                  href="https://www.vascario.com/returns"
+                  className="underline hover:text-[var(--vsc-accent)]"
+                >
+                  https://www.vascario.com/returns
+                </a>
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
+                Returns & exchanges
+              </h2>
+              <ul className="list-disc pl-5 space-y-1 mb-2">
+                <li>We accept <strong className="font-bold text-[var(--vsc-gray-900)]">returns</strong> for both defective and non-defective products.</li>
+                <li>We accept <strong className="font-bold text-[var(--vsc-gray-900)]">exchanges</strong> within the return window.</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
+                Product condition & window
+              </h2>
+              <ul className="list-disc pl-5 space-y-1 mb-2">
+                <li><strong className="font-bold text-[var(--vsc-gray-900)]">Product condition:</strong> New only. Items must be unworn, unwashed, with original tags and packaging intact.</li>
+                <li><strong className="font-bold text-[var(--vsc-gray-900)]">Window:</strong> <strong className="font-bold text-[var(--vsc-gray-900)]">7 days</strong> from delivery.</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
+                Method & fees
+              </h2>
+              <ul className="list-disc pl-5 space-y-1 mb-2">
+                <li><strong className="font-bold text-[var(--vsc-gray-900)]">Method:</strong> By mail.</li>
+                <li><strong className="font-bold text-[var(--vsc-gray-900)]">Return label:</strong> Customer responsibility.</li>
+                <li><strong className="font-bold text-[var(--vsc-gray-900)]">Restocking fee:</strong> INR 100.</li>
+                <li><strong className="font-bold text-[var(--vsc-gray-900)]">Refund processing time:</strong> 5 days.</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="text-base md:text-lg text-[var(--vsc-gray-900)] mb-3 uppercase tracking-[0.18em]">
+                Return window (summary)
               </h2>
               <p className="mb-3">
-                We accept returns on unworn, unwashed items within{" "}
+                We accept returns on new, unworn, unwashed items within{" "}
                 <strong className="font-bold text-[var(--vsc-gray-900)]">7 days</strong> of delivery,
                 with original tags and packaging intact.
               </p>
@@ -89,7 +145,7 @@ export default function ReturnsPage() {
                 Non-returnable items
               </h2>
               <p className="mb-2">
-                Final‑sale items and heavily worn or damaged garments can&apos;t be accepted back.
+                We accept new items only. Final‑sale items and heavily worn or damaged garments can&apos;t be accepted back.
                 If you&apos;re unsure, reach out first and we&apos;ll help you out.
               </p>
             </section>

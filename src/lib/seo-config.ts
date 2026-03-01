@@ -186,7 +186,7 @@ export const SEO_PAGES = {
   returns: {
     title: "Returns & Exchanges | Vascario Premium Streetwear India",
     description:
-      "Returns and exchanges for Vascario premium streetwear orders. Understand our 7-day return window, conditions and how to start a return if the fit or piece isn't right.",
+      "Returns and exchanges for Vascario in India. We accept returns for defective and non-defective items (new only), 7-day window, by mail. Customer pays return label; restocking fee INR 100; refund in 5 days.",
     keywords: [
       "Vascario returns",
       "embroidered clothing exchange",
@@ -453,6 +453,25 @@ export const SEO_IMAGE_ALT = {
 
   logo: () => "VASCARIO logo - Premium embroidered streetwear brand",
 };
+/** Shared MerchantReturnPolicy for India: 7-day window, by mail, customer label, INR 100 restocking, 5-day refund. */
+const MERCHANT_RETURN_POLICY = {
+  "@type": "MerchantReturnPolicy",
+  applicableCountry: "IN",
+  merchantReturnLink: `${SEO_BASE.siteUrl}/returns`,
+  returnPolicyCategory:
+    "https://schema.org/MerchantReturnFiniteReturnWindow",
+  merchantReturnDays: 7,
+  returnMethod: "https://schema.org/ReturnByMail",
+  returnLabelSource: "https://schema.org/ReturnLabelCustomerResponsibility",
+  returnFees: "https://schema.org/ReturnFeesCustomerResponsibility",
+  restockingFee: {
+    "@type": "MonetaryAmount",
+    value: 100,
+    currency: "INR",
+  },
+  itemCondition: "https://schema.org/NewCondition",
+};
+
 export const SEO_STRUCTURED_DATA = {
   organization: {
     "@context": "https://schema.org",
@@ -552,13 +571,7 @@ export const SEO_STRUCTURED_DATA = {
         "@type": "Organization",
         name: SEO_BASE.brandName,
       },
-      hasMerchantReturnPolicy: {
-        "@type": "MerchantReturnPolicy",
-        applicableCountry: "IN",
-        returnPolicyCategory:
-          "https://schema.org/MerchantReturnFiniteReturnWindow",
-        merchantReturnDays: 7,
-      },
+      hasMerchantReturnPolicy: MERCHANT_RETURN_POLICY,
       shippingDetails: {
         "@type": "OfferShippingDetails",
         shippingRate: {
@@ -704,13 +717,7 @@ export const SEO_STRUCTURED_DATA = {
             priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
               .toISOString()
               .split("T")[0],
-            hasMerchantReturnPolicy: {
-              "@type": "MerchantReturnPolicy",
-              applicableCountry: "IN",
-              returnPolicyCategory:
-                "https://schema.org/MerchantReturnFiniteReturnWindow",
-              merchantReturnDays: 7,
-            },
+            hasMerchantReturnPolicy: MERCHANT_RETURN_POLICY,
             shippingDetails: {
               "@type": "OfferShippingDetails",
               shippingRate: {
