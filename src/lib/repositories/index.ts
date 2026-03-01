@@ -21,6 +21,7 @@ export type { Coupon } from "@/models/coupon";
 // Product
 export {
     getProductById,
+    getProductBySku,
     getProductBySlug,
     getAllProducts,
     getActiveProducts,

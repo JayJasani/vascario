@@ -20,6 +20,10 @@ export const SEO_BASE = {
     email: "wear@vascario.com",
     phone: "+91-8866990844",
   },
+  /** Checkout URL for Google Merchant Center / Shopping ads. Use {id} placeholder; value can be product id, SKU (e.g. vsc-002), or slug. */
+  checkoutUrl: "https://www.vascario.com/checkout?item_id={id}",
+  /** Cart URL (alternative to checkout for review-before-purchase flow). */
+  cartUrl: "https://www.vascario.com/cart",
 };
 
 export const SEO_PAGES = {

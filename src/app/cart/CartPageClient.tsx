@@ -30,7 +30,8 @@ export default function CartPageClient({ initialItems }: CartPageClientProps = {
     const viewCartFired = useRef(false)
     const lastRepricedKeyRef = useRef<string | null>(null)
 
-    const effectiveItems = items.length ? items : initialItems ?? []
+    // Use items from context as source of truth (fixes empty cart stuck showing last item after remove)
+    const effectiveItems = items
     const effectiveCartTotal =
         items.length
             ? cartTotal

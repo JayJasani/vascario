@@ -29,6 +29,34 @@ export async function getProductById(id: string | null | undefined): Promise<Pro
     } as Product;
 }
 
+export async function getProductBySku(sku: string | null | undefined): Promise<Product | null> {
+    if (!sku || typeof sku !== "string" || !sku.trim()) return null;
+    const snapshot = await db
+        .collection(COLLECTIONS.PRODUCTS)
+        .where("sku", "==", sku.trim())
+        .limit(1)
+        .get();
+    if (snapshot.empty) return null;
+    const doc = snapshot.docs[0];
+    const data = doc.data()!;
+    return {
+        id: doc.id,
+        name: data.name,
+        slug: data.slug || (data.name ? data.name.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, "") : ""),
+        description: data.description,
+        price: Number(data.price),
+        cutPrice: data.cutPrice != null ? Number(data.cutPrice) : null,
+        images: data.images || [],
+        colors: data.colors || [],
+        sizes: data.sizes || [],
+        sku: data.sku || null,
+        isActive: data.isActive ?? true,
+        isFeatured: (data.isFeatured as boolean) ?? false,
+        createdAt: toDate(data.createdAt),
+        updatedAt: toDate(data.updatedAt),
+    } as Product;
+}
+
 export async function getProductBySlug(slug: string | null | undefined): Promise<Product | null> {
     if (!slug || typeof slug !== "string" || !slug.trim()) return null;
     const snapshot = await db

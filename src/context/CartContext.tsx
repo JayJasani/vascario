@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useReducer, useEffect, type ReactNode } from "react"
+import { createContext, useContext, useReducer, useEffect, useState, type ReactNode } from "react"
 import { useAuth } from "@/context/AuthContext"
 
 export interface CartItem {
@@ -93,6 +93,8 @@ interface CartContextType {
   refreshPrices: (updates: { id: string; size: string; price: number }[]) => void
   cartTotal: number
   cartCount: number
+  /** True once cart has loaded from server (or cleared for guest) - use to avoid race with item_id add */
+  hasHydrated: boolean
 }
 
 const CartContext = createContext<CartContextType | null>(null)
@@ -107,20 +109,24 @@ const defaultCartValue: CartContextType = {
   refreshPrices: () => {},
   cartTotal: 0,
   cartCount: 0,
+  hasHydrated: false,
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const [state, dispatch] = useReducer(cartReducer, { items: [] })
+  const [hasHydrated, setHasHydrated] = useState(false)
 
   // Hydrate from server (Firestore) so cart is shared across browsers
   useEffect(() => {
     if (!user) {
       // When logged out, ensure in-memory cart is cleared
       dispatch({ type: "HYDRATE", payload: [] })
+      setHasHydrated(true)
       return
     }
     let cancelled = false
+    setHasHydrated(false)
 
     const loadFromServer = async () => {
       try {
@@ -174,6 +180,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         dispatch({ type: "HYDRATE", payload: serverItems })
       } catch (err) {
         console.error("Failed to load cart from server", err)
+      } finally {
+        if (!cancelled) setHasHydrated(true)
       }
     }
 
@@ -245,7 +253,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items: state.items, addItem, removeItem, updateQuantity, clearCart, refreshPrices, cartTotal, cartCount }}
+      value={{ items: state.items, addItem, removeItem, updateQuantity, clearCart, refreshPrices, cartTotal, cartCount, hasHydrated }}
     >
       {children}
     </CartContext.Provider>

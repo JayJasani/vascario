@@ -14,7 +14,7 @@ import {
 import { openRazorpayCheckout } from "@/lib/payments/razorpay-client";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 const stepVariants = {
@@ -49,10 +49,10 @@ type AvailableCoupon = {
 };
 
 export default function CheckoutPageClient() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { profile, loading: profileLoading } = useUserProfile();
   const { formatPrice } = useCurrency();
-  const { items, cartTotal, clearCart } = useCart();
+  const { items, cartTotal, clearCart, addItem, hasHydrated } = useCart();
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
   const [mounted, setMounted] = useState(false);
@@ -72,8 +72,10 @@ export default function CheckoutPageClient() {
   const [loadingAvailableCoupons, setLoadingAvailableCoupons] = useState(false);
   const [availableCouponsError, setAvailableCouponsError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const beginCheckoutFired = useRef(false);
+  const itemIdHandled = useRef(false);
 
   const subtotal = serverSubtotal ?? cartTotal;
   const couponDiscount =
@@ -84,6 +86,53 @@ export default function CheckoutPageClient() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Handle item_id from URL (e.g. Google Shopping ads: /checkout?item_id={id} or item_id=vsc-002)
+  // Wait for auth + cart hydration so we don't add then get overwritten when auth resolves
+  useEffect(() => {
+    if (!mounted || authLoading || !hasHydrated || itemIdHandled.current) return;
+    const itemId = searchParams.get("item_id");
+    if (!itemId?.trim()) return;
+
+    itemIdHandled.current = true;
+
+    (async () => {
+      try {
+        const res = await fetch(`/api/products/${encodeURIComponent(itemId.trim())}`);
+        if (!res.ok) {
+          itemIdHandled.current = false;
+          return;
+        }
+        const data = await res.json();
+        const size = data.firstInStockSize ?? data.sizes?.[0];
+        if (!size) {
+          itemIdHandled.current = false;
+          return;
+        }
+
+        const image = Array.isArray(data.images) && data.images[0] ? data.images[0] : "";
+        addItem({
+          id: data.id,
+          name: data.name,
+          price: Number(data.price),
+          image,
+          size,
+          quantity: 1,
+          slug: data.slug,
+        });
+
+        // Only replace URL when logged in so guest Sign-in link keeps item_id for after login
+        if (user) {
+          const next = new URLSearchParams(searchParams);
+          next.delete("item_id");
+          const qs = next.toString();
+          router.replace(qs ? `/checkout?${qs}` : "/checkout", { scroll: false });
+        }
+      } catch {
+        itemIdHandled.current = false;
+      }
+    })();
+  }, [mounted, authLoading, hasHydrated, user, searchParams, router, addItem]);
 
   const buildAnalyticsItems = (): AnalyticsItem[] =>
     items.map((item, i) => ({
@@ -490,7 +539,7 @@ export default function CheckoutPageClient() {
               SIGN IN TO CHECK OUT
             </p>
             <Link
-              href="/login?redirect=/checkout"
+              href={`/login?redirect=${encodeURIComponent("/checkout" + (searchParams.toString() ? "?" + searchParams.toString() : ""))}`}
               className="w-full sm:w-auto text-center px-6 sm:px-10 py-4 sm:py-6 bg-[var(--vsc-gray-900)] !text-[var(--vsc-cream)] text-xs sm:text-sm font-bold uppercase tracking-[0.2em] hover:bg-[var(--vsc-gray-800)] hover:!text-[var(--vsc-white)] border-2 border-[var(--vsc-gray-900)] transition-all duration-200 hover:shadow-[0_0_20px_var(--vsc-accent-dim)]"
               style={{ fontFamily: "var(--font-space-mono)" }}
             >
