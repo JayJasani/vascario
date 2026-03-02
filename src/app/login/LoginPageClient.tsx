@@ -250,7 +250,7 @@ function LoginForm() {
             </div>
 
             {/* Right — form card */}
-            <div className="border-2 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] px-4 sm:px-6 py-5 sm:py-7 md:px-8 md:py-8 shadow-sm">
+            <div className="w-full max-w-md md:max-w-none border-2 border-[var(--vsc-gray-200)] bg-[var(--vsc-white)] px-4 sm:px-6 py-5 sm:py-7 md:px-8 md:py-8 shadow-sm rounded-lg mx-auto">
               <form
                 onSubmit={step === "enterPhone" ? handleSendOtp : handleVerifyOtp}
                 className="space-y-5 sm:space-y-6"
@@ -260,11 +260,11 @@ function LoginForm() {
                   <label className="text-[10px] uppercase tracking-[0.25em] text-[var(--vsc-gray-600)]">
                     Phone number
                   </label>
-                  <div className="flex gap-3">
+                  <div className="flex w-full items-stretch overflow-hidden rounded border border-[var(--vsc-gray-300)] bg-[var(--vsc-cream)] focus-within:border-[var(--vsc-gray-900)]">
                     <select
                       value={countryIso2}
                       onChange={(e) => setCountryIso2(e.target.value)}
-                      className="px-3 py-3.5 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-xs tracking-[0.12em] focus:outline-none focus:border-[var(--vsc-gray-900)]"
+                      className="px-3 py-3.5 bg-transparent text-[var(--vsc-gray-900)] text-xs tracking-[0.12em] focus:outline-none"
                       disabled={pending || step === "enterOtp"}
                     >
                       {COUNTRY_OPTIONS.map((c) => (
@@ -277,7 +277,7 @@ function LoginForm() {
                       type="tel"
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value)}
-                      className="flex-1 px-5 py-3.5 bg-[var(--vsc-cream)] border border-[var(--vsc-gray-300)] text-[var(--vsc-gray-900)] text-sm tracking-[0.1em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none focus:border-[var(--vsc-gray-900)]"
+                      className="flex-1 px-4 py-3.5 bg-transparent text-[var(--vsc-gray-900)] text-sm tracking-[0.1em] placeholder:text-[var(--vsc-gray-400)] focus:outline-none"
                       placeholder="98765 43210"
                       disabled={pending || step === "enterOtp"}
                       required
@@ -330,9 +330,9 @@ function LoginForm() {
                     )}`;
                     window.location.href = url;
                   }}
-                  className="w-full px-6 py-3 sm:py-3.5 bg-[var(--vsc-white)] text-[var(--vsc-gray-900)] text-xs font-bold uppercase tracking-[0.2em] border-2 border-[var(--vsc-gray-900)] hover:bg-[var(--vsc-gray-900)] hover:text-[var(--vsc-cream)] transition-all duration-200 disabled:opacity-60 flex items-center justify-center gap-3"
+                  className="w-full px-4 py-2.5 sm:py-3 bg-[var(--vsc-white)] text-[var(--vsc-gray-900)] text-xs font-bold uppercase tracking-[0.2em] border-2 border-[var(--vsc-gray-900)] hover:bg-[var(--vsc-gray-900)] hover:text-[var(--vsc-cream)] transition-all duration-200 disabled:opacity-60 flex items-center justify-center gap-2"
                 >
-                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-sm bg-white">
+                  <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-white">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 48 48"
